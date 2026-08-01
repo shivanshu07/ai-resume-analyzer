@@ -1,13 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+.venv/
 venv/
 
-__pycache__/
-
-.ipynb_checkpoints/
-
+# Environment Variables
 .env
 
+# VS Code
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+logs/
+*.log
+
+# Model Files
+models/
+
+# Outputs
 outputs/
 
-*.pyc
-
+# macOS
 .DS_Store
+
+# Windows
+Thumbs.db
