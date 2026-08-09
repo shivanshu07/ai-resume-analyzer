@@ -1,0 +1,25 @@
+Data Scientist
+
+Minimum qualifications:
+Bachelor's degree in Statistics, Data Science, Mathematics, Physics, Economics, Operations Research, Engineering, or a related quantitative field, or equivalent practical experience.
+Experience in data science, statistics, or a related field.
+
+Preferred qualifications:
+Master's degree in Statistics, Mathematics, Bioinformatics, Economics, another quantitative field, or equivalent practical experience.
+2 years of experience using analytics to solve product or business problems, coding (e.g., Python, R, SQL), querying databases or statistical analysis, or a relevant PhD degree.
+Experience with statistical software (e.g., Python, R or MATLAB) and database languages (e.g., SQL) with a good understanding of the AI/ML and statistical methods typically used in marketing analytics.
+Experience delivering insights from AI/ML and statistical solutions to clients, including problem scoping/definition, modeling and interpretation.
+About the job
+Google's leadership team hand-picks thorny business challenges, and members of BizOps work in small teams to find solutions. As part of this team you fully immerse yourself in data collection, draw insight from analysis, and then zoom out to develop compelling, synthesized recommendations. Taking strategy one step further, you also persuasively communicate your recommendations to senior-level executives, roll-up your sleeves to help drive implementation and check back-in to see the impact of your recommendations.
+
+The Product Deployment Engineering is the regional product authority, providing specialized product guidance and adapting standard solutions for complex client architectures while supporting sales through technical objection handling and discovery. By replacing bespoke regional coding with standardized, requestable services, the role maximizes delivery velocity and drives revenue growth.
+
+As a Data Scientist, you are positioned within the gTech Ads Large Customer Sales Regional team and form part of the wider PDE team. You take a creative, collaborative, and customer-centric approach to provide consulting and solutions to large advertisers and agency partners. You act as the strategic technical gateway to bring DS resources into T1 accounts during discovery. Through technical implementation, optimization, and engineering solutions, gTech Data Scientists help customers achieve their business goals while building long-term tech and marketing capabilities.
+Google Ads is helping power the open internet with the best technology that connects and creates value for people, publishers, advertisers, and Google. We’re made up of multiple teams, building Google’s Advertising products including search, display, shopping, travel and video advertising, as well as analytics. Our teams create trusted experiences between people and businesses with useful ads. We help grow businesses of all sizes from small businesses, to large brands, to YouTube creators, with effective advertiser tools that deliver measurable results. We also enable Google to engage with customers at scale.
+
+Responsibilities
+Lead data science aspects of client engagements in the area of marketing effectiveness and marketing portfolio management - with deep knowledge of ML and statistics.
+Collaborate with customers to solve their problems with the best statistical techniques by developing an end-to-end modeling framework. Engage important stakeholders to assess data and model readiness and be able to scale a proof-of-concept to a larger solution.
+Work with customers and internal teams to translate data and model results into tactical and strategic insights that are actionable for decision-making. Co-present to and work with clients to integrate recommendations into business processes.
+Collaborate with Product/Engineering teams to increase capabilities of our Applied DS team, employing methods which create opportunities for scale, helping to drive innovation.
+Develop comprehensive understanding of Google data structures, and metrics, advocating for product changes where needed.
