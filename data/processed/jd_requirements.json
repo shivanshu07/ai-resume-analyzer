@@ -1,0 +1,184 @@
+[
+    {
+        "original_text": "Bachelor's degree in Statistics, Data Science, Mathematics, Physics, Economics, Operations Research, Engineering, or a related quantitative field, or equivalent practical experience.",
+        "category": "required",
+        "importance": "high",
+        "skills": [
+            "Statistics",
+            "Data Science"
+        ],
+        "education_fields": [
+            "Statistics",
+            "Data Science",
+            "Mathematics",
+            "Physics",
+            "Economics",
+            "Operations Research",
+            "Engineering"
+        ],
+        "experience": [],
+        "concepts": []
+    },
+    {
+        "original_text": "Experience in data science, statistics, or a related field.",
+        "category": "required",
+        "importance": "high",
+        "skills": [
+            "Statistics",
+            "Data Science"
+        ],
+        "education_fields": [
+            "Statistics",
+            "Data Science"
+        ],
+        "experience": [],
+        "concepts": []
+    },
+    {
+        "original_text": "Master's degree in Statistics, Mathematics, Bioinformatics, Economics, another quantitative field, or equivalent practical experience.",
+        "category": "preferred",
+        "importance": "medium",
+        "skills": [
+            "Statistics"
+        ],
+        "education_fields": [
+            "Statistics",
+            "Mathematics",
+            "Economics",
+            "Bioinformatics"
+        ],
+        "experience": [],
+        "concepts": []
+    },
+    {
+        "original_text": "2 years of experience using analytics to solve product or business problems, coding (e.g., Python, R, SQL), querying databases or statistical analysis, or a relevant PhD degree.",
+        "category": "preferred",
+        "importance": "medium",
+        "skills": [
+            "Python",
+            "R",
+            "SQL",
+            "Statistical Analysis",
+            "Data Analytics",
+            "Database"
+        ],
+        "education_fields": [],
+        "experience": [
+            "2 years"
+        ],
+        "concepts": [
+            "Business Problems"
+        ]
+    },
+    {
+        "original_text": "Experience with statistical software (e.g., Python, R or MATLAB) and database languages (e.g., SQL) with a good understanding of the AI/ML and statistical methods typically used in marketing analytics.",
+        "category": "preferred",
+        "importance": "medium",
+        "skills": [
+            "Python",
+            "R",
+            "SQL",
+            "MATLAB",
+            "Machine Learning",
+            "Artificial Intelligence",
+            "Statistical Methods",
+            "Data Analytics",
+            "Database",
+            "Marketing Analytics"
+        ],
+        "education_fields": [],
+        "experience": [],
+        "concepts": []
+    },
+    {
+        "original_text": "Experience delivering insights from AI/ML and statistical solutions to clients, including problem scoping/definition, modeling and interpretation.",
+        "category": "preferred",
+        "importance": "medium",
+        "skills": [
+            "Machine Learning",
+            "Artificial Intelligence",
+            "Modeling",
+            "Problem Scoping"
+        ],
+        "education_fields": [],
+        "experience": [],
+        "concepts": [
+            "Business Insights"
+        ]
+    },
+    {
+        "original_text": "Lead data science aspects of client engagements in the area of marketing effectiveness and marketing portfolio management - with deep knowledge of ML and statistics.",
+        "category": "responsibility",
+        "importance": "medium",
+        "skills": [
+            "Machine Learning",
+            "Statistics",
+            "Data Science",
+            "Marketing Effectiveness"
+        ],
+        "education_fields": [
+            "Statistics",
+            "Data Science"
+        ],
+        "experience": [],
+        "concepts": [
+            "Client Engagement",
+            "Marketing Portfolio Management"
+        ]
+    },
+    {
+        "original_text": "Collaborate with customers to solve their problems with the best statistical techniques by developing an end-to-end modeling framework. Engage important stakeholders to assess data and model readiness and be able to scale a proof-of-concept to a larger solution.",
+        "category": "responsibility",
+        "importance": "medium",
+        "skills": [
+            "Modeling"
+        ],
+        "education_fields": [],
+        "experience": [],
+        "concepts": [
+            "Stakeholder Management",
+            "Customer Collaboration",
+            "Proof of Concept"
+        ]
+    },
+    {
+        "original_text": "Work with customers and internal teams to translate data and model results into tactical and strategic insights that are actionable for decision-making. Co-present to and work with clients to integrate recommendations into business processes.",
+        "category": "responsibility",
+        "importance": "medium",
+        "skills": [],
+        "education_fields": [],
+        "experience": [],
+        "concepts": [
+            "Business Insights",
+            "Decision Making",
+            "Business Processes",
+            "Strategic Insights"
+        ]
+    },
+    {
+        "original_text": "Collaborate with Product/Engineering teams to increase capabilities of our Applied DS team, employing methods which create opportunities for scale, helping to drive innovation.",
+        "category": "responsibility",
+        "importance": "medium",
+        "skills": [],
+        "education_fields": [
+            "Engineering"
+        ],
+        "experience": [],
+        "concepts": [
+            "Product Engineering Collaboration",
+            "Innovation"
+        ]
+    },
+    {
+        "original_text": "Develop comprehensive understanding of Google data structures, and metrics, advocating for product changes where needed.",
+        "category": "responsibility",
+        "importance": "medium",
+        "skills": [],
+        "education_fields": [],
+        "experience": [],
+        "concepts": [
+            "Data Structures",
+            "Metrics"
+        ]
+    }
+]
