@@ -1,0 +1,756 @@
+[
+    {
+        "requirement": "Bachelor's degree in Statistics, Data Science, Mathematics, Physics, Economics, Operations Research, Engineering, or a related quantitative field, or equivalent practical experience.",
+        "category": "required",
+        "importance": "high",
+        "skills": [
+            "Statistics",
+            "Data Science"
+        ],
+        "education_fields": [
+            "Statistics",
+            "Data Science",
+            "Mathematics",
+            "Physics",
+            "Economics",
+            "Operations Research",
+            "Engineering"
+        ],
+        "experience": [],
+        "concepts": [],
+        "best_match": {
+            "chunk_id": "resume_001",
+            "section": "SUMMARY",
+            "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+            "similarity": 0.4162
+        },
+        "match_level": "weak",
+        "all_matches": [
+            {
+                "chunk_id": "resume_001",
+                "section": "SUMMARY",
+                "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                "similarity": 0.4162
+            },
+            {
+                "chunk_id": "resume_002",
+                "section": "SKILLS",
+                "text": "Programming: Python, SQL\nData Analysis: NumPy, Pandas, EDA, Data Cleaning, Feature Engineering\nMachine Learning: Scikit-learn, Regression, Classification, Clustering, Model Evaluation\nDeep Learning: PyTorch, TensorFlow, CNNs, RNNs, Transformers, NLP, Computer Vision\nVisualization: Power BI, Matplotlib\nDeployment / Tools: Flask, Streamlit, Git, GitHub\nMath: Probability & Statistics, Linear Algebra",
+                "similarity": 0.3231
+            },
+            {
+                "chunk_id": "resume_007",
+                "section": "CERTIFICATIONS & LANGUAGES",
+                "text": "- Google Advanced Data Analytics Professional Certificate\n- Languages: English (Intermediate), Hindi (Fluent)",
+                "similarity": 0.3144
+            },
+            {
+                "chunk_id": "resume_006",
+                "section": "EDUCATION",
+                "text": "Indraprastha Institute of Information Technology, Delhi\n2020 - 2024 Bachelor of Technology in Computer Science and Artificial Intelligence\nKIIT World School, New Delhi\n2004 - 2018 Senior Secondary School Education",
+                "similarity": 0.2922
+            },
+            {
+                "chunk_id": "resume_003",
+                "section": "WORK EXPERIENCE",
+                "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                "similarity": 0.0875
+            },
+            {
+                "chunk_id": "resume_005",
+                "section": "PROJECTS",
+                "text": "Number Plate Recognition using CV & OCR - Personal Project\nFeb 2023 - May 2023\n- Developed an end-to-end license plate recognition pipeline using Haar Cascade, Canny Edge Detection, image preprocessing, and EasyOCR for automated character extraction from vehicle images.\n- Integrated preprocessing, plate localization, cropping, OCR, and text extraction into a complete computer vision workflow for real-world vehicle images.",
+                "similarity": 0.0263
+            },
+            {
+                "chunk_id": "resume_004",
+                "section": "PROJECTS",
+                "text": "Book Recommender System - Academic Team Project (IIITD)\nFeb 2024 - May 2024\n- Designed and evaluated content-based, collaborative filtering, and hybrid recommendation models on the Book-Crossing dataset (271K+ books, 279K+ users, 1.15M+ ratings) as part of a 6-member team.\n- Implemented TF-IDF, cosine similarity, and collaborative filtering approaches; the TF-IDF model achieved the best performance (F1: 0.72), outperforming collaborative (0.69) and hybrid (0.70) models.\n- Deployed the recommendation engine as an interactive Streamlit application with a feedback loop that dynamically re-weighted similarity scores based on user ratings.",
+                "similarity": -0.0177
+            }
+        ],
+        "requirement_id": 1
+    },
+    {
+        "requirement": "Experience in data science, statistics, or a related field.",
+        "category": "required",
+        "importance": "high",
+        "skills": [
+            "Statistics",
+            "Data Science"
+        ],
+        "education_fields": [
+            "Statistics",
+            "Data Science"
+        ],
+        "experience": [],
+        "concepts": [],
+        "best_match": {
+            "chunk_id": "resume_001",
+            "section": "SUMMARY",
+            "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+            "similarity": 0.5633
+        },
+        "match_level": "moderate",
+        "all_matches": [
+            {
+                "chunk_id": "resume_001",
+                "section": "SUMMARY",
+                "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                "similarity": 0.5633
+            },
+            {
+                "chunk_id": "resume_002",
+                "section": "SKILLS",
+                "text": "Programming: Python, SQL\nData Analysis: NumPy, Pandas, EDA, Data Cleaning, Feature Engineering\nMachine Learning: Scikit-learn, Regression, Classification, Clustering, Model Evaluation\nDeep Learning: PyTorch, TensorFlow, CNNs, RNNs, Transformers, NLP, Computer Vision\nVisualization: Power BI, Matplotlib\nDeployment / Tools: Flask, Streamlit, Git, GitHub\nMath: Probability & Statistics, Linear Algebra",
+                "similarity": 0.432
+            },
+            {
+                "chunk_id": "resume_007",
+                "section": "CERTIFICATIONS & LANGUAGES",
+                "text": "- Google Advanced Data Analytics Professional Certificate\n- Languages: English (Intermediate), Hindi (Fluent)",
+                "similarity": 0.4134
+            },
+            {
+                "chunk_id": "resume_006",
+                "section": "EDUCATION",
+                "text": "Indraprastha Institute of Information Technology, Delhi\n2020 - 2024 Bachelor of Technology in Computer Science and Artificial Intelligence\nKIIT World School, New Delhi\n2004 - 2018 Senior Secondary School Education",
+                "similarity": 0.2367
+            },
+            {
+                "chunk_id": "resume_003",
+                "section": "WORK EXPERIENCE",
+                "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                "similarity": 0.2299
+            },
+            {
+                "chunk_id": "resume_004",
+                "section": "PROJECTS",
+                "text": "Book Recommender System - Academic Team Project (IIITD)\nFeb 2024 - May 2024\n- Designed and evaluated content-based, collaborative filtering, and hybrid recommendation models on the Book-Crossing dataset (271K+ books, 279K+ users, 1.15M+ ratings) as part of a 6-member team.\n- Implemented TF-IDF, cosine similarity, and collaborative filtering approaches; the TF-IDF model achieved the best performance (F1: 0.72), outperforming collaborative (0.69) and hybrid (0.70) models.\n- Deployed the recommendation engine as an interactive Streamlit application with a feedback loop that dynamically re-weighted similarity scores based on user ratings.",
+                "similarity": 0.0713
+            },
+            {
+                "chunk_id": "resume_005",
+                "section": "PROJECTS",
+                "text": "Number Plate Recognition using CV & OCR - Personal Project\nFeb 2023 - May 2023\n- Developed an end-to-end license plate recognition pipeline using Haar Cascade, Canny Edge Detection, image preprocessing, and EasyOCR for automated character extraction from vehicle images.\n- Integrated preprocessing, plate localization, cropping, OCR, and text extraction into a complete computer vision workflow for real-world vehicle images.",
+                "similarity": 0.0105
+            }
+        ],
+        "requirement_id": 2
+    },
+    {
+        "requirement": "Master's degree in Statistics, Mathematics, Bioinformatics, Economics, another quantitative field, or equivalent practical experience.",
+        "category": "preferred",
+        "importance": "medium",
+        "skills": [
+            "Statistics"
+        ],
+        "education_fields": [
+            "Statistics",
+            "Mathematics",
+            "Economics",
+            "Bioinformatics"
+        ],
+        "experience": [],
+        "concepts": [],
+        "best_match": {
+            "chunk_id": "resume_001",
+            "section": "SUMMARY",
+            "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+            "similarity": 0.3914
+        },
+        "match_level": "weak",
+        "all_matches": [
+            {
+                "chunk_id": "resume_001",
+                "section": "SUMMARY",
+                "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                "similarity": 0.3914
+            },
+            {
+                "chunk_id": "resume_002",
+                "section": "SKILLS",
+                "text": "Programming: Python, SQL\nData Analysis: NumPy, Pandas, EDA, Data Cleaning, Feature Engineering\nMachine Learning: Scikit-learn, Regression, Classification, Clustering, Model Evaluation\nDeep Learning: PyTorch, TensorFlow, CNNs, RNNs, Transformers, NLP, Computer Vision\nVisualization: Power BI, Matplotlib\nDeployment / Tools: Flask, Streamlit, Git, GitHub\nMath: Probability & Statistics, Linear Algebra",
+                "similarity": 0.3888
+            },
+            {
+                "chunk_id": "resume_007",
+                "section": "CERTIFICATIONS & LANGUAGES",
+                "text": "- Google Advanced Data Analytics Professional Certificate\n- Languages: English (Intermediate), Hindi (Fluent)",
+                "similarity": 0.3033
+            },
+            {
+                "chunk_id": "resume_006",
+                "section": "EDUCATION",
+                "text": "Indraprastha Institute of Information Technology, Delhi\n2020 - 2024 Bachelor of Technology in Computer Science and Artificial Intelligence\nKIIT World School, New Delhi\n2004 - 2018 Senior Secondary School Education",
+                "similarity": 0.2917
+            },
+            {
+                "chunk_id": "resume_003",
+                "section": "WORK EXPERIENCE",
+                "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                "similarity": 0.0605
+            },
+            {
+                "chunk_id": "resume_005",
+                "section": "PROJECTS",
+                "text": "Number Plate Recognition using CV & OCR - Personal Project\nFeb 2023 - May 2023\n- Developed an end-to-end license plate recognition pipeline using Haar Cascade, Canny Edge Detection, image preprocessing, and EasyOCR for automated character extraction from vehicle images.\n- Integrated preprocessing, plate localization, cropping, OCR, and text extraction into a complete computer vision workflow for real-world vehicle images.",
+                "similarity": 0.0248
+            },
+            {
+                "chunk_id": "resume_004",
+                "section": "PROJECTS",
+                "text": "Book Recommender System - Academic Team Project (IIITD)\nFeb 2024 - May 2024\n- Designed and evaluated content-based, collaborative filtering, and hybrid recommendation models on the Book-Crossing dataset (271K+ books, 279K+ users, 1.15M+ ratings) as part of a 6-member team.\n- Implemented TF-IDF, cosine similarity, and collaborative filtering approaches; the TF-IDF model achieved the best performance (F1: 0.72), outperforming collaborative (0.69) and hybrid (0.70) models.\n- Deployed the recommendation engine as an interactive Streamlit application with a feedback loop that dynamically re-weighted similarity scores based on user ratings.",
+                "similarity": -0.0421
+            }
+        ],
+        "requirement_id": 3
+    },
+    {
+        "requirement": "2 years of experience using analytics to solve product or business problems, coding (e.g., Python, R, SQL), querying databases or statistical analysis, or a relevant PhD degree.",
+        "category": "preferred",
+        "importance": "medium",
+        "skills": [
+            "Python",
+            "R",
+            "SQL",
+            "Statistical Analysis",
+            "Data Analytics",
+            "Database"
+        ],
+        "education_fields": [],
+        "experience": [
+            "2 years"
+        ],
+        "concepts": [
+            "Business Problems"
+        ],
+        "best_match": {
+            "chunk_id": "resume_001",
+            "section": "SUMMARY",
+            "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+            "similarity": 0.6309
+        },
+        "match_level": "moderate",
+        "all_matches": [
+            {
+                "chunk_id": "resume_001",
+                "section": "SUMMARY",
+                "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                "similarity": 0.6309
+            },
+            {
+                "chunk_id": "resume_002",
+                "section": "SKILLS",
+                "text": "Programming: Python, SQL\nData Analysis: NumPy, Pandas, EDA, Data Cleaning, Feature Engineering\nMachine Learning: Scikit-learn, Regression, Classification, Clustering, Model Evaluation\nDeep Learning: PyTorch, TensorFlow, CNNs, RNNs, Transformers, NLP, Computer Vision\nVisualization: Power BI, Matplotlib\nDeployment / Tools: Flask, Streamlit, Git, GitHub\nMath: Probability & Statistics, Linear Algebra",
+                "similarity": 0.4847
+            },
+            {
+                "chunk_id": "resume_007",
+                "section": "CERTIFICATIONS & LANGUAGES",
+                "text": "- Google Advanced Data Analytics Professional Certificate\n- Languages: English (Intermediate), Hindi (Fluent)",
+                "similarity": 0.4252
+            },
+            {
+                "chunk_id": "resume_003",
+                "section": "WORK EXPERIENCE",
+                "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                "similarity": 0.404
+            },
+            {
+                "chunk_id": "resume_006",
+                "section": "EDUCATION",
+                "text": "Indraprastha Institute of Information Technology, Delhi\n2020 - 2024 Bachelor of Technology in Computer Science and Artificial Intelligence\nKIIT World School, New Delhi\n2004 - 2018 Senior Secondary School Education",
+                "similarity": 0.2808
+            },
+            {
+                "chunk_id": "resume_004",
+                "section": "PROJECTS",
+                "text": "Book Recommender System - Academic Team Project (IIITD)\nFeb 2024 - May 2024\n- Designed and evaluated content-based, collaborative filtering, and hybrid recommendation models on the Book-Crossing dataset (271K+ books, 279K+ users, 1.15M+ ratings) as part of a 6-member team.\n- Implemented TF-IDF, cosine similarity, and collaborative filtering approaches; the TF-IDF model achieved the best performance (F1: 0.72), outperforming collaborative (0.69) and hybrid (0.70) models.\n- Deployed the recommendation engine as an interactive Streamlit application with a feedback loop that dynamically re-weighted similarity scores based on user ratings.",
+                "similarity": 0.0469
+            },
+            {
+                "chunk_id": "resume_005",
+                "section": "PROJECTS",
+                "text": "Number Plate Recognition using CV & OCR - Personal Project\nFeb 2023 - May 2023\n- Developed an end-to-end license plate recognition pipeline using Haar Cascade, Canny Edge Detection, image preprocessing, and EasyOCR for automated character extraction from vehicle images.\n- Integrated preprocessing, plate localization, cropping, OCR, and text extraction into a complete computer vision workflow for real-world vehicle images.",
+                "similarity": 0.0249
+            }
+        ],
+        "requirement_id": 4
+    },
+    {
+        "requirement": "Experience with statistical software (e.g., Python, R or MATLAB) and database languages (e.g., SQL) with a good understanding of the AI/ML and statistical methods typically used in marketing analytics.",
+        "category": "preferred",
+        "importance": "medium",
+        "skills": [
+            "Python",
+            "R",
+            "SQL",
+            "MATLAB",
+            "Machine Learning",
+            "Artificial Intelligence",
+            "Statistical Methods",
+            "Data Analytics",
+            "Database",
+            "Marketing Analytics"
+        ],
+        "education_fields": [],
+        "experience": [],
+        "concepts": [],
+        "best_match": {
+            "chunk_id": "resume_001",
+            "section": "SUMMARY",
+            "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+            "similarity": 0.5849
+        },
+        "match_level": "moderate",
+        "all_matches": [
+            {
+                "chunk_id": "resume_001",
+                "section": "SUMMARY",
+                "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                "similarity": 0.5849
+            },
+            {
+                "chunk_id": "resume_002",
+                "section": "SKILLS",
+                "text": "Programming: Python, SQL\nData Analysis: NumPy, Pandas, EDA, Data Cleaning, Feature Engineering\nMachine Learning: Scikit-learn, Regression, Classification, Clustering, Model Evaluation\nDeep Learning: PyTorch, TensorFlow, CNNs, RNNs, Transformers, NLP, Computer Vision\nVisualization: Power BI, Matplotlib\nDeployment / Tools: Flask, Streamlit, Git, GitHub\nMath: Probability & Statistics, Linear Algebra",
+                "similarity": 0.5244
+            },
+            {
+                "chunk_id": "resume_007",
+                "section": "CERTIFICATIONS & LANGUAGES",
+                "text": "- Google Advanced Data Analytics Professional Certificate\n- Languages: English (Intermediate), Hindi (Fluent)",
+                "similarity": 0.3885
+            },
+            {
+                "chunk_id": "resume_003",
+                "section": "WORK EXPERIENCE",
+                "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                "similarity": 0.3591
+            },
+            {
+                "chunk_id": "resume_006",
+                "section": "EDUCATION",
+                "text": "Indraprastha Institute of Information Technology, Delhi\n2020 - 2024 Bachelor of Technology in Computer Science and Artificial Intelligence\nKIIT World School, New Delhi\n2004 - 2018 Senior Secondary School Education",
+                "similarity": 0.2056
+            },
+            {
+                "chunk_id": "resume_004",
+                "section": "PROJECTS",
+                "text": "Book Recommender System - Academic Team Project (IIITD)\nFeb 2024 - May 2024\n- Designed and evaluated content-based, collaborative filtering, and hybrid recommendation models on the Book-Crossing dataset (271K+ books, 279K+ users, 1.15M+ ratings) as part of a 6-member team.\n- Implemented TF-IDF, cosine similarity, and collaborative filtering approaches; the TF-IDF model achieved the best performance (F1: 0.72), outperforming collaborative (0.69) and hybrid (0.70) models.\n- Deployed the recommendation engine as an interactive Streamlit application with a feedback loop that dynamically re-weighted similarity scores based on user ratings.",
+                "similarity": 0.1462
+            },
+            {
+                "chunk_id": "resume_005",
+                "section": "PROJECTS",
+                "text": "Number Plate Recognition using CV & OCR - Personal Project\nFeb 2023 - May 2023\n- Developed an end-to-end license plate recognition pipeline using Haar Cascade, Canny Edge Detection, image preprocessing, and EasyOCR for automated character extraction from vehicle images.\n- Integrated preprocessing, plate localization, cropping, OCR, and text extraction into a complete computer vision workflow for real-world vehicle images.",
+                "similarity": 0.0326
+            }
+        ],
+        "requirement_id": 5
+    },
+    {
+        "requirement": "Experience delivering insights from AI/ML and statistical solutions to clients, including problem scoping/definition, modeling and interpretation.",
+        "category": "preferred",
+        "importance": "medium",
+        "skills": [
+            "Machine Learning",
+            "Artificial Intelligence",
+            "Modeling",
+            "Problem Scoping"
+        ],
+        "education_fields": [],
+        "experience": [],
+        "concepts": [
+            "Business Insights"
+        ],
+        "best_match": {
+            "chunk_id": "resume_001",
+            "section": "SUMMARY",
+            "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+            "similarity": 0.4831
+        },
+        "match_level": "weak",
+        "all_matches": [
+            {
+                "chunk_id": "resume_001",
+                "section": "SUMMARY",
+                "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                "similarity": 0.4831
+            },
+            {
+                "chunk_id": "resume_003",
+                "section": "WORK EXPERIENCE",
+                "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                "similarity": 0.3703
+            },
+            {
+                "chunk_id": "resume_007",
+                "section": "CERTIFICATIONS & LANGUAGES",
+                "text": "- Google Advanced Data Analytics Professional Certificate\n- Languages: English (Intermediate), Hindi (Fluent)",
+                "similarity": 0.2532
+            },
+            {
+                "chunk_id": "resume_002",
+                "section": "SKILLS",
+                "text": "Programming: Python, SQL\nData Analysis: NumPy, Pandas, EDA, Data Cleaning, Feature Engineering\nMachine Learning: Scikit-learn, Regression, Classification, Clustering, Model Evaluation\nDeep Learning: PyTorch, TensorFlow, CNNs, RNNs, Transformers, NLP, Computer Vision\nVisualization: Power BI, Matplotlib\nDeployment / Tools: Flask, Streamlit, Git, GitHub\nMath: Probability & Statistics, Linear Algebra",
+                "similarity": 0.2498
+            },
+            {
+                "chunk_id": "resume_006",
+                "section": "EDUCATION",
+                "text": "Indraprastha Institute of Information Technology, Delhi\n2020 - 2024 Bachelor of Technology in Computer Science and Artificial Intelligence\nKIIT World School, New Delhi\n2004 - 2018 Senior Secondary School Education",
+                "similarity": 0.1747
+            },
+            {
+                "chunk_id": "resume_004",
+                "section": "PROJECTS",
+                "text": "Book Recommender System - Academic Team Project (IIITD)\nFeb 2024 - May 2024\n- Designed and evaluated content-based, collaborative filtering, and hybrid recommendation models on the Book-Crossing dataset (271K+ books, 279K+ users, 1.15M+ ratings) as part of a 6-member team.\n- Implemented TF-IDF, cosine similarity, and collaborative filtering approaches; the TF-IDF model achieved the best performance (F1: 0.72), outperforming collaborative (0.69) and hybrid (0.70) models.\n- Deployed the recommendation engine as an interactive Streamlit application with a feedback loop that dynamically re-weighted similarity scores based on user ratings.",
+                "similarity": 0.1383
+            },
+            {
+                "chunk_id": "resume_005",
+                "section": "PROJECTS",
+                "text": "Number Plate Recognition using CV & OCR - Personal Project\nFeb 2023 - May 2023\n- Developed an end-to-end license plate recognition pipeline using Haar Cascade, Canny Edge Detection, image preprocessing, and EasyOCR for automated character extraction from vehicle images.\n- Integrated preprocessing, plate localization, cropping, OCR, and text extraction into a complete computer vision workflow for real-world vehicle images.",
+                "similarity": 0.0152
+            }
+        ],
+        "requirement_id": 6
+    },
+    {
+        "requirement": "Lead data science aspects of client engagements in the area of marketing effectiveness and marketing portfolio management - with deep knowledge of ML and statistics.",
+        "category": "responsibility",
+        "importance": "medium",
+        "skills": [
+            "Machine Learning",
+            "Statistics",
+            "Data Science",
+            "Marketing Effectiveness"
+        ],
+        "education_fields": [
+            "Statistics",
+            "Data Science"
+        ],
+        "experience": [],
+        "concepts": [
+            "Client Engagement",
+            "Marketing Portfolio Management"
+        ],
+        "best_match": {
+            "chunk_id": "resume_003",
+            "section": "WORK EXPERIENCE",
+            "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+            "similarity": 0.4562
+        },
+        "match_level": "weak",
+        "all_matches": [
+            {
+                "chunk_id": "resume_003",
+                "section": "WORK EXPERIENCE",
+                "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                "similarity": 0.4562
+            },
+            {
+                "chunk_id": "resume_001",
+                "section": "SUMMARY",
+                "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                "similarity": 0.3408
+            },
+            {
+                "chunk_id": "resume_007",
+                "section": "CERTIFICATIONS & LANGUAGES",
+                "text": "- Google Advanced Data Analytics Professional Certificate\n- Languages: English (Intermediate), Hindi (Fluent)",
+                "similarity": 0.27
+            },
+            {
+                "chunk_id": "resume_002",
+                "section": "SKILLS",
+                "text": "Programming: Python, SQL\nData Analysis: NumPy, Pandas, EDA, Data Cleaning, Feature Engineering\nMachine Learning: Scikit-learn, Regression, Classification, Clustering, Model Evaluation\nDeep Learning: PyTorch, TensorFlow, CNNs, RNNs, Transformers, NLP, Computer Vision\nVisualization: Power BI, Matplotlib\nDeployment / Tools: Flask, Streamlit, Git, GitHub\nMath: Probability & Statistics, Linear Algebra",
+                "similarity": 0.2353
+            },
+            {
+                "chunk_id": "resume_004",
+                "section": "PROJECTS",
+                "text": "Book Recommender System - Academic Team Project (IIITD)\nFeb 2024 - May 2024\n- Designed and evaluated content-based, collaborative filtering, and hybrid recommendation models on the Book-Crossing dataset (271K+ books, 279K+ users, 1.15M+ ratings) as part of a 6-member team.\n- Implemented TF-IDF, cosine similarity, and collaborative filtering approaches; the TF-IDF model achieved the best performance (F1: 0.72), outperforming collaborative (0.69) and hybrid (0.70) models.\n- Deployed the recommendation engine as an interactive Streamlit application with a feedback loop that dynamically re-weighted similarity scores based on user ratings.",
+                "similarity": 0.1748
+            },
+            {
+                "chunk_id": "resume_006",
+                "section": "EDUCATION",
+                "text": "Indraprastha Institute of Information Technology, Delhi\n2020 - 2024 Bachelor of Technology in Computer Science and Artificial Intelligence\nKIIT World School, New Delhi\n2004 - 2018 Senior Secondary School Education",
+                "similarity": 0.1378
+            },
+            {
+                "chunk_id": "resume_005",
+                "section": "PROJECTS",
+                "text": "Number Plate Recognition using CV & OCR - Personal Project\nFeb 2023 - May 2023\n- Developed an end-to-end license plate recognition pipeline using Haar Cascade, Canny Edge Detection, image preprocessing, and EasyOCR for automated character extraction from vehicle images.\n- Integrated preprocessing, plate localization, cropping, OCR, and text extraction into a complete computer vision workflow for real-world vehicle images.",
+                "similarity": 0.0311
+            }
+        ],
+        "requirement_id": 7
+    },
+    {
+        "requirement": "Collaborate with customers to solve their problems with the best statistical techniques by developing an end-to-end modeling framework. Engage important stakeholders to assess data and model readiness and be able to scale a proof-of-concept to a larger solution.",
+        "category": "responsibility",
+        "importance": "medium",
+        "skills": [
+            "Modeling"
+        ],
+        "education_fields": [],
+        "experience": [],
+        "concepts": [
+            "Stakeholder Management",
+            "Customer Collaboration",
+            "Proof of Concept"
+        ],
+        "best_match": {
+            "chunk_id": "resume_003",
+            "section": "WORK EXPERIENCE",
+            "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+            "similarity": 0.4816
+        },
+        "match_level": "weak",
+        "all_matches": [
+            {
+                "chunk_id": "resume_003",
+                "section": "WORK EXPERIENCE",
+                "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                "similarity": 0.4816
+            },
+            {
+                "chunk_id": "resume_001",
+                "section": "SUMMARY",
+                "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                "similarity": 0.3007
+            },
+            {
+                "chunk_id": "resume_007",
+                "section": "CERTIFICATIONS & LANGUAGES",
+                "text": "- Google Advanced Data Analytics Professional Certificate\n- Languages: English (Intermediate), Hindi (Fluent)",
+                "similarity": 0.2399
+            },
+            {
+                "chunk_id": "resume_002",
+                "section": "SKILLS",
+                "text": "Programming: Python, SQL\nData Analysis: NumPy, Pandas, EDA, Data Cleaning, Feature Engineering\nMachine Learning: Scikit-learn, Regression, Classification, Clustering, Model Evaluation\nDeep Learning: PyTorch, TensorFlow, CNNs, RNNs, Transformers, NLP, Computer Vision\nVisualization: Power BI, Matplotlib\nDeployment / Tools: Flask, Streamlit, Git, GitHub\nMath: Probability & Statistics, Linear Algebra",
+                "similarity": 0.1851
+            },
+            {
+                "chunk_id": "resume_004",
+                "section": "PROJECTS",
+                "text": "Book Recommender System - Academic Team Project (IIITD)\nFeb 2024 - May 2024\n- Designed and evaluated content-based, collaborative filtering, and hybrid recommendation models on the Book-Crossing dataset (271K+ books, 279K+ users, 1.15M+ ratings) as part of a 6-member team.\n- Implemented TF-IDF, cosine similarity, and collaborative filtering approaches; the TF-IDF model achieved the best performance (F1: 0.72), outperforming collaborative (0.69) and hybrid (0.70) models.\n- Deployed the recommendation engine as an interactive Streamlit application with a feedback loop that dynamically re-weighted similarity scores based on user ratings.",
+                "similarity": 0.1644
+            },
+            {
+                "chunk_id": "resume_006",
+                "section": "EDUCATION",
+                "text": "Indraprastha Institute of Information Technology, Delhi\n2020 - 2024 Bachelor of Technology in Computer Science and Artificial Intelligence\nKIIT World School, New Delhi\n2004 - 2018 Senior Secondary School Education",
+                "similarity": 0.1331
+            },
+            {
+                "chunk_id": "resume_005",
+                "section": "PROJECTS",
+                "text": "Number Plate Recognition using CV & OCR - Personal Project\nFeb 2023 - May 2023\n- Developed an end-to-end license plate recognition pipeline using Haar Cascade, Canny Edge Detection, image preprocessing, and EasyOCR for automated character extraction from vehicle images.\n- Integrated preprocessing, plate localization, cropping, OCR, and text extraction into a complete computer vision workflow for real-world vehicle images.",
+                "similarity": 0.0274
+            }
+        ],
+        "requirement_id": 8
+    },
+    {
+        "requirement": "Work with customers and internal teams to translate data and model results into tactical and strategic insights that are actionable for decision-making. Co-present to and work with clients to integrate recommendations into business processes.",
+        "category": "responsibility",
+        "importance": "medium",
+        "skills": [],
+        "education_fields": [],
+        "experience": [],
+        "concepts": [
+            "Business Insights",
+            "Decision Making",
+            "Business Processes",
+            "Strategic Insights"
+        ],
+        "best_match": {
+            "chunk_id": "resume_003",
+            "section": "WORK EXPERIENCE",
+            "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+            "similarity": 0.4657
+        },
+        "match_level": "weak",
+        "all_matches": [
+            {
+                "chunk_id": "resume_003",
+                "section": "WORK EXPERIENCE",
+                "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                "similarity": 0.4657
+            },
+            {
+                "chunk_id": "resume_001",
+                "section": "SUMMARY",
+                "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                "similarity": 0.293
+            },
+            {
+                "chunk_id": "resume_004",
+                "section": "PROJECTS",
+                "text": "Book Recommender System - Academic Team Project (IIITD)\nFeb 2024 - May 2024\n- Designed and evaluated content-based, collaborative filtering, and hybrid recommendation models on the Book-Crossing dataset (271K+ books, 279K+ users, 1.15M+ ratings) as part of a 6-member team.\n- Implemented TF-IDF, cosine similarity, and collaborative filtering approaches; the TF-IDF model achieved the best performance (F1: 0.72), outperforming collaborative (0.69) and hybrid (0.70) models.\n- Deployed the recommendation engine as an interactive Streamlit application with a feedback loop that dynamically re-weighted similarity scores based on user ratings.",
+                "similarity": 0.2663
+            },
+            {
+                "chunk_id": "resume_007",
+                "section": "CERTIFICATIONS & LANGUAGES",
+                "text": "- Google Advanced Data Analytics Professional Certificate\n- Languages: English (Intermediate), Hindi (Fluent)",
+                "similarity": 0.2105
+            },
+            {
+                "chunk_id": "resume_002",
+                "section": "SKILLS",
+                "text": "Programming: Python, SQL\nData Analysis: NumPy, Pandas, EDA, Data Cleaning, Feature Engineering\nMachine Learning: Scikit-learn, Regression, Classification, Clustering, Model Evaluation\nDeep Learning: PyTorch, TensorFlow, CNNs, RNNs, Transformers, NLP, Computer Vision\nVisualization: Power BI, Matplotlib\nDeployment / Tools: Flask, Streamlit, Git, GitHub\nMath: Probability & Statistics, Linear Algebra",
+                "similarity": 0.1208
+            },
+            {
+                "chunk_id": "resume_006",
+                "section": "EDUCATION",
+                "text": "Indraprastha Institute of Information Technology, Delhi\n2020 - 2024 Bachelor of Technology in Computer Science and Artificial Intelligence\nKIIT World School, New Delhi\n2004 - 2018 Senior Secondary School Education",
+                "similarity": 0.1167
+            },
+            {
+                "chunk_id": "resume_005",
+                "section": "PROJECTS",
+                "text": "Number Plate Recognition using CV & OCR - Personal Project\nFeb 2023 - May 2023\n- Developed an end-to-end license plate recognition pipeline using Haar Cascade, Canny Edge Detection, image preprocessing, and EasyOCR for automated character extraction from vehicle images.\n- Integrated preprocessing, plate localization, cropping, OCR, and text extraction into a complete computer vision workflow for real-world vehicle images.",
+                "similarity": -0.0323
+            }
+        ],
+        "requirement_id": 9
+    },
+    {
+        "requirement": "Collaborate with Product/Engineering teams to increase capabilities of our Applied DS team, employing methods which create opportunities for scale, helping to drive innovation.",
+        "category": "responsibility",
+        "importance": "medium",
+        "skills": [],
+        "education_fields": [
+            "Engineering"
+        ],
+        "experience": [],
+        "concepts": [
+            "Product Engineering Collaboration",
+            "Innovation"
+        ],
+        "best_match": {
+            "chunk_id": "resume_001",
+            "section": "SUMMARY",
+            "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+            "similarity": 0.3686
+        },
+        "match_level": "weak",
+        "all_matches": [
+            {
+                "chunk_id": "resume_001",
+                "section": "SUMMARY",
+                "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                "similarity": 0.3686
+            },
+            {
+                "chunk_id": "resume_003",
+                "section": "WORK EXPERIENCE",
+                "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                "similarity": 0.3685
+            },
+            {
+                "chunk_id": "resume_002",
+                "section": "SKILLS",
+                "text": "Programming: Python, SQL\nData Analysis: NumPy, Pandas, EDA, Data Cleaning, Feature Engineering\nMachine Learning: Scikit-learn, Regression, Classification, Clustering, Model Evaluation\nDeep Learning: PyTorch, TensorFlow, CNNs, RNNs, Transformers, NLP, Computer Vision\nVisualization: Power BI, Matplotlib\nDeployment / Tools: Flask, Streamlit, Git, GitHub\nMath: Probability & Statistics, Linear Algebra",
+                "similarity": 0.2291
+            },
+            {
+                "chunk_id": "resume_007",
+                "section": "CERTIFICATIONS & LANGUAGES",
+                "text": "- Google Advanced Data Analytics Professional Certificate\n- Languages: English (Intermediate), Hindi (Fluent)",
+                "similarity": 0.16
+            },
+            {
+                "chunk_id": "resume_006",
+                "section": "EDUCATION",
+                "text": "Indraprastha Institute of Information Technology, Delhi\n2020 - 2024 Bachelor of Technology in Computer Science and Artificial Intelligence\nKIIT World School, New Delhi\n2004 - 2018 Senior Secondary School Education",
+                "similarity": 0.1206
+            },
+            {
+                "chunk_id": "resume_004",
+                "section": "PROJECTS",
+                "text": "Book Recommender System - Academic Team Project (IIITD)\nFeb 2024 - May 2024\n- Designed and evaluated content-based, collaborative filtering, and hybrid recommendation models on the Book-Crossing dataset (271K+ books, 279K+ users, 1.15M+ ratings) as part of a 6-member team.\n- Implemented TF-IDF, cosine similarity, and collaborative filtering approaches; the TF-IDF model achieved the best performance (F1: 0.72), outperforming collaborative (0.69) and hybrid (0.70) models.\n- Deployed the recommendation engine as an interactive Streamlit application with a feedback loop that dynamically re-weighted similarity scores based on user ratings.",
+                "similarity": 0.0561
+            },
+            {
+                "chunk_id": "resume_005",
+                "section": "PROJECTS",
+                "text": "Number Plate Recognition using CV & OCR - Personal Project\nFeb 2023 - May 2023\n- Developed an end-to-end license plate recognition pipeline using Haar Cascade, Canny Edge Detection, image preprocessing, and EasyOCR for automated character extraction from vehicle images.\n- Integrated preprocessing, plate localization, cropping, OCR, and text extraction into a complete computer vision workflow for real-world vehicle images.",
+                "similarity": 0.0398
+            }
+        ],
+        "requirement_id": 10
+    },
+    {
+        "requirement": "Develop comprehensive understanding of Google data structures, and metrics, advocating for product changes where needed.",
+        "category": "responsibility",
+        "importance": "medium",
+        "skills": [],
+        "education_fields": [],
+        "experience": [],
+        "concepts": [
+            "Data Structures",
+            "Metrics"
+        ],
+        "best_match": {
+            "chunk_id": "resume_007",
+            "section": "CERTIFICATIONS & LANGUAGES",
+            "text": "- Google Advanced Data Analytics Professional Certificate\n- Languages: English (Intermediate), Hindi (Fluent)",
+            "similarity": 0.4301
+        },
+        "match_level": "weak",
+        "all_matches": [
+            {
+                "chunk_id": "resume_007",
+                "section": "CERTIFICATIONS & LANGUAGES",
+                "text": "- Google Advanced Data Analytics Professional Certificate\n- Languages: English (Intermediate), Hindi (Fluent)",
+                "similarity": 0.4301
+            },
+            {
+                "chunk_id": "resume_003",
+                "section": "WORK EXPERIENCE",
+                "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                "similarity": 0.4005
+            },
+            {
+                "chunk_id": "resume_001",
+                "section": "SUMMARY",
+                "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                "similarity": 0.3799
+            },
+            {
+                "chunk_id": "resume_002",
+                "section": "SKILLS",
+                "text": "Programming: Python, SQL\nData Analysis: NumPy, Pandas, EDA, Data Cleaning, Feature Engineering\nMachine Learning: Scikit-learn, Regression, Classification, Clustering, Model Evaluation\nDeep Learning: PyTorch, TensorFlow, CNNs, RNNs, Transformers, NLP, Computer Vision\nVisualization: Power BI, Matplotlib\nDeployment / Tools: Flask, Streamlit, Git, GitHub\nMath: Probability & Statistics, Linear Algebra",
+                "similarity": 0.2286
+            },
+            {
+                "chunk_id": "resume_006",
+                "section": "EDUCATION",
+                "text": "Indraprastha Institute of Information Technology, Delhi\n2020 - 2024 Bachelor of Technology in Computer Science and Artificial Intelligence\nKIIT World School, New Delhi\n2004 - 2018 Senior Secondary School Education",
+                "similarity": 0.1945
+            },
+            {
+                "chunk_id": "resume_004",
+                "section": "PROJECTS",
+                "text": "Book Recommender System - Academic Team Project (IIITD)\nFeb 2024 - May 2024\n- Designed and evaluated content-based, collaborative filtering, and hybrid recommendation models on the Book-Crossing dataset (271K+ books, 279K+ users, 1.15M+ ratings) as part of a 6-member team.\n- Implemented TF-IDF, cosine similarity, and collaborative filtering approaches; the TF-IDF model achieved the best performance (F1: 0.72), outperforming collaborative (0.69) and hybrid (0.70) models.\n- Deployed the recommendation engine as an interactive Streamlit application with a feedback loop that dynamically re-weighted similarity scores based on user ratings.",
+                "similarity": 0.1807
+            },
+            {
+                "chunk_id": "resume_005",
+                "section": "PROJECTS",
+                "text": "Number Plate Recognition using CV & OCR - Personal Project\nFeb 2023 - May 2023\n- Developed an end-to-end license plate recognition pipeline using Haar Cascade, Canny Edge Detection, image preprocessing, and EasyOCR for automated character extraction from vehicle images.\n- Integrated preprocessing, plate localization, cropping, OCR, and text extraction into a complete computer vision workflow for real-world vehicle images.",
+                "similarity": 0.0489
+            }
+        ],
+        "requirement_id": 11
+    }
+]

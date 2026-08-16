@@ -8,6 +8,7 @@ from src.extraction.requirement_extractor import RequirementExtractor
 from src.preprocessing.requirement_normalizer import RequirementNormalizer
 
 from src.llm.embedder import TextEmbedder
+from src.llm.matcher import ResumeJDMatcher
 
 # ============================================================
 # FILE PATHS
@@ -35,6 +36,10 @@ JD_EMBEDDINGS_PATH = (
     "data/processed/jd_embeddings.json"
 )
 
+MATCH_RESULTS_PATH = (
+    "data/processed/match_results.json"
+)
+
 # ============================================================
 # INITIALIZE COMPONENTS
 # ============================================================
@@ -58,6 +63,10 @@ requirement_extractor = RequirementExtractor()
 requirement_normalizer = RequirementNormalizer()
 
 embedder = TextEmbedder()
+
+matcher = ResumeJDMatcher(
+    similarity_threshold=0.35
+)
 
 # ============================================================
 # DAY 2
@@ -250,6 +259,45 @@ embedder.save_embeddings(
     jd_embeddings,
     JD_EMBEDDINGS_PATH
 )
+
+# ============================================================
+# DAY 4
+# LOAD EMBEDDINGS
+# ============================================================
+
+resume_embeddings_loaded = (
+    embedder.load_embeddings(
+        RESUME_EMBEDDINGS_PATH
+    )
+)
+
+jd_embeddings_loaded = (
+    embedder.load_embeddings(
+        JD_EMBEDDINGS_PATH
+    )
+)
+
+# ============================================================
+# DAY 4
+# SEMANTIC MATCHING
+# ============================================================
+
+match_results = matcher.match_all(
+
+    normalized_requirements,
+
+    jd_embeddings_loaded,
+
+    chunks,
+
+    resume_embeddings_loaded
+)
+
+matcher.save_results(
+    match_results,
+    MATCH_RESULTS_PATH
+)
+
 
 # ============================================================
 # OUTPUT / INFORMATION
@@ -477,4 +525,62 @@ print(
 
 print(
     f"  {JD_EMBEDDINGS_PATH}"
+)
+
+print(
+    "\n"
+    + "=" * 60
+)
+
+print(
+    "SEMANTIC MATCHING RESULTS"
+)
+
+print(
+    "=" * 60
+)
+
+for result in match_results:
+
+    print(
+        f"\nRequirement "
+        f"{result['requirement_id']}"
+    )
+
+    print(
+        f"Category: "
+        f"{result['category']}"
+    )
+
+    print(
+        f"Requirement: "
+        f"{result['requirement']}"
+    )
+
+    print(
+        f"Best evidence section: "
+        f"{result['best_match']['section']}"
+    )
+
+    print(
+        f"Resume chunk: "
+        f"{result['best_match']['chunk_id']}"
+    )
+
+    print(
+        f"Similarity: "
+        f"{result['best_match']['similarity']}"
+    )
+
+    print(
+        f"Match level: "
+        f"{result['match_level']}"
+    )
+
+print(
+    "\nMatch results saved to:"
+)
+
+print(
+    f"  {MATCH_RESULTS_PATH}"
 )
