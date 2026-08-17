@@ -1,14 +1,22 @@
 from src.extraction.pdf_parser import PDFParser
+
 from src.preprocessing.cleaner import TextCleaner
 from src.preprocessing.chunker import SemanticChunker
+
 from src.utils.file_handler import FileHandler
 
 from src.extraction.jd_parser import JobDescriptionParser
 from src.extraction.requirement_extractor import RequirementExtractor
+
 from src.preprocessing.requirement_normalizer import RequirementNormalizer
 
 from src.llm.embedder import TextEmbedder
 from src.llm.matcher import ResumeJDMatcher
+
+from src.evaluation.hybrid_scorer import HybridMatcher
+
+import numpy as np
+
 
 # ============================================================
 # FILE PATHS
@@ -40,6 +48,11 @@ MATCH_RESULTS_PATH = (
     "data/processed/match_results.json"
 )
 
+HYBRID_RESULTS_PATH = (
+    "data/processed/hybrid_results.json"
+)
+
+
 # ============================================================
 # INITIALIZE COMPONENTS
 # ============================================================
@@ -68,10 +81,124 @@ matcher = ResumeJDMatcher(
     similarity_threshold=0.35
 )
 
+hybrid_scorer = HybridMatcher()
+
+
+# ============================================================
+# HELPER
+# ============================================================
+
+def calculate_semantic_scores(
+    requirement_embedding,
+    resume_embeddings
+):
+    """
+    Calculate cosine similarity between one JD requirement
+    embedding and every resume chunk embedding.
+
+    Returns:
+        list[float]
+    """
+
+    query = np.asarray(
+        requirement_embedding,
+        dtype=float
+    )
+
+    matrix = np.asarray(
+        resume_embeddings,
+        dtype=float
+    )
+
+    # --------------------------------------------------------
+    # Ensure correct dimensions
+    # --------------------------------------------------------
+
+    if matrix.ndim == 1:
+        matrix = matrix.reshape(1, -1)
+
+    query = query.reshape(-1)
+
+    # --------------------------------------------------------
+    # Check dimensions
+    # --------------------------------------------------------
+
+    if matrix.shape[1] != query.shape[0]:
+
+        raise ValueError(
+            "Embedding dimension mismatch: "
+            f"resume embeddings have dimension "
+            f"{matrix.shape[1]}, while JD embedding has "
+            f"dimension {query.shape[0]}."
+        )
+
+    # --------------------------------------------------------
+    # Calculate norms
+    # --------------------------------------------------------
+
+    query_norm = np.linalg.norm(
+        query
+    )
+
+    matrix_norms = np.linalg.norm(
+        matrix,
+        axis=1
+    )
+
+    # --------------------------------------------------------
+    # Prevent division by zero
+    # --------------------------------------------------------
+
+    if query_norm == 0:
+
+        return [
+            0.0
+            for _ in range(len(matrix))
+        ]
+
+    matrix_norms = np.where(
+        matrix_norms == 0,
+        1e-12,
+        matrix_norms
+    )
+
+    # --------------------------------------------------------
+    # Cosine similarity
+    # --------------------------------------------------------
+
+    scores = (
+        matrix @ query
+    ) / (
+        matrix_norms * query_norm
+    )
+
+    return [
+        round(
+            float(score),
+            4
+        )
+        for score in scores
+    ]
+
+
 # ============================================================
 # DAY 2
 # RESUME PROCESSING PIPELINE
 # ============================================================
+
+print(
+    "\n"
+    + "=" * 60
+)
+
+print(
+    "RESUME PROCESSING"
+)
+
+print(
+    "=" * 60
+)
+
 
 # ------------------------------------------------------------
 # 1. Extract text from resume PDF
@@ -153,10 +280,25 @@ handler.save_json(
     CHUNKS_PATH
 )
 
+
 # ============================================================
 # DAY 3
 # RESUME EMBEDDINGS
 # ============================================================
+
+print(
+    "\n"
+    + "=" * 60
+)
+
+print(
+    "RESUME EMBEDDING GENERATION"
+)
+
+print(
+    "=" * 60
+)
+
 
 resume_texts = []
 
@@ -184,6 +326,20 @@ embedder.save_embeddings(
 # DAY 3
 # JOB DESCRIPTION PROCESSING
 # ============================================================
+
+print(
+    "\n"
+    + "=" * 60
+)
+
+print(
+    "JOB DESCRIPTION PROCESSING"
+)
+
+print(
+    "=" * 60
+)
+
 
 # ------------------------------------------------------------
 # 8. Load and parse job description
@@ -234,6 +390,7 @@ handler.save_json(
     JD_REQUIREMENTS_PATH
 )
 
+
 # ============================================================
 # DAY 3
 # JOB DESCRIPTION EMBEDDINGS
@@ -260,6 +417,7 @@ embedder.save_embeddings(
     JD_EMBEDDINGS_PATH
 )
 
+
 # ============================================================
 # DAY 4
 # LOAD EMBEDDINGS
@@ -277,10 +435,25 @@ jd_embeddings_loaded = (
     )
 )
 
+
 # ============================================================
 # DAY 4
 # SEMANTIC MATCHING
 # ============================================================
+
+print(
+    "\n"
+    + "=" * 60
+)
+
+print(
+    "SEMANTIC MATCHING"
+)
+
+print(
+    "=" * 60
+)
+
 
 match_results = matcher.match_all(
 
@@ -293,6 +466,7 @@ match_results = matcher.match_all(
     resume_embeddings_loaded
 )
 
+
 matcher.save_results(
     match_results,
     MATCH_RESULTS_PATH
@@ -300,7 +474,134 @@ matcher.save_results(
 
 
 # ============================================================
-# OUTPUT / INFORMATION
+# DAY 5
+# HYBRID SCORING
+# ============================================================
+
+print(
+    "\n"
+    + "=" * 60
+)
+
+print(
+    "HYBRID MATCHING"
+)
+
+print(
+    "=" * 60
+)
+
+
+hybrid_results = []
+
+
+# ------------------------------------------------------------
+# IMPORTANT:
+#
+# normalized_requirements is a LIST.
+#
+# match_requirement() expects ONE requirement DICTIONARY.
+#
+# Therefore we process every requirement separately.
+# ------------------------------------------------------------
+
+for index, requirement in enumerate(
+    normalized_requirements
+):
+
+    requirement_number = index + 1
+
+    print(
+        f"\nProcessing requirement "
+        f"{requirement_number}/"
+        f"{len(normalized_requirements)}"
+    )
+
+    # --------------------------------------------------------
+    # Get the embedding belonging to THIS requirement
+    # --------------------------------------------------------
+
+    requirement_embedding = (
+        jd_embeddings_loaded[index]
+    )
+
+    # --------------------------------------------------------
+    # Calculate semantic similarity between this JD
+    # requirement and EVERY resume chunk.
+    # --------------------------------------------------------
+
+    semantic_scores = (
+        calculate_semantic_scores(
+            requirement_embedding,
+            resume_embeddings_loaded
+        )
+    )
+
+    # --------------------------------------------------------
+    # Hybrid matching
+    # --------------------------------------------------------
+
+    result = hybrid_scorer.match_requirement(
+
+        requirement=requirement,
+
+        resume_chunks=chunks,
+
+        resume_sections=chunks,
+
+        semantic_scores=semantic_scores
+    )
+
+    # --------------------------------------------------------
+    # Add requirement metadata to result
+    # --------------------------------------------------------
+
+    result["requirement_id"] = (
+        requirement_number
+    )
+
+    result["requirement"] = (
+        requirement["original_text"]
+    )
+
+    result["category"] = (
+        requirement.get(
+            "category",
+            "preferred"
+        )
+    )
+
+    result["importance"] = (
+        requirement.get(
+            "importance",
+            "medium"
+        )
+    )
+
+    result["requirement_type"] = (
+        requirement.get(
+            "category",
+            "preferred"
+        )
+    )
+
+    hybrid_results.append(
+        result
+    )
+
+
+# ============================================================
+# SAVE HYBRID RESULTS
+# ============================================================
+
+handler.save_json(
+    hybrid_results,
+    HYBRID_RESULTS_PATH
+)
+
+
+# ============================================================
+# OUTPUT
 # ============================================================
 
 print(
@@ -347,6 +648,10 @@ for section in sections:
         f"  - {section['section']}"
     )
 
+
+# ============================================================
+# JD INFORMATION
+# ============================================================
 
 print(
     "\n"
@@ -397,6 +702,10 @@ for section, items in jd_sections.items():
         )
 
 
+# ============================================================
+# NORMALIZED REQUIREMENTS
+# ============================================================
+
 print(
     "\n"
     + "=" * 60
@@ -441,47 +750,24 @@ for index, requirement in enumerate(
     )
 
     print(
+        f"  Education: "
+        f"{requirement.get('education_fields', [])}"
+    )
+
+    print(
+        f"  Concepts: "
+        f"{requirement.get('concepts', [])}"
+    )
+
+    print(
         f"  Experience: "
         f"{requirement['experience']}"
     )
 
 
-print(
-    "\n"
-    + "=" * 60
-)
-
-print(
-    "DAY 3 PROCESSING COMPLETED"
-)
-
-print(
-    "=" * 60
-)
-
-print(
-    f"\nResume chunks saved to:"
-)
-
-print(
-    f"  {CHUNKS_PATH}"
-)
-
-print(
-    f"\nNormalized JD requirements saved to:"
-)
-
-print(
-    f"  {JD_REQUIREMENTS_PATH}"
-)
-
-print(
-    "\nNext stage:"
-)
-
-print(
-    "  Resume <-> Job Description semantic matching"
-)
+# ============================================================
+# EMBEDDING INFORMATION
+# ============================================================
 
 print(
     "\n"
@@ -527,6 +813,11 @@ print(
     f"  {JD_EMBEDDINGS_PATH}"
 )
 
+
+# ============================================================
+# SEMANTIC RESULTS
+# ============================================================
+
 print(
     "\n"
     + "=" * 60
@@ -539,6 +830,7 @@ print(
 print(
     "=" * 60
 )
+
 
 for result in match_results:
 
@@ -577,10 +869,96 @@ for result in match_results:
         f"{result['match_level']}"
     )
 
+
 print(
     "\nMatch results saved to:"
 )
 
 print(
     f"  {MATCH_RESULTS_PATH}"
+)
+
+
+# ============================================================
+# HYBRID RESULTS
+# ============================================================
+
+print(
+    "\n"
+    + "=" * 60
+)
+
+print(
+    "HYBRID MATCHING COMPLETED"
+)
+
+print(
+    "=" * 60
+)
+
+print(
+    f"Requirements processed: "
+    f"{len(hybrid_results)}"
+)
+
+print(
+    "\nOutput saved to:"
+)
+
+print(
+    f"  {HYBRID_RESULTS_PATH}"
+)
+
+
+print(
+    "\nRequirement summary:"
+)
+
+
+for result in hybrid_results:
+
+    print(
+        f"\nRequirement "
+        f"{result['requirement_id']}"
+    )
+
+    print(
+        f"Category: "
+        f"{result['category']}"
+    )
+
+    print(
+        f"Score: "
+        f"{result['hybrid_score']}"
+    )
+
+    print(
+        f"Assessment: "
+        f"{result['assessment']}"
+    )
+
+    best = result.get(
+        "best_evidence"
+    )
+
+    if best:
+
+        print(
+            f"Best evidence: "
+            f"{best['chunk_id']} "
+            f"({best['section']})"
+        )
+
+
+print(
+    "\n"
+    + "=" * 60
+)
+
+print(
+    "DAY 5 COMPLETED SUCCESSFULLY"
+)
+
+print(
+    "=" * 60
 )
