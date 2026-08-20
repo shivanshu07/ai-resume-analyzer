@@ -1,0 +1,328 @@
+{
+    "overall_ats_score": 45.89,
+    "score_interpretation": "Weak Match",
+    "requirement_summary": {
+        "total": 11,
+        "strong": 4,
+        "partial": 5,
+        "weak": 2,
+        "no_alignment": 0
+    },
+    "category_summary": {
+        "required": {
+            "score": 39.32,
+            "summary": {
+                "total": 2,
+                "strong": 0,
+                "partial": 2,
+                "weak": 0,
+                "no_alignment": 0
+            }
+        },
+        "preferred": {
+            "score": 67.03,
+            "summary": {
+                "total": 4,
+                "strong": 4,
+                "partial": 0,
+                "weak": 0,
+                "no_alignment": 0
+            }
+        },
+        "responsibility": {
+            "score": 32.92,
+            "summary": {
+                "total": 5,
+                "strong": 0,
+                "partial": 3,
+                "weak": 2,
+                "no_alignment": 0
+            }
+        }
+    },
+    "skills": {
+        "matched": [
+            "Statistics",
+            "Python",
+            "R",
+            "SQL",
+            "Statistical Analysis",
+            "Data Analytics",
+            "Database",
+            "Machine Learning",
+            "Artificial Intelligence",
+            "Modeling"
+        ],
+        "missing": [
+            "Data Science",
+            "MATLAB",
+            "Statistical Methods",
+            "Marketing Analytics",
+            "Problem Scoping",
+            "Marketing Effectiveness"
+        ]
+    },
+    "concepts": {
+        "matched": [
+            "Business Insights",
+            "Stakeholder Management",
+            "Data Structures"
+        ],
+        "missing": [
+            "Business Problems",
+            "Client Engagement",
+            "Marketing Portfolio Management",
+            "Customer Collaboration",
+            "Proof of Concept",
+            "Decision Making",
+            "Business Processes",
+            "Strategic Insights",
+            "Product Engineering Collaboration",
+            "Innovation",
+            "Metrics"
+        ]
+    },
+    "education": {
+        "matched": [],
+        "related": [],
+        "missing": [
+            "Statistics",
+            "Data Science",
+            "Mathematics",
+            "Physics",
+            "Economics",
+            "Operations Research",
+            "Engineering",
+            "Bioinformatics"
+        ],
+        "degree_levels": [
+            "bachelor"
+        ]
+    },
+    "experience": {
+        "required": [
+            "2 years"
+        ],
+        "evidence": [
+            "Professional work experience present"
+        ],
+        "estimated_years": 2.0
+    },
+    "requirements": {
+        "strengths": [
+            {
+                "requirement_id": 3,
+                "requirement": "Master's degree in Statistics, Mathematics, Bioinformatics, Economics, another quantitative field, or equivalent practical experience.",
+                "category": "preferred",
+                "importance": "medium",
+                "hybrid_score": 0.75,
+                "best_evidence": {
+                    "chunk_id": "resume_001",
+                    "section": "SUMMARY",
+                    "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                    "similarity": 0.3914
+                }
+            },
+            {
+                "requirement_id": 4,
+                "requirement": "2 years of experience using analytics to solve product or business problems, coding (e.g., Python, R, SQL), querying databases or statistical analysis, or a relevant PhD degree.",
+                "category": "preferred",
+                "importance": "medium",
+                "hybrid_score": 0.75,
+                "best_evidence": {
+                    "chunk_id": "resume_001",
+                    "section": "SUMMARY",
+                    "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                    "similarity": 0.6309
+                }
+            },
+            {
+                "requirement_id": 5,
+                "requirement": "Experience with statistical software (e.g., Python, R or MATLAB) and database languages (e.g., SQL) with a good understanding of the AI/ML and statistical methods typically used in marketing analytics.",
+                "category": "preferred",
+                "importance": "medium",
+                "hybrid_score": 0.525,
+                "best_evidence": {
+                    "chunk_id": "resume_001",
+                    "section": "SUMMARY",
+                    "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                    "similarity": 0.5849
+                }
+            },
+            {
+                "requirement_id": 6,
+                "requirement": "Experience delivering insights from AI/ML and statistical solutions to clients, including problem scoping/definition, modeling and interpretation.",
+                "category": "preferred",
+                "importance": "medium",
+                "hybrid_score": 0.6562,
+                "best_evidence": {
+                    "chunk_id": "resume_001",
+                    "section": "SUMMARY",
+                    "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                    "similarity": 0.4831
+                }
+            }
+        ],
+        "partial_matches": [
+            {
+                "requirement_id": 1,
+                "requirement": "Bachelor's degree in Statistics, Data Science, Mathematics, Physics, Economics, Operations Research, Engineering, or a related quantitative field, or equivalent practical experience.",
+                "category": "required",
+                "importance": "high",
+                "hybrid_score": 0.4115,
+                "best_evidence": {
+                    "chunk_id": "resume_001",
+                    "section": "SUMMARY",
+                    "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                    "similarity": 0.4162
+                }
+            },
+            {
+                "requirement_id": 2,
+                "requirement": "Experience in data science, statistics, or a related field.",
+                "category": "required",
+                "importance": "high",
+                "hybrid_score": 0.375,
+                "best_evidence": {
+                    "chunk_id": "resume_001",
+                    "section": "SUMMARY",
+                    "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                    "similarity": 0.5633
+                }
+            },
+            {
+                "requirement_id": 7,
+                "requirement": "Lead data science aspects of client engagements in the area of marketing effectiveness and marketing portfolio management - with deep knowledge of ML and statistics.",
+                "category": "responsibility",
+                "importance": "medium",
+                "hybrid_score": 0.375,
+                "best_evidence": {
+                    "chunk_id": "resume_001",
+                    "section": "SUMMARY",
+                    "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                    "similarity": 0.3408
+                }
+            },
+            {
+                "requirement_id": 8,
+                "requirement": "Collaborate with customers to solve their problems with the best statistical techniques by developing an end-to-end modeling framework. Engage important stakeholders to assess data and model readiness and be able to scale a proof-of-concept to a larger solution.",
+                "category": "responsibility",
+                "importance": "medium",
+                "hybrid_score": 0.5,
+                "best_evidence": {
+                    "chunk_id": "resume_001",
+                    "section": "SUMMARY",
+                    "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                    "similarity": 0.3007
+                }
+            },
+            {
+                "requirement_id": 11,
+                "requirement": "Develop comprehensive understanding of Google data structures, and metrics, advocating for product changes where needed.",
+                "category": "responsibility",
+                "importance": "medium",
+                "hybrid_score": 0.375,
+                "best_evidence": {
+                    "chunk_id": "resume_003",
+                    "section": "WORK EXPERIENCE",
+                    "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                    "similarity": 0.4005
+                }
+            }
+        ],
+        "weak_matches": [
+            {
+                "requirement_id": 9,
+                "requirement": "Work with customers and internal teams to translate data and model results into tactical and strategic insights that are actionable for decision-making. Co-present to and work with clients to integrate recommendations into business processes.",
+                "category": "responsibility",
+                "importance": "medium",
+                "hybrid_score": 0.2488,
+                "best_evidence": {
+                    "chunk_id": "resume_003",
+                    "section": "WORK EXPERIENCE",
+                    "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                    "similarity": 0.4657
+                }
+            },
+            {
+                "requirement_id": 10,
+                "requirement": "Collaborate with Product/Engineering teams to increase capabilities of our Applied DS team, employing methods which create opportunities for scale, helping to drive innovation.",
+                "category": "responsibility",
+                "importance": "medium",
+                "hybrid_score": 0.1474,
+                "best_evidence": {
+                    "chunk_id": "resume_001",
+                    "section": "SUMMARY",
+                    "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
+                    "similarity": 0.3686
+                }
+            }
+        ],
+        "missing_requirements": []
+    },
+    "priority_gaps": [
+        {
+            "requirement_id": 2,
+            "requirement": "Experience in data science, statistics, or a related field.",
+            "category": "required",
+            "importance": "high",
+            "assessment": "PARTIAL_ALIGNMENT",
+            "hybrid_score": 0.375,
+            "priority_score": 38.12
+        },
+        {
+            "requirement_id": 1,
+            "requirement": "Bachelor's degree in Statistics, Data Science, Mathematics, Physics, Economics, Operations Research, Engineering, or a related quantitative field, or equivalent practical experience.",
+            "category": "required",
+            "importance": "high",
+            "assessment": "PARTIAL_ALIGNMENT",
+            "hybrid_score": 0.4115,
+            "priority_score": 37.94
+        },
+        {
+            "requirement_id": 10,
+            "requirement": "Collaborate with Product/Engineering teams to increase capabilities of our Applied DS team, employing methods which create opportunities for scale, helping to drive innovation.",
+            "category": "responsibility",
+            "importance": "medium",
+            "assessment": "WEAK_ALIGNMENT",
+            "hybrid_score": 0.1474,
+            "priority_score": 34.26
+        },
+        {
+            "requirement_id": 9,
+            "requirement": "Work with customers and internal teams to translate data and model results into tactical and strategic insights that are actionable for decision-making. Co-present to and work with clients to integrate recommendations into business processes.",
+            "category": "responsibility",
+            "importance": "medium",
+            "assessment": "WEAK_ALIGNMENT",
+            "hybrid_score": 0.2488,
+            "priority_score": 33.76
+        },
+        {
+            "requirement_id": 7,
+            "requirement": "Lead data science aspects of client engagements in the area of marketing effectiveness and marketing portfolio management - with deep knowledge of ML and statistics.",
+            "category": "responsibility",
+            "importance": "medium",
+            "assessment": "PARTIAL_ALIGNMENT",
+            "hybrid_score": 0.375,
+            "priority_score": 28.12
+        },
+        {
+            "requirement_id": 11,
+            "requirement": "Develop comprehensive understanding of Google data structures, and metrics, advocating for product changes where needed.",
+            "category": "responsibility",
+            "importance": "medium",
+            "assessment": "PARTIAL_ALIGNMENT",
+            "hybrid_score": 0.375,
+            "priority_score": 28.12
+        },
+        {
+            "requirement_id": 8,
+            "requirement": "Collaborate with customers to solve their problems with the best statistical techniques by developing an end-to-end modeling framework. Engage important stakeholders to assess data and model readiness and be able to scale a proof-of-concept to a larger solution.",
+            "category": "responsibility",
+            "importance": "medium",
+            "assessment": "PARTIAL_ALIGNMENT",
+            "hybrid_score": 0.5,
+            "priority_score": 27.5
+        }
+    ]
+}

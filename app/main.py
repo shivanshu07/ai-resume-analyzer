@@ -1,3 +1,7 @@
+import numpy as np
+import json
+from pathlib import Path
+
 from src.extraction.pdf_parser import PDFParser
 
 from src.preprocessing.cleaner import TextCleaner
@@ -15,8 +19,7 @@ from src.llm.matcher import ResumeJDMatcher
 
 from src.evaluation.hybrid_scorer import HybridMatcher
 
-import numpy as np
-
+from src.evaluation.analysis import ResumeAnalysisEngine
 
 # ============================================================
 # FILE PATHS
@@ -52,6 +55,9 @@ HYBRID_RESULTS_PATH = (
     "data/processed/hybrid_results.json"
 )
 
+ATS_ANALYSIS_PATH = (
+    "data/processed/ats_analysis.json"
+)
 
 # ============================================================
 # INITIALIZE COMPONENTS
@@ -179,6 +185,8 @@ def calculate_semantic_scores(
         )
         for score in scores
     ]
+
+
 
 
 # ============================================================
@@ -599,6 +607,56 @@ handler.save_json(
     HYBRID_RESULTS_PATH
 )
 
+# ============================================================
+# DAY 6
+# ATS SCORE + RESUME GAP ANALYSIS
+# ============================================================
+
+print(
+    "\n"
+    + "=" * 60
+)
+
+print(
+    "DAY 6 - ATS SCORE + GAP ANALYSIS"
+)
+
+print(
+    "=" * 60
+)
+
+
+# ------------------------------------------------------------
+# Initialize Day-6 analysis engine
+# ------------------------------------------------------------
+
+analysis_engine = (
+    ResumeAnalysisEngine()
+)
+
+
+# ------------------------------------------------------------
+# Analyze hybrid matching results
+# ------------------------------------------------------------
+
+ats_analysis = (
+    analysis_engine.analyze(
+        hybrid_results
+    )
+)
+
+
+# ------------------------------------------------------------
+# Save final ATS analysis
+# ------------------------------------------------------------
+
+handler.save_json(
+    ats_analysis,
+    ATS_ANALYSIS_PATH
+)
+
+
+
 
 # ============================================================
 # OUTPUT
@@ -961,4 +1019,361 @@ print(
 
 print(
     "=" * 60
+)
+
+
+# ============================================================
+# ATS STYLE OUTPUT
+# ============================================================
+
+print(
+    "\n"
+    + "-" * 60
+)
+
+print(
+    "ATS SCORE"
+)
+
+print(
+    "-" * 60
+)
+
+print(
+    f"Overall ATS Score: "
+    f"{ats_analysis['overall_ats_score']}/100"
+)
+
+print(
+    f"Interpretation: "
+    f"{ats_analysis['score_interpretation']}"
+)
+
+
+# ============================================================
+# REQUIREMENT SUMMARY
+# ============================================================
+
+summary = (
+    ats_analysis[
+        "requirement_summary"
+    ]
+)
+
+print(
+    "\n"
+    + "-" * 60
+)
+
+print(
+    "REQUIREMENT SUMMARY"
+)
+
+print(
+    "-" * 60
+)
+
+print(
+    f"Total requirements: "
+    f"{summary['total']}"
+)
+
+print(
+    f"Strong alignment: "
+    f"{summary['strong']}"
+)
+
+print(
+    f"Partial alignment: "
+    f"{summary['partial']}"
+)
+
+print(
+    f"Weak alignment: "
+    f"{summary['weak']}"
+)
+
+print(
+    f"No alignment: "
+    f"{summary['no_alignment']}"
+)
+
+
+# ============================================================
+# CATEGORY SCORES
+# ============================================================
+
+print(
+    "\n"
+    + "-" * 60
+)
+
+print(
+    "CATEGORY SCORES"
+)
+
+print(
+    "-" * 60
+)
+
+
+for category, data in (
+    ats_analysis[
+        "category_summary"
+    ].items()
+):
+
+    print(
+        f"{category}: "
+        f"{data['score']}/100"
+    )
+
+
+# ============================================================
+# SKILL ANALYSIS
+# ============================================================
+
+skills = (
+    ats_analysis[
+        "skills"
+    ]
+)
+
+print(
+    "\n"
+    + "-" * 60
+)
+
+print(
+    "SKILL ANALYSIS"
+)
+
+print(
+    "-" * 60
+)
+
+print(
+    "\nMatched skills:"
+)
+
+for skill in skills["matched"]:
+
+    print(
+        f"  + {skill}"
+    )
+
+
+print(
+    "\nMissing skills:"
+)
+
+for skill in skills["missing"]:
+
+    print(
+        f"  - {skill}"
+    )
+
+
+# ============================================================
+# CONCEPT ANALYSIS
+# ============================================================
+
+concepts = (
+    ats_analysis[
+        "concepts"
+    ]
+)
+
+print(
+    "\n"
+    + "-" * 60
+)
+
+print(
+    "CONCEPT ANALYSIS"
+)
+
+print(
+    "-" * 60
+)
+
+print(
+    "\nMatched concepts:"
+)
+
+for concept in concepts["matched"]:
+
+    print(
+        f"  + {concept}"
+    )
+
+
+print(
+    "\nMissing concepts:"
+)
+
+for concept in concepts["missing"]:
+
+    print(
+        f"  - {concept}"
+    )
+
+
+# ============================================================
+# EDUCATION ANALYSIS
+# ============================================================
+
+education = (
+    ats_analysis[
+        "education"
+    ]
+)
+
+print(
+    "\n"
+    + "-" * 60
+)
+
+print(
+    "EDUCATION ANALYSIS"
+)
+
+print(
+    "-" * 60
+)
+
+print(
+    f"Matched: "
+    f"{education['matched']}"
+)
+
+print(
+    f"Related: "
+    f"{education['related']}"
+)
+
+print(
+    f"Missing: "
+    f"{education['missing']}"
+)
+
+
+# ============================================================
+# EXPERIENCE ANALYSIS
+# ============================================================
+
+experience = (
+    ats_analysis[
+        "experience"
+    ]
+)
+
+print(
+    "\n"
+    + "-" * 60
+)
+
+print(
+    "EXPERIENCE ANALYSIS"
+)
+
+print(
+    "-" * 60
+)
+
+print(
+    f"Required experience: "
+    f"{experience['required']}"
+)
+
+print(
+    f"Estimated years: "
+    f"{experience['estimated_years']}"
+)
+
+print(
+    f"Evidence: "
+    f"{experience['evidence']}"
+)
+
+
+# ============================================================
+# PRIORITY GAPS
+# ============================================================
+
+priority_gaps = (
+    ats_analysis[
+        "priority_gaps"
+    ]
+)
+
+print(
+    "\n"
+    + "-" * 60
+)
+
+print(
+    "PRIORITY GAPS"
+)
+
+print(
+    "-" * 60
+)
+
+
+for index, gap in enumerate(
+    priority_gaps[:5],
+    start=1
+):
+
+    print(
+        f"\n{index}. "
+        f"Requirement "
+        f"{gap['requirement_id']}"
+    )
+
+    print(
+        f"   Importance: "
+        f"{gap['importance']}"
+    )
+
+    print(
+        f"   Assessment: "
+        f"{gap['assessment']}"
+    )
+
+    print(
+        f"   Score: "
+        f"{gap['hybrid_score']}"
+    )
+
+    print(
+        f"   Requirement: "
+        f"{gap['requirement']}"
+    )
+
+
+# ============================================================
+# SAVE LOCATION
+# ============================================================
+
+print(
+    "\n"
+    + "=" * 60
+)
+
+print(
+    "DAY 6 COMPLETED SUCCESSFULLY"
+)
+
+print(
+    "=" * 60
+)
+
+print(
+    "\nATS analysis saved to:"
+)
+
+print(
+    f"  {ATS_ANALYSIS_PATH}"
 )
