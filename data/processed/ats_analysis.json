@@ -1,42 +1,42 @@
 {
-    "overall_ats_score": 45.89,
+    "overall_ats_score": 45.6,
     "score_interpretation": "Weak Match",
     "requirement_summary": {
         "total": 11,
-        "strong": 4,
-        "partial": 5,
-        "weak": 2,
-        "no_alignment": 0
+        "strong": 1,
+        "partial": 2,
+        "weak": 5,
+        "no_alignment": 3
     },
     "category_summary": {
         "required": {
-            "score": 39.32,
+            "score": 59.85,
             "summary": {
                 "total": 2,
-                "strong": 0,
-                "partial": 2,
-                "weak": 0,
+                "strong": 1,
+                "partial": 0,
+                "weak": 1,
                 "no_alignment": 0
             }
         },
         "preferred": {
-            "score": 67.03,
+            "score": 44.46,
             "summary": {
                 "total": 4,
-                "strong": 4,
-                "partial": 0,
-                "weak": 0,
-                "no_alignment": 0
+                "strong": 0,
+                "partial": 2,
+                "weak": 1,
+                "no_alignment": 1
             }
         },
         "responsibility": {
-            "score": 32.92,
+            "score": 24.01,
             "summary": {
                 "total": 5,
                 "strong": 0,
-                "partial": 3,
-                "weak": 2,
-                "no_alignment": 0
+                "partial": 0,
+                "weak": 3,
+                "no_alignment": 2
             }
         }
     },
@@ -46,18 +46,18 @@
             "Python",
             "R",
             "SQL",
-            "Statistical Analysis",
             "Data Analytics",
-            "Database",
             "Machine Learning",
-            "Artificial Intelligence",
-            "Modeling"
+            "Artificial Intelligence"
         ],
         "missing": [
             "Data Science",
+            "Statistical Analysis",
+            "Database",
             "MATLAB",
             "Statistical Methods",
             "Marketing Analytics",
+            "Modeling",
             "Problem Scoping",
             "Marketing Effectiveness"
         ]
@@ -66,7 +66,8 @@
         "matched": [
             "Business Insights",
             "Stakeholder Management",
-            "Data Structures"
+            "Business Processes",
+            "Product Engineering Collaboration"
         ],
         "missing": [
             "Business Problems",
@@ -75,24 +76,24 @@
             "Customer Collaboration",
             "Proof of Concept",
             "Decision Making",
-            "Business Processes",
             "Strategic Insights",
-            "Product Engineering Collaboration",
             "Innovation",
+            "Data Structures",
             "Metrics"
         ]
     },
     "education": {
-        "matched": [],
-        "related": [],
-        "missing": [
+        "matched": [
             "Statistics",
             "Data Science",
+            "Engineering"
+        ],
+        "related": [],
+        "missing": [
             "Mathematics",
             "Physics",
             "Economics",
             "Operations Research",
-            "Engineering",
             "Bioinformatics"
         ],
         "degree_levels": [
@@ -104,31 +105,34 @@
             "2 years"
         ],
         "evidence": [
-            "Professional work experience present"
+            "Professional work experience present",
+            "Estimated professional experience: 20.00 years"
         ],
-        "estimated_years": 2.0
+        "estimated_years": 20.0
     },
     "requirements": {
         "strengths": [
             {
-                "requirement_id": 3,
-                "requirement": "Master's degree in Statistics, Mathematics, Bioinformatics, Economics, another quantitative field, or equivalent practical experience.",
-                "category": "preferred",
-                "importance": "medium",
-                "hybrid_score": 0.75,
+                "requirement_id": 2,
+                "requirement": "Experience in data science, statistics, or a related field.",
+                "category": "required",
+                "importance": "high",
+                "hybrid_score": 0.8095,
                 "best_evidence": {
                     "chunk_id": "resume_001",
                     "section": "SUMMARY",
                     "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
-                    "similarity": 0.3914
+                    "similarity": 0.5633
                 }
-            },
+            }
+        ],
+        "partial_matches": [
             {
                 "requirement_id": 4,
                 "requirement": "2 years of experience using analytics to solve product or business problems, coding (e.g., Python, R, SQL), querying databases or statistical analysis, or a relevant PhD degree.",
                 "category": "preferred",
                 "importance": "medium",
-                "hybrid_score": 0.75,
+                "hybrid_score": 0.6595,
                 "best_evidence": {
                     "chunk_id": "resume_001",
                     "section": "SUMMARY",
@@ -137,24 +141,11 @@
                 }
             },
             {
-                "requirement_id": 5,
-                "requirement": "Experience with statistical software (e.g., Python, R or MATLAB) and database languages (e.g., SQL) with a good understanding of the AI/ML and statistical methods typically used in marketing analytics.",
-                "category": "preferred",
-                "importance": "medium",
-                "hybrid_score": 0.525,
-                "best_evidence": {
-                    "chunk_id": "resume_001",
-                    "section": "SUMMARY",
-                    "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
-                    "similarity": 0.5849
-                }
-            },
-            {
                 "requirement_id": 6,
                 "requirement": "Experience delivering insights from AI/ML and statistical solutions to clients, including problem scoping/definition, modeling and interpretation.",
                 "category": "preferred",
                 "importance": "medium",
-                "hybrid_score": 0.6562,
+                "hybrid_score": 0.5449,
                 "best_evidence": {
                     "chunk_id": "resume_001",
                     "section": "SUMMARY",
@@ -163,13 +154,13 @@
                 }
             }
         ],
-        "partial_matches": [
+        "weak_matches": [
             {
                 "requirement_id": 1,
                 "requirement": "Bachelor's degree in Statistics, Data Science, Mathematics, Physics, Economics, Operations Research, Engineering, or a related quantitative field, or equivalent practical experience.",
                 "category": "required",
                 "importance": "high",
-                "hybrid_score": 0.4115,
+                "hybrid_score": 0.3874,
                 "best_evidence": {
                     "chunk_id": "resume_001",
                     "section": "SUMMARY",
@@ -178,29 +169,16 @@
                 }
             },
             {
-                "requirement_id": 2,
-                "requirement": "Experience in data science, statistics, or a related field.",
-                "category": "required",
-                "importance": "high",
-                "hybrid_score": 0.375,
-                "best_evidence": {
-                    "chunk_id": "resume_001",
-                    "section": "SUMMARY",
-                    "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
-                    "similarity": 0.5633
-                }
-            },
-            {
-                "requirement_id": 7,
-                "requirement": "Lead data science aspects of client engagements in the area of marketing effectiveness and marketing portfolio management - with deep knowledge of ML and statistics.",
-                "category": "responsibility",
+                "requirement_id": 5,
+                "requirement": "Experience with statistical software (e.g., Python, R or MATLAB) and database languages (e.g., SQL) with a good understanding of the AI/ML and statistical methods typically used in marketing analytics.",
+                "category": "preferred",
                 "importance": "medium",
-                "hybrid_score": 0.375,
+                "hybrid_score": 0.4155,
                 "best_evidence": {
                     "chunk_id": "resume_001",
                     "section": "SUMMARY",
                     "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
-                    "similarity": 0.3408
+                    "similarity": 0.5849
                 }
             },
             {
@@ -208,35 +186,20 @@
                 "requirement": "Collaborate with customers to solve their problems with the best statistical techniques by developing an end-to-end modeling framework. Engage important stakeholders to assess data and model readiness and be able to scale a proof-of-concept to a larger solution.",
                 "category": "responsibility",
                 "importance": "medium",
-                "hybrid_score": 0.5,
-                "best_evidence": {
-                    "chunk_id": "resume_001",
-                    "section": "SUMMARY",
-                    "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
-                    "similarity": 0.3007
-                }
-            },
-            {
-                "requirement_id": 11,
-                "requirement": "Develop comprehensive understanding of Google data structures, and metrics, advocating for product changes where needed.",
-                "category": "responsibility",
-                "importance": "medium",
-                "hybrid_score": 0.375,
+                "hybrid_score": 0.2704,
                 "best_evidence": {
                     "chunk_id": "resume_003",
                     "section": "WORK EXPERIENCE",
                     "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
-                    "similarity": 0.4005
+                    "similarity": 0.4816
                 }
-            }
-        ],
-        "weak_matches": [
+            },
             {
                 "requirement_id": 9,
                 "requirement": "Work with customers and internal teams to translate data and model results into tactical and strategic insights that are actionable for decision-making. Co-present to and work with clients to integrate recommendations into business processes.",
                 "category": "responsibility",
                 "importance": "medium",
-                "hybrid_score": 0.2488,
+                "hybrid_score": 0.3414,
                 "best_evidence": {
                     "chunk_id": "resume_003",
                     "section": "WORK EXPERIENCE",
@@ -249,35 +212,102 @@
                 "requirement": "Collaborate with Product/Engineering teams to increase capabilities of our Applied DS team, employing methods which create opportunities for scale, helping to drive innovation.",
                 "category": "responsibility",
                 "importance": "medium",
-                "hybrid_score": 0.1474,
+                "hybrid_score": 0.3171,
                 "best_evidence": {
-                    "chunk_id": "resume_001",
-                    "section": "SUMMARY",
-                    "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
-                    "similarity": 0.3686
+                    "chunk_id": "resume_003",
+                    "section": "WORK EXPERIENCE",
+                    "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                    "similarity": 0.3685
                 }
             }
         ],
-        "missing_requirements": []
+        "missing_requirements": [
+            {
+                "requirement_id": 3,
+                "requirement": "Master's degree in Statistics, Mathematics, Bioinformatics, Economics, another quantitative field, or equivalent practical experience.",
+                "category": "preferred",
+                "importance": "medium",
+                "hybrid_score": 0.1587,
+                "best_evidence": {
+                    "chunk_id": "resume_006",
+                    "section": "EDUCATION",
+                    "text": "Indraprastha Institute of Information Technology, Delhi\n2020 - 2024 Bachelor of Technology in Computer Science and Artificial Intelligence\nKIIT World School, New Delhi\n2004 - 2018 Senior Secondary School Education",
+                    "similarity": 0.2917
+                }
+            },
+            {
+                "requirement_id": 7,
+                "requirement": "Lead data science aspects of client engagements in the area of marketing effectiveness and marketing portfolio management - with deep knowledge of ML and statistics.",
+                "category": "responsibility",
+                "importance": "medium",
+                "hybrid_score": 0.1641,
+                "best_evidence": {
+                    "chunk_id": "resume_003",
+                    "section": "WORK EXPERIENCE",
+                    "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                    "similarity": 0.4562
+                }
+            },
+            {
+                "requirement_id": 11,
+                "requirement": "Develop comprehensive understanding of Google data structures, and metrics, advocating for product changes where needed.",
+                "category": "responsibility",
+                "importance": "medium",
+                "hybrid_score": 0.1075,
+                "best_evidence": {
+                    "chunk_id": "resume_003",
+                    "section": "WORK EXPERIENCE",
+                    "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+                    "similarity": 0.4005
+                }
+            }
+        ]
     },
     "priority_gaps": [
-        {
-            "requirement_id": 2,
-            "requirement": "Experience in data science, statistics, or a related field.",
-            "category": "required",
-            "importance": "high",
-            "assessment": "PARTIAL_ALIGNMENT",
-            "hybrid_score": 0.375,
-            "priority_score": 38.12
-        },
         {
             "requirement_id": 1,
             "requirement": "Bachelor's degree in Statistics, Data Science, Mathematics, Physics, Economics, Operations Research, Engineering, or a related quantitative field, or equivalent practical experience.",
             "category": "required",
             "importance": "high",
-            "assessment": "PARTIAL_ALIGNMENT",
-            "hybrid_score": 0.4115,
-            "priority_score": 37.94
+            "assessment": "WEAK_ALIGNMENT",
+            "hybrid_score": 0.3874,
+            "priority_score": 43.06
+        },
+        {
+            "requirement_id": 11,
+            "requirement": "Develop comprehensive understanding of Google data structures, and metrics, advocating for product changes where needed.",
+            "category": "responsibility",
+            "importance": "medium",
+            "assessment": "NO_ALIGNMENT",
+            "hybrid_score": 0.1075,
+            "priority_score": 39.46
+        },
+        {
+            "requirement_id": 3,
+            "requirement": "Master's degree in Statistics, Mathematics, Bioinformatics, Economics, another quantitative field, or equivalent practical experience.",
+            "category": "preferred",
+            "importance": "medium",
+            "assessment": "NO_ALIGNMENT",
+            "hybrid_score": 0.1587,
+            "priority_score": 39.21
+        },
+        {
+            "requirement_id": 7,
+            "requirement": "Lead data science aspects of client engagements in the area of marketing effectiveness and marketing portfolio management - with deep knowledge of ML and statistics.",
+            "category": "responsibility",
+            "importance": "medium",
+            "assessment": "NO_ALIGNMENT",
+            "hybrid_score": 0.1641,
+            "priority_score": 39.18
+        },
+        {
+            "requirement_id": 8,
+            "requirement": "Collaborate with customers to solve their problems with the best statistical techniques by developing an end-to-end modeling framework. Engage important stakeholders to assess data and model readiness and be able to scale a proof-of-concept to a larger solution.",
+            "category": "responsibility",
+            "importance": "medium",
+            "assessment": "WEAK_ALIGNMENT",
+            "hybrid_score": 0.2704,
+            "priority_score": 33.65
         },
         {
             "requirement_id": 10,
@@ -285,8 +315,8 @@
             "category": "responsibility",
             "importance": "medium",
             "assessment": "WEAK_ALIGNMENT",
-            "hybrid_score": 0.1474,
-            "priority_score": 34.26
+            "hybrid_score": 0.3171,
+            "priority_score": 33.41
         },
         {
             "requirement_id": 9,
@@ -294,35 +324,35 @@
             "category": "responsibility",
             "importance": "medium",
             "assessment": "WEAK_ALIGNMENT",
-            "hybrid_score": 0.2488,
-            "priority_score": 33.76
+            "hybrid_score": 0.3414,
+            "priority_score": 33.29
         },
         {
-            "requirement_id": 7,
-            "requirement": "Lead data science aspects of client engagements in the area of marketing effectiveness and marketing portfolio management - with deep knowledge of ML and statistics.",
-            "category": "responsibility",
+            "requirement_id": 5,
+            "requirement": "Experience with statistical software (e.g., Python, R or MATLAB) and database languages (e.g., SQL) with a good understanding of the AI/ML and statistical methods typically used in marketing analytics.",
+            "category": "preferred",
             "importance": "medium",
-            "assessment": "PARTIAL_ALIGNMENT",
-            "hybrid_score": 0.375,
-            "priority_score": 28.12
+            "assessment": "WEAK_ALIGNMENT",
+            "hybrid_score": 0.4155,
+            "priority_score": 32.92
         },
         {
-            "requirement_id": 11,
-            "requirement": "Develop comprehensive understanding of Google data structures, and metrics, advocating for product changes where needed.",
-            "category": "responsibility",
+            "requirement_id": 6,
+            "requirement": "Experience delivering insights from AI/ML and statistical solutions to clients, including problem scoping/definition, modeling and interpretation.",
+            "category": "preferred",
             "importance": "medium",
             "assessment": "PARTIAL_ALIGNMENT",
-            "hybrid_score": 0.375,
-            "priority_score": 28.12
+            "hybrid_score": 0.5449,
+            "priority_score": 27.28
         },
         {
-            "requirement_id": 8,
-            "requirement": "Collaborate with customers to solve their problems with the best statistical techniques by developing an end-to-end modeling framework. Engage important stakeholders to assess data and model readiness and be able to scale a proof-of-concept to a larger solution.",
-            "category": "responsibility",
+            "requirement_id": 4,
+            "requirement": "2 years of experience using analytics to solve product or business problems, coding (e.g., Python, R, SQL), querying databases or statistical analysis, or a relevant PhD degree.",
+            "category": "preferred",
             "importance": "medium",
             "assessment": "PARTIAL_ALIGNMENT",
-            "hybrid_score": 0.5,
-            "priority_score": 27.5
+            "hybrid_score": 0.6595,
+            "priority_score": 26.7
         }
     ]
 }

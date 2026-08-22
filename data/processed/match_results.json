@@ -154,10 +154,10 @@
         "experience": [],
         "concepts": [],
         "best_match": {
-            "chunk_id": "resume_001",
-            "section": "SUMMARY",
-            "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
-            "similarity": 0.3914
+            "chunk_id": "resume_002",
+            "section": "SKILLS",
+            "text": "Programming: Python, SQL\nData Analysis: NumPy, Pandas, EDA, Data Cleaning, Feature Engineering\nMachine Learning: Scikit-learn, Regression, Classification, Clustering, Model Evaluation\nDeep Learning: PyTorch, TensorFlow, CNNs, RNNs, Transformers, NLP, Computer Vision\nVisualization: Power BI, Matplotlib\nDeployment / Tools: Flask, Streamlit, Git, GitHub\nMath: Probability & Statistics, Linear Algebra",
+            "similarity": 0.3888
         },
         "match_level": "weak",
         "all_matches": [
@@ -637,10 +637,10 @@
             "Innovation"
         ],
         "best_match": {
-            "chunk_id": "resume_001",
-            "section": "SUMMARY",
-            "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
-            "similarity": 0.3686
+            "chunk_id": "resume_003",
+            "section": "WORK EXPERIENCE",
+            "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+            "similarity": 0.3685
         },
         "match_level": "weak",
         "all_matches": [

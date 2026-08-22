@@ -60,25 +60,23 @@ class TextCleaner:
         return text
 
     def remove_pdf_artifacts(self, text):
-        """
-        Remove PDF extraction artifacts while preserving
-        meaningful punctuation and symbols.
-        """
 
-        # Unicode replacement character
-        text = text.replace("\ufffd", "")
+        text = text.replace(
+            "\ufffd",
+            ""
+        )
 
-        # Escaped asterisk artifact
-        text = text.replace("\\*", "")
+        text = text.replace(
+            "\\*",
+            ""
+        )
 
-        # Remove standalone decorative asterisks
         text = re.sub(
-            r"(?m)^\s*\*\s*",
+            r"(?m)^\s*\*+\s*$",
             "",
             text
         )
 
-        # Convert common bullet symbols to -
         text = re.sub(
             r"(?m)^\s*[•●▪◦■□◆◇]\s*",
             "- ",
@@ -88,14 +86,12 @@ class TextCleaner:
         return text
 
     def normalize_spaces(self, text):
-        """
-        Normalize spaces without destroying line structure.
-        """
 
-        # Tabs -> spaces
-        text = text.replace("\t", " ")
+        text = text.replace(
+            "\t",
+            " "
+        )
 
-        # Remove trailing spaces
         text = re.sub(
             r"[ \t]+$",
             "",
@@ -103,14 +99,12 @@ class TextCleaner:
             flags=re.MULTILINE
         )
 
-        # Multiple spaces -> one space
         text = re.sub(
             r"[ \t]{2,}",
             " ",
             text
         )
 
-        # Excessive blank lines -> one blank line
         text = re.sub(
             r"\n[ \t]*\n+",
             "\n\n",
@@ -120,14 +114,9 @@ class TextCleaner:
         return text
 
     def normalize_heading(self, line):
-        """
-        Normalize a candidate section heading so that
-        different PDF representations can be compared.
-        """
 
         heading = line.strip()
 
-        # Remove decorative characters around headings
         heading = re.sub(
             r"^[\s|:_\-•●▪◦]+",
             "",
@@ -140,14 +129,12 @@ class TextCleaner:
             heading
         )
 
-        # Normalize whitespace
         heading = re.sub(
             r"\s+",
             " ",
             heading
         )
 
-        # Normalize Unicode
         heading = unicodedata.normalize(
             "NFKC",
             heading
@@ -176,9 +163,6 @@ class TextCleaner:
         )
 
     def is_bullet(self, line):
-        """
-        Determine whether a line is a bullet.
-        """
 
         return bool(
             re.match(
@@ -229,18 +213,6 @@ class TextCleaner:
         )
 
     def fix_hyphenated_line_breaks(self, text):
-        """
-        Fix words split across PDF line boundaries.
-
-        Example:
-
-            re-
-            weighted
-
-        becomes:
-
-            re-weighted
-        """
 
         return re.sub(
             r"(\w)-\s*\n\s*(\w)",

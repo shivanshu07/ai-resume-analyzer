@@ -1,443 +1,478 @@
 import re
+from typing import Any, Dict, List
 
 
 class HybridMatcher:
+    """
+    Requirement-aware hybrid resume/JD matcher.
 
-    # =========================================================
-    # SKILL SYNONYMS
-    # =========================================================
+    The scorer combines:
 
-    SKILL_SYNONYMS = {
+        1. Semantic similarity
+        2. Explicit skill evidence
+        3. Concept evidence
+        4. Education evidence
+        5. Experience evidence
 
-        "python": {
-            "python"
-        },
+    Important design principle:
 
-        "r": {
-            "r",
-            "r programming",
-            "r language"
-        },
+        Semantic similarity can support a match,
+        but it cannot replace explicit evidence
+        when a requirement asks for a concrete skill,
+        degree, experience level, or responsibility.
 
-        "sql": {
-            "sql",
-            "structured query language"
-        },
+    Scores are normalized to [0, 1].
+    """
 
-        "matlab": {
-            "matlab"
-        },
+    # ========================================================
+    # NORMALIZATION
+    # ========================================================
 
-        "statistics": {
-            "statistics",
-            "statistical",
-            "statistical analysis",
-            "statistical methods"
-        },
+    @staticmethod
+    def normalize(value: Any) -> str:
 
-        "statistical analysis": {
-            "statistical analysis",
-            "statistical methods",
-            "statistics"
-        },
-
-        "machine learning": {
-            "machine learning",
-            "ml",
-            "predictive modeling",
-            "predictive models",
-            "machine-learning"
-        },
-
-        "artificial intelligence": {
-            "artificial intelligence",
-            "ai",
-            "ai/ml",
-            "ai ml"
-        },
-
-        "data science": {
-            "data science",
-            "data scientist",
-            "data sciences"
-        },
-
-        "data analytics": {
-            "data analytics",
-            "analytics",
-            "data analysis",
-            "analytical"
-        },
-
-        "database": {
-            "database",
-            "databases",
-            "database languages",
-            "querying databases",
-            "sql"
-        },
-
-        "modeling": {
-            "modeling",
-            "modelling",
-            "predictive modeling",
-            "predictive models",
-            "built models",
-            "building models",
-            "developed models",
-            "developing models"
-        },
-
-        "problem scoping": {
-            "problem scoping",
-            "problem definition",
-            "problem definition/scoping",
-            "requirements definition",
-            "scoping"
-        },
-
-        "marketing analytics": {
-            "marketing analytics",
-            "marketing analysis",
-            "marketing effectiveness"
-        }
-    }
-
-
-    # =========================================================
-    # CONCEPT SYNONYMS
-    # =========================================================
-
-    CONCEPT_SYNONYMS = {
-
-        "business insights": {
-            "business insights",
-            "business-ready insights",
-            "business ready insights",
-            "data-driven insights",
-            "actionable insights",
-            "insights"
-        },
-
-        "business problems": {
-            "business problems",
-            "business problem",
-            "business requirements",
-            "business challenges"
-        },
-
-        "stakeholder management": {
-            "stakeholder management",
-            "stakeholders",
-            "cross-functional teams",
-            "cross functional teams",
-            "business teams",
-            "functional teams"
-        },
-
-        "customer collaboration": {
-            "customer collaboration",
-            "customer engagement",
-            "client collaboration",
-            "client engagement",
-            "worked with customers",
-            "worked with clients"
-        },
-
-        "proof of concept": {
-            "proof of concept",
-            "poc",
-            "prototype",
-            "pilot"
-        },
-
-        "decision making": {
-            "decision making",
-            "decision-making",
-            "decision support",
-            "decision making process"
-        },
-
-        "business processes": {
-            "business processes",
-            "business process",
-            "enterprise processes",
-            "business workflow"
-        },
-
-        "strategic insights": {
-            "strategic insights",
-            "strategic recommendations",
-            "strategic decisions"
-        },
-
-        "product engineering collaboration": {
-            "product engineering",
-            "product/engineering",
-            "engineering teams",
-            "product teams",
-            "cross-functional teams"
-        },
-
-        "innovation": {
-            "innovation",
-            "innovative",
-            "new solutions",
-            "improvements",
-            "optimization"
-        },
-
-        "data structures": {
-            "data structures",
-            "data structure",
-            "data pipeline",
-            "data pipelines"
-        },
-
-        "metrics": {
-            "metrics",
-            "measurements",
-            "performance metrics",
-            "kpis",
-            "key performance indicators"
-        },
-
-        "client engagement": {
-            "client engagement",
-            "client engagements",
-            "customer engagement",
-            "customer collaboration",
-            "worked with customers",
-            "worked with clients"
-        },
-
-        "marketing portfolio management": {
-            "marketing portfolio management",
-            "portfolio management"
-        }
-    }
-
-
-    # =========================================================
-    # CONSTRUCTOR
-    # =========================================================
-
-    def __init__(
-        self,
-        embedding_matcher=None
-    ):
-
-        self.embedding_matcher = (
-            embedding_matcher
-        )
-
-
-    # =========================================================
-    # TEXT NORMALIZATION
-    # =========================================================
-
-    def normalize_text(
-        self,
-        text
-    ):
-
-        if text is None:
-
-            return ""
-
-        text = str(
-            text
-        ).lower()
-
-        text = text.replace(
-            "/",
-            " "
-        )
-
-        text = text.replace(
-            "-",
-            " "
-        )
-
-        text = re.sub(
-            r"\s+",
+        return re.sub(
+            r"[^a-z0-9+#.]",
             " ",
-            text
-        )
+            str(value).lower()
+        ).strip()
 
-        return text.strip()
+    @staticmethod
+    def normalize_list(value: Any) -> List[str]:
 
+        if value is None:
+            return []
 
-    # =========================================================
-    # PHRASE MATCHING
-    # =========================================================
+        if isinstance(value, list):
+            return [
+                str(item).strip()
+                for item in value
+                if str(item).strip()
+            ]
 
-    def contains_phrase(
+        if isinstance(value, str):
+            return [
+                item.strip()
+                for item in value.split(",")
+                if item.strip()
+            ]
+
+        return [str(value).strip()]
+
+    # ========================================================
+    # TEXT MATCHING
+    # ========================================================
+
+    def text_contains(
         self,
-        text,
-        phrase
-    ):
+        text: str,
+        phrase: str
+    ) -> bool:
 
-        text = self.normalize_text(
-            text
-        )
+        text_normalized = self.normalize(text)
+        phrase_normalized = self.normalize(phrase)
 
-        phrase = self.normalize_text(
-            phrase
-        )
-
-        if not phrase:
-
+        if not phrase_normalized:
             return False
 
-        return phrase in text
+        return phrase_normalized in text_normalized
 
-
-    # =========================================================
-    # SKILL MATCHING
-    # =========================================================
-
-    def match_skills(
+    def find_skill_matches(
         self,
-        required_skills,
-        resume_text
-    ):
-
-        if not required_skills:
-
-            return {
-                "score": 0.0,
-                "matched": [],
-                "missing": []
-            }
-
-        resume_text = self.normalize_text(
-            resume_text
-        )
+        required_skills: List[str],
+        resume_text: str
+    ) -> Dict[str, Any]:
 
         matched = []
         missing = []
 
         for skill in required_skills:
 
-            skill_key = (
-                skill.lower().strip()
-            )
-
-            synonyms = (
-                self.SKILL_SYNONYMS.get(
-                    skill_key,
-                    {skill_key}
-                )
-            )
-
-            found = False
-
-            for synonym in synonyms:
-
-                if self.contains_phrase(
-                    resume_text,
-                    synonym
-                ):
-
-                    found = True
-                    break
-
-            if found:
-
-                matched.append(
-                    skill
-                )
-
+            if self.text_contains(
+                resume_text,
+                skill
+            ):
+                matched.append(skill)
             else:
+                missing.append(skill)
 
-                missing.append(
-                    skill
-                )
+        if not required_skills:
 
-        score = (
-            len(matched)
-            /
-            len(required_skills)
-        )
+            score = 0.0
+
+        else:
+
+            score = (
+                len(matched)
+                /
+                len(required_skills)
+            )
 
         return {
-            "score": round(
-                score,
-                4
-            ),
+            "score": round(score, 4),
             "matched": matched,
             "missing": missing
         }
 
-
-    # =========================================================
+    # ========================================================
     # CONCEPT MATCHING
-    # =========================================================
+    # ========================================================
+
+    CONCEPT_ALIASES = {
+
+        "business problems": [
+            "business problem",
+            "business problems",
+            "business solution",
+            "business solutions",
+            "business requirements"
+        ],
+
+        "business insights": [
+            "business insights",
+            "insights",
+            "data driven insights",
+            "data-driven insights"
+        ],
+
+        "stakeholder management": [
+            "stakeholder",
+            "stakeholders",
+            "stakeholder management",
+            "cross functional",
+            "cross-functional"
+        ],
+
+        "customer collaboration": [
+            "customer",
+            "customers",
+            "client",
+            "clients",
+            "client collaboration"
+        ],
+
+        "client engagement": [
+            "client",
+            "clients",
+            "client engagement",
+            "customer engagement"
+        ],
+
+        "decision making": [
+            "decision making",
+            "decision-making",
+            "decision support"
+        ],
+
+        "business processes": [
+            "business process",
+            "business processes",
+            "process improvement",
+            "workflow"
+        ],
+
+        "strategic insights": [
+            "strategic insights",
+            "strategic recommendations",
+            "strategy"
+        ],
+
+        "proof of concept": [
+            "proof of concept",
+            "poc",
+            "prototype",
+            "prototyping"
+        ],
+
+        "product engineering collaboration": [
+            "product team",
+            "engineering team",
+            "product/engineering",
+            "cross functional",
+            "cross-functional"
+        ],
+
+        "innovation": [
+            "innovation",
+            "innovative",
+            "new solutions",
+            "new approaches"
+        ],
+
+        "metrics": [
+            "metrics",
+            "metric",
+            "kpi",
+            "kpis"
+        ],
+
+        "data structures": [
+            "data structure",
+            "data structures",
+            "database structure",
+            "data architecture"
+        ],
+
+        "marketing effectiveness": [
+            "marketing effectiveness",
+            "marketing analytics",
+            "marketing performance"
+        ],
+
+        "marketing portfolio management": [
+            "marketing portfolio",
+            "portfolio management"
+        ]
+    }
+
+    def concept_is_present(
+        self,
+        concept: str,
+        resume_text: str
+    ) -> bool:
+
+        normalized_concept = self.normalize(
+            concept
+        )
+
+        aliases = self.CONCEPT_ALIASES.get(
+            normalized_concept,
+            [concept]
+        )
+
+        for alias in aliases:
+
+            if self.text_contains(
+                resume_text,
+                alias
+            ):
+                return True
+
+        return False
 
     def match_concepts(
         self,
-        required_concepts,
-        resume_text
-    ):
-
-        if not required_concepts:
-
-            return {
-                "score": 0.0,
-                "matched": [],
-                "missing": []
-            }
-
-        resume_text = self.normalize_text(
-            resume_text
-        )
+        concepts: List[str],
+        resume_text: str
+    ) -> Dict[str, Any]:
 
         matched = []
         missing = []
 
-        for concept in required_concepts:
+        for concept in concepts:
 
-            concept_key = (
-                concept.lower().strip()
+            if self.concept_is_present(
+                concept,
+                resume_text
+            ):
+                matched.append(concept)
+            else:
+                missing.append(concept)
+
+        if not concepts:
+
+            score = 0.0
+
+        else:
+
+            score = (
+                len(matched)
+                /
+                len(concepts)
             )
 
-            synonyms = (
-                self.CONCEPT_SYNONYMS.get(
-                    concept_key,
-                    {concept_key}
-                )
+        return {
+            "score": round(score, 4),
+            "matched": matched,
+            "missing": missing
+        }
+
+    # ========================================================
+    # EDUCATION MATCHING
+    # ========================================================
+
+    EDUCATION_ALIASES = {
+
+        "statistics": [
+            "statistics",
+            "statistical"
+        ],
+
+        "data science": [
+            "data science",
+            "data analytics"
+        ],
+
+        "mathematics": [
+            "mathematics",
+            "mathematics and computing",
+            "mathematical"
+        ],
+
+        "physics": [
+            "physics"
+        ],
+
+        "economics": [
+            "economics",
+            "econometrics"
+        ],
+
+        "operations research": [
+            "operations research",
+            "operations research and analytics"
+        ],
+
+        "engineering": [
+            "engineering",
+            "bachelor of technology",
+            "b tech",
+            "b.tech",
+            "bachelor's technology"
+        ],
+
+        "bioinformatics": [
+            "bioinformatics"
+        ]
+    }
+
+    def detect_degree_level(
+        self,
+        text: str
+    ) -> str:
+
+        normalized = self.normalize(
+            text
+        )
+
+        if re.search(
+            r"\b(phd|doctorate)\b",
+            normalized
+        ):
+            return "phd"
+
+        if re.search(
+            r"\b(master|masters|m\.s\.|m\.tech|mtech|mba)\b",
+            normalized
+        ):
+            return "master"
+
+        if re.search(
+            r"\b(bachelor|bachelor's|b\.tech|btech|b\.sc|bsc)\b",
+            normalized
+        ):
+            return "bachelor"
+
+        return "unknown"
+
+    def match_education(
+        self,
+        education_fields: List[str],
+        required_degree_level: str,
+        resume_text: str
+    ) -> Dict[str, Any]:
+
+        normalized_resume = self.normalize(
+            resume_text
+        )
+
+        resume_degree_level = (
+            self.detect_degree_level(
+                resume_text
+            )
+        )
+
+        matched = []
+        related = []
+        missing = []
+
+        for field in education_fields:
+
+            normalized_field = self.normalize(
+                field
+            )
+
+            aliases = self.EDUCATION_ALIASES.get(
+                normalized_field,
+                [field]
             )
 
             found = False
 
-            for synonym in synonyms:
+            for alias in aliases:
 
-                if self.contains_phrase(
-                    resume_text,
-                    synonym
+                if self.text_contains(
+                    normalized_resume,
+                    alias
                 ):
-
+                    matched.append(field)
                     found = True
                     break
 
-            if found:
+            if not found:
 
-                matched.append(
-                    concept
-                )
+                # Computer Science / AI / technology
+                # degrees are considered related to
+                # quantitative engineering requirements.
+                if (
+                    normalized_field == "engineering"
+                    and (
+                        "computer science"
+                        in normalized_resume
+                        or
+                        "artificial intelligence"
+                        in normalized_resume
+                        or
+                        "information technology"
+                        in normalized_resume
+                    )
+                ):
+                    related.append(field)
 
+                else:
+                    missing.append(field)
+
+        degree_level_match = True
+
+        if required_degree_level != "unknown":
+
+            degree_level_match = (
+                resume_degree_level
+                == required_degree_level
+            )
+
+            # A higher degree satisfies a lower-level
+            # requirement.
+            if (
+                required_degree_level == "bachelor"
+                and resume_degree_level in {
+                    "master",
+                    "phd"
+                }
+            ):
+                degree_level_match = True
+
+        if not education_fields:
+
+            score = 0.0
+
+        else:
+
+            field_score = (
+                len(matched)
+                +
+                0.5 * len(related)
+            ) / len(education_fields)
+
+            field_score = min(
+                field_score,
+                1.0
+            )
+
+            if degree_level_match:
+                score = field_score
             else:
-
-                missing.append(
-                    concept
-                )
-
-        score = (
-            len(matched)
-            /
-            len(required_concepts)
-        )
+                score = field_score * 0.5
 
         return {
             "score": round(
@@ -445,932 +480,713 @@ class HybridMatcher:
                 4
             ),
             "matched": matched,
-            "missing": missing
+            "related": related,
+            "missing": missing,
+            "degree_level": resume_degree_level,
+            "required_degree_level": (
+                required_degree_level
+            ),
+            "degree_level_match": (
+                degree_level_match
+            )
         }
 
+    # ========================================================
+    # EXPERIENCE MATCHING
+    # ========================================================
 
-    # =========================================================
-    # EDUCATION MATCHING
-    # =========================================================
-
-    def match_education(
+    def extract_required_years(
         self,
-        education_fields,
-        required_degree_level,
-        resume_sections
-    ):
+        experience: List[str]
+    ) -> float:
 
-        education_text = ""
+        maximum = 0.0
 
-        for chunk in resume_sections:
+        for item in experience:
 
-            if (
-                chunk.get(
-                    "section",
-                    ""
-                ).upper()
-                == "EDUCATION"
-            ):
+            matches = re.findall(
+                r"(\d+(?:\.\d+)?)\s*\+?\s*years?",
+                str(item).lower()
+            )
 
-                education_text += " "
+            for match in matches:
 
-                education_text += (
-                    chunk.get(
-                        "text",
-                        ""
-                    )
+                maximum = max(
+                    maximum,
+                    float(match)
                 )
 
-        education_text_normalized = (
-            self.normalize_text(
-                education_text
-            )
+        return maximum
+
+    def estimate_resume_years(
+        self,
+        resume_text: str
+    ) -> float:
+
+        # Look for explicit ranges such as:
+        # Sep 2024 - Present
+        # 2023 - 2025
+
+        current_year = 2026
+
+        total_months = 0
+
+        pattern = re.compile(
+            r"("
+            r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
+            r"\s+)?"
+            r"(20\d{2})"
+            r"\s*[-–]\s*"
+            r"("
+            r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
+            r"\s+)?"
+            r"(20\d{2}|present)"
+            ,
+            re.IGNORECASE
         )
 
-        # -----------------------------------------------------
-        # Degree detection
-        # -----------------------------------------------------
-
-        degree_level = "unknown"
-
-        if re.search(
-            r"\bbachelor\b|\bb\.?tech\b|\bb\.?e\b",
-            education_text_normalized
+        for match in pattern.finditer(
+            resume_text
         ):
 
-            degree_level = "bachelor"
-
-        elif re.search(
-            r"\bmaster\b|\bm\.?tech\b|\bm\.?sc\b",
-            education_text_normalized
-        ):
-
-            degree_level = "master"
-
-        elif re.search(
-            r"\bphd\b|\bdoctorate\b",
-            education_text_normalized
-        ):
-
-            degree_level = "phd"
-
-
-        # -----------------------------------------------------
-        # Required degree check
-        # -----------------------------------------------------
-
-        degree_match = False
-
-        if required_degree_level is None:
-
-            degree_match = False
-
-        elif (
-            required_degree_level
-            == degree_level
-        ):
-
-            degree_match = True
-
-        elif (
-            required_degree_level
-            == "bachelor"
-            and degree_level
-            in {
-                "master",
-                "phd"
-            }
-        ):
-
-            degree_match = True
-
-
-        # -----------------------------------------------------
-        # Education field matching
-        # -----------------------------------------------------
-
-        matched_fields = []
-        related_fields = []
-        missing_fields = []
-
-        for field in education_fields:
-
-            field_normalized = (
-                self.normalize_text(
-                    field
-                )
+            start_year = int(
+                match.group(2)
             )
 
-            if (
-                field_normalized
-                in education_text_normalized
-            ):
+            end_value = match.group(4)
 
-                matched_fields.append(
-                    field
-                )
+            if end_value.lower() == "present":
+
+                end_year = current_year
 
             else:
 
-                missing_fields.append(
-                    field
+                end_year = int(
+                    end_value
                 )
 
+            if end_year >= start_year:
 
-        # -----------------------------------------------------
-        # Related-field handling
-        # -----------------------------------------------------
+                total_months += (
+                    end_year - start_year
+                ) * 12
 
-        if (
-            "engineering"
-            in education_text_normalized
-        ):
+        # If dates were not found, presence of
+        # professional experience still provides
+        # qualitative evidence.
+        if total_months == 0:
 
-            if (
-                "engineering"
-                in [
-                    self.normalize_text(
-                        field
-                    )
-                    for field
-                    in education_fields
-                ]
+            if re.search(
+                r"\bexperience\b|\btechnical lead\b|\bengineer\b",
+                resume_text,
+                re.IGNORECASE
             ):
+                return 1.0
 
-                if (
-                    "engineering"
-                    not in matched_fields
-                ):
+            return 0.0
 
-                    related_fields.append(
-                        "Engineering"
-                    )
+        return round(
+            total_months / 12,
+            2
+        )
 
+    def match_experience(
+        self,
+        experience: List[str],
+        resume_text: str
+    ) -> Dict[str, Any]:
 
-        # -----------------------------------------------------
-        # Score
-        # -----------------------------------------------------
+        required_years = (
+            self.extract_required_years(
+                experience
+            )
+        )
 
-        field_score = 0.0
+        estimated_years = (
+            self.estimate_resume_years(
+                resume_text
+            )
+        )
 
-        if education_fields:
+        if required_years <= 0:
 
-            field_score = (
-                len(matched_fields)
+            score = 0.0
+
+        elif estimated_years >= required_years:
+
+            score = 1.0
+
+        elif estimated_years > 0:
+
+            score = (
+                estimated_years
                 /
-                len(education_fields)
-            )
-
-        if (
-            degree_match
-            and field_score > 0
-        ):
-
-            score = (
-                field_score * 0.6
-                + 0.4
-            )
-
-        elif degree_match:
-
-            score = 0.4
-
-        elif field_score > 0:
-
-            score = (
-                field_score * 0.6
+                required_years
             )
 
         else:
 
             score = 0.0
 
+        evidence = []
 
-        # -----------------------------------------------------
-        # Important:
-        # Computer Science + AI is a related technical field,
-        # but we do not automatically claim that it equals
-        # Statistics/Mathematics/etc.
-        # -----------------------------------------------------
+        if estimated_years > 0:
+
+            evidence.append(
+                "Professional work experience present"
+            )
+
+            evidence.append(
+                f"Estimated professional experience: "
+                f"{estimated_years:.2f} years"
+            )
 
         return {
             "score": round(
                 min(score, 1.0),
                 4
             ),
-            "matched": matched_fields,
-            "related": related_fields,
-            "missing": missing_fields,
-            "degree_level": degree_level
-        }
-
-
-    # =========================================================
-    # EXPERIENCE MATCHING
-    # =========================================================
-
-    def match_experience(
-        self,
-        required_experience,
-        resume_sections
-    ):
-
-        if not required_experience:
-
-            return {
-                "score": 0.0,
-                "required": [],
-                "estimated_years": 0.0,
-                "evidence": []
-            }
-
-
-        work_experience = ""
-
-        for chunk in resume_sections:
-
-            if (
-                chunk.get(
-                    "section",
-                    ""
-                ).upper()
-                == "WORK EXPERIENCE"
-            ):
-
-                work_experience += " "
-
-                work_experience += (
-                    chunk.get(
-                        "text",
-                        ""
-                    )
-                )
-
-
-        if not work_experience.strip():
-
-            return {
-                "score": 0.0,
-                "required": required_experience,
-                "estimated_years": 0.0,
-                "evidence": []
-            }
-
-
-        # -----------------------------------------------------
-        # Estimate current professional experience.
-        #
-        # The resume says:
-        # Sep 2024 - Present
-        #
-        # This is approximately 2 years as of 2026.
-        # -----------------------------------------------------
-
-        estimated_years = 2.0
-
-
-        required_years = 0.0
-
-        for item in required_experience:
-
-            match = re.search(
-                r"(\d+(?:\.\d+)?)\s*years?",
-                item.lower()
-            )
-
-            if match:
-
-                required_years = float(
-                    match.group(1)
-                )
-
-
-        if required_years == 0:
-
-            score = 1.0
-
-        else:
-
-            score = min(
-                estimated_years
-                /
-                required_years,
-                1.0
-            )
-
-
-        return {
-            "score": round(
-                score,
-                4
-            ),
-            "required": required_experience,
+            "required": experience,
+            "required_years": required_years,
             "estimated_years": estimated_years,
-            "evidence": [
-                "Professional work experience present"
-            ]
+            "evidence": evidence
         }
 
-
-    # =========================================================
-    # EXPLICIT EVIDENCE SCORE
-    # =========================================================
-
-    def explicit_evidence_score(
-        self,
-        skill_match,
-        concept_match,
-        education_match,
-        experience_match
-    ):
-
-        scores = []
-
-        if skill_match["matched"]:
-
-            scores.append(
-                skill_match["score"]
-            )
-
-        if concept_match["matched"]:
-
-            scores.append(
-                concept_match["score"]
-            )
-
-        if (
-            education_match["matched"]
-            or education_match["related"]
-        ):
-
-            scores.append(
-                education_match["score"]
-            )
-
-        if experience_match["evidence"]:
-
-            scores.append(
-                experience_match["score"]
-            )
-
-
-        if not scores:
-
-            return 0.0
-
-
-        return round(
-            sum(scores)
-            /
-            len(scores),
-            4
-        )
-
-
-    # =========================================================
-    # ASSESSMENT
-    # =========================================================
-
-    def get_assessment(
-        self,
-        score,
-        category,
-        explicit_score
-    ):
-
-        effective_score = max(
-            score,
-            explicit_score
-        )
-
-
-        if category == "required":
-
-            if effective_score >= 0.70:
-
-                return (
-                    "STRONG_ALIGNMENT"
-                )
-
-            elif effective_score >= 0.45:
-
-                return (
-                    "PARTIAL_ALIGNMENT"
-                )
-
-            return (
-                "WEAK_ALIGNMENT"
-            )
-
-
-        else:
-
-            if effective_score >= 0.70:
-
-                return (
-                    "STRONG_ALIGNMENT"
-                )
-
-            elif effective_score >= 0.40:
-
-                return (
-                    "PARTIAL_ALIGNMENT"
-                )
-
-            return (
-                "WEAK_ALIGNMENT"
-            )
-
-
-    # =========================================================
+    # ========================================================
     # BEST EVIDENCE
-    # =========================================================
+    # ========================================================
 
     def select_best_evidence(
         self,
-        requirement,
-        resume_chunks,
-        semantic_scores
-    ):
+        resume_chunks: List[Dict[str, Any]],
+        semantic_scores: List[float],
+        requirement: Dict[str, Any]
+    ) -> Dict[str, Any]:
 
-        best_chunk = None
+        if not resume_chunks:
 
-        best_score = -1.0
+            return {}
 
+        category = str(
+            requirement.get(
+                "category",
+                ""
+            )
+        ).lower()
 
-        # -----------------------------------------------------
-        # Safety check
-        # -----------------------------------------------------
+        preferred_sections = []
 
-        if not isinstance(
-            semantic_scores,
-            (list, tuple)
+        if (
+            requirement.get(
+                "education_fields"
+            )
         ):
+            preferred_sections.append(
+                "EDUCATION"
+            )
 
-            semantic_scores = []
+        if (
+            requirement.get(
+                "experience"
+            )
+        ):
+            preferred_sections.append(
+                "WORK EXPERIENCE"
+            )
 
+        if category == "responsibility":
+            preferred_sections.append(
+                "WORK EXPERIENCE"
+            )
 
-        # -----------------------------------------------------
-        # Match every resume chunk with its semantic score
-        # -----------------------------------------------------
+        best_index = 0
+        best_score = -1.0
 
         for index, chunk in enumerate(
             resume_chunks
         ):
 
-            if index < len(
-                semantic_scores
-            ):
-
-                semantic_score = float(
-                    semantic_scores[index]
+            semantic = (
+                semantic_scores[index]
+                if index < len(
+                    semantic_scores
                 )
+                else 0.0
+            )
 
-            else:
+            section = str(
+                chunk.get(
+                    "section",
+                    ""
+                )
+            ).upper()
 
-                semantic_score = 0.0
+            section_bonus = (
+                0.10
+                if section in preferred_sections
+                else 0.0
+            )
 
+            score = semantic + section_bonus
 
-            text = chunk.get(
+            if score > best_score:
+
+                best_score = score
+                best_index = index
+
+        chunk = resume_chunks[
+            best_index
+        ]
+
+        return {
+            "chunk_id": chunk.get(
+                "chunk_id",
+                f"resume_{best_index + 1:03d}"
+            ),
+            "section": chunk.get(
+                "section",
+                "UNKNOWN"
+            ),
+            "text": chunk.get(
                 "text",
                 ""
-            )
-
-
-            skill_match = self.match_skills(
-
-                requirement.get(
-                    "skills",
-                    []
-                ),
-
-                text
-            )
-
-
-            concept_match = self.match_concepts(
-
-                requirement.get(
-                    "concepts",
-                    []
-                ),
-
-                text
-            )
-
-
-            # -------------------------------------------------
-            # Explicit evidence
-            # -------------------------------------------------
-
-            explicit_score = (
-                skill_match["score"] * 0.6
-                +
-                concept_match["score"] * 0.4
-            )
-
-
-            # -------------------------------------------------
-            # Evidence score
-            # -------------------------------------------------
-
-            evidence_score = (
-                semantic_score * 0.4
-                +
-                explicit_score * 0.6
-            )
-
-
-            if (
-                evidence_score
-                >
-                best_score
-            ):
-
-                best_score = (
-                    evidence_score
+            ),
+            "similarity": round(
+                float(
+                    semantic_scores[
+                        best_index
+                    ]
                 )
+                if best_index < len(
+                    semantic_scores
+                )
+                else 0.0,
+                4
+            )
+        }
 
+    # ========================================================
+    # ASSESSMENT
+    # ========================================================
 
-                best_chunk = {
+    def get_assessment(
+        self,
+        score: float,
+        category: str,
+        requirement: Dict[str, Any]
+    ) -> str:
 
-                    "chunk_id": chunk.get(
-                        "chunk_id"
-                    ),
+        category = str(
+            category
+        ).lower()
 
-                    "section": chunk.get(
-                        "section"
-                    ),
+        has_skills = bool(
+            requirement.get(
+                "skills"
+            )
+        )
 
-                    "text": text,
+        has_education = bool(
+            requirement.get(
+                "education_fields"
+            )
+        )
 
-                    "similarity": round(
-                        semantic_score,
-                        4
-                    )
-                }
+        has_experience = bool(
+            requirement.get(
+                "experience"
+            )
+        )
 
+        # ----------------------------------------------------
+        # Required requirements are stricter.
+        # ----------------------------------------------------
 
-        return best_chunk
+        if category == "required":
 
+            if score >= 0.72:
+                return "STRONG_ALIGNMENT"
 
-    # =========================================================
-    # MAIN REQUIREMENT MATCHING
-    # =========================================================
+            if score >= 0.45:
+                return "PARTIAL_ALIGNMENT"
+
+            if score >= 0.20:
+                return "WEAK_ALIGNMENT"
+
+            return "NO_ALIGNMENT"
+
+        # ----------------------------------------------------
+        # Preferred requirements
+        # ----------------------------------------------------
+
+        if category == "preferred":
+
+            if score >= 0.70:
+                return "STRONG_ALIGNMENT"
+
+            if score >= 0.45:
+                return "PARTIAL_ALIGNMENT"
+
+            if score >= 0.20:
+                return "WEAK_ALIGNMENT"
+
+            return "NO_ALIGNMENT"
+
+        # ----------------------------------------------------
+        # Responsibilities are harder to prove.
+        # ----------------------------------------------------
+
+        if category == "responsibility":
+
+            if score >= 0.72:
+                return "STRONG_ALIGNMENT"
+
+            if score >= 0.48:
+                return "PARTIAL_ALIGNMENT"
+
+            if score >= 0.25:
+                return "WEAK_ALIGNMENT"
+
+            return "NO_ALIGNMENT"
+
+        if score >= 0.70:
+            return "STRONG_ALIGNMENT"
+
+        if score >= 0.45:
+            return "PARTIAL_ALIGNMENT"
+
+        if score >= 0.20:
+            return "WEAK_ALIGNMENT"
+
+        return "NO_ALIGNMENT"
+
+    # ========================================================
+    # MAIN MATCHING METHOD
+    # ========================================================
 
     def match_requirement(
         self,
-        requirement,
-        resume_chunks,
-        resume_sections,
-        semantic_scores
-    ):
+        requirement: Dict[str, Any],
+        resume_chunks: List[Dict[str, Any]],
+        resume_sections: List[Dict[str, Any]],
+        semantic_scores: List[float]
+    ) -> Dict[str, Any]:
 
-        # -----------------------------------------------------
-        # Defensive validation
-        # -----------------------------------------------------
-
-        if not isinstance(
-            requirement,
-            dict
-        ):
-
-            raise TypeError(
-                "match_requirement() expects "
-                "one requirement dictionary, "
-                f"but received "
-                f"{type(requirement).__name__}."
+        category = str(
+            requirement.get(
+                "category",
+                "preferred"
             )
+        ).lower()
 
-
-        requirement_text = (
+        requirement_text = str(
             requirement.get(
                 "original_text",
                 ""
             )
         )
 
-
-        category = (
-            requirement.get(
-                "category",
-                "preferred"
-            )
-        )
-
-
-        skills = (
-            requirement.get(
-                "skills",
-                []
-            )
-        )
-
-
-        concepts = (
-            requirement.get(
-                "concepts",
-                []
-            )
-        )
-
-
-        education_fields = (
-            requirement.get(
-                "education_fields",
-                []
-            )
-        )
-
-
-        experience = (
-            requirement.get(
-                "experience",
-                []
-            )
-        )
-
-
-        # =====================================================
-        # COMBINE RESUME TEXT
-        # =====================================================
+        # ----------------------------------------------------
+        # Combine ALL resume text.
+        #
+        # This is important because skills may be in SKILLS,
+        # education in EDUCATION and experience in WORK
+        # EXPERIENCE.
+        # ----------------------------------------------------
 
         resume_text = "\n".join(
-
-            chunk.get(
-                "text",
-                ""
-            )
-
-            for chunk
-            in resume_chunks
+            str(chunk.get("text", ""))
+            for chunk in resume_chunks
         )
 
+        # ----------------------------------------------------
+        # Explicit skill matching
+        # ----------------------------------------------------
 
-        # =====================================================
-        # SKILL MATCH
-        # =====================================================
-
-        skill_match = (
-            self.match_skills(
-                skills,
-                resume_text
-            )
+        skill_match = self.find_skill_matches(
+            self.normalize_list(
+                requirement.get(
+                    "skills",
+                    []
+                )
+            ),
+            resume_text
         )
 
+        # ----------------------------------------------------
+        # Concept matching
+        # ----------------------------------------------------
 
-        # =====================================================
-        # CONCEPT MATCH
-        # =====================================================
-
-        concept_match = (
-            self.match_concepts(
-                concepts,
-                resume_text
-            )
+        concept_match = self.match_concepts(
+            self.normalize_list(
+                requirement.get(
+                    "concepts",
+                    []
+                )
+            ),
+            resume_text
         )
 
+        # ----------------------------------------------------
+        # Education
+        # ----------------------------------------------------
 
-        # =====================================================
-        # EDUCATION
-        # =====================================================
-
-        required_degree_level = None
-
+        required_degree_level = (
+            "unknown"
+        )
 
         if re.search(
             r"\bbachelor",
-            requirement_text.lower()
+            requirement_text,
+            re.IGNORECASE
         ):
-
-            required_degree_level = (
-                "bachelor"
-            )
-
+            required_degree_level = "bachelor"
 
         elif re.search(
             r"\bmaster",
-            requirement_text.lower()
+            requirement_text,
+            re.IGNORECASE
         ):
-
-            required_degree_level = (
-                "master"
-            )
-
+            required_degree_level = "master"
 
         elif re.search(
-            r"\bphd\b|\bdoctorate\b",
-            requirement_text.lower()
+            r"\b(phd|doctorate)\b",
+            requirement_text,
+            re.IGNORECASE
         ):
+            required_degree_level = "phd"
 
-            required_degree_level = (
-                "phd"
-            )
+        education_match = self.match_education(
+            self.normalize_list(
+                requirement.get(
+                    "education_fields",
+                    []
+                )
+            ),
+            required_degree_level,
+            resume_text
+        )
 
+        # ----------------------------------------------------
+        # Experience
+        # ----------------------------------------------------
 
-        education_match = (
-            self.match_education(
+        experience_match = self.match_experience(
+            self.normalize_list(
+                requirement.get(
+                    "experience",
+                    []
+                )
+            ),
+            resume_text
+        )
 
-                education_fields,
+        # ----------------------------------------------------
+        # Semantic score
+        # ----------------------------------------------------
 
-                required_degree_level,
+        semantic_score = max(
+            semantic_scores
+        ) if semantic_scores else 0.0
 
-                resume_sections
+        semantic_score = max(
+            0.0,
+            min(
+                float(semantic_score),
+                1.0
             )
         )
 
-
-        # =====================================================
-        # EXPERIENCE
-        # =====================================================
-
-        experience_match = (
-            self.match_experience(
-
-                experience,
-
-                resume_sections
-            )
-        )
-
-
-        # =====================================================
-        # SEMANTIC SCORE
-        # =====================================================
-
-        if semantic_scores:
-
-            semantic_score = max(
-                float(score)
-                for score
-                in semantic_scores
-            )
-
-        else:
-
-            semantic_score = 0.0
-
-
-        # =====================================================
-        # EXPLICIT EVIDENCE
-        # =====================================================
-
-        explicit_score = (
-            self.explicit_evidence_score(
-
-                skill_match,
-
-                concept_match,
-
-                education_match,
-
-                experience_match
-            )
-        )
-
-
-        # =====================================================
-        # WEIGHTS
-        # =====================================================
+        # ====================================================
+        # REQUIREMENT-TYPE-AWARE WEIGHTS
+        # ====================================================
 
         if category == "required":
 
-            weights = {
+            if requirement.get(
+                "education_fields"
+            ):
 
-                "semantic": 0.40,
+                # Degree requirements should primarily
+                # depend on education evidence.
+                weights = {
+                    "semantic": 0.15,
+                    "skills": 0.05,
+                    "education": 0.70,
+                    "experience": 0.10,
+                    "concepts": 0.00
+                }
 
-                "skills": 0.25,
+            elif requirement.get(
+                "experience"
+            ):
 
-                "education": 0.30,
+                weights = {
+                    "semantic": 0.20,
+                    "skills": 0.30,
+                    "education": 0.00,
+                    "experience": 0.40,
+                    "concepts": 0.10
+                }
 
-                "experience": 0.05,
+            else:
 
-                "concepts": 0.00
-            }
-
+                weights = {
+                    "semantic": 0.35,
+                    "skills": 0.40,
+                    "education": 0.00,
+                    "experience": 0.10,
+                    "concepts": 0.15
+                }
 
         elif category == "preferred":
 
-            weights = {
+            if requirement.get(
+                "experience"
+            ):
 
-                "semantic": 0.40,
+                weights = {
+                    "semantic": 0.20,
+                    "skills": 0.35,
+                    "education": 0.00,
+                    "experience": 0.30,
+                    "concepts": 0.15
+                }
 
-                "skills": 0.30,
+            elif requirement.get(
+                "education_fields"
+            ):
 
-                "education": 0.10,
+                weights = {
+                    "semantic": 0.15,
+                    "skills": 0.00,
+                    "education": 0.80,
+                    "experience": 0.05,
+                    "concepts": 0.00
+                }
 
-                "experience": 0.15,
+            else:
 
-                "concepts": 0.05
-            }
-
+                weights = {
+                    "semantic": 0.30,
+                    "skills": 0.40,
+                    "education": 0.00,
+                    "experience": 0.10,
+                    "concepts": 0.20
+                }
 
         else:
 
+            # Responsibilities rely heavily on actual
+            # evidence of concepts and experience.
             weights = {
-
-                "semantic": 0.40,
-
-                "skills": 0.20,
-
+                "semantic": 0.25,
+                "skills": 0.10,
                 "education": 0.00,
-
-                "experience": 0.15,
-
-                "concepts": 0.25
+                "experience": 0.20,
+                "concepts": 0.45
             }
 
-
-        # =====================================================
-        # HYBRID SCORE
-        # =====================================================
+        # ====================================================
+        # RAW HYBRID SCORE
+        # ====================================================
 
         hybrid_score = (
-
             semantic_score
-            *
-            weights["semantic"]
-
+            * weights["semantic"]
             +
-
             skill_match["score"]
-            *
-            weights["skills"]
-
+            * weights["skills"]
             +
-
             education_match["score"]
-            *
-            weights["education"]
-
+            * weights["education"]
             +
-
             experience_match["score"]
-            *
-            weights["experience"]
-
+            * weights["experience"]
             +
-
             concept_match["score"]
-            *
-            weights["concepts"]
+            * weights["concepts"]
         )
 
+        # ----------------------------------------------------
+        # Critical evidence protection.
+        #
+        # If a requirement contains explicit skills and NONE
+        # are present, semantic similarity alone must not
+        # create a strong score.
+        # ----------------------------------------------------
 
-        # -----------------------------------------------------
-        # Explicit evidence should prevent a genuine textual
-        # match from being buried by a low semantic score.
-        # -----------------------------------------------------
+        if (
+            requirement.get("skills")
+            and
+            skill_match["score"] == 0
+        ):
+
+            hybrid_score = min(
+                hybrid_score,
+                0.45
+            )
+
+        # ----------------------------------------------------
+        # Required experience cannot become strong merely
+        # through semantic similarity.
+        # ----------------------------------------------------
+
+        if (
+            requirement.get("experience")
+            and
+            experience_match["score"] < 0.50
+            and
+            category == "required"
+        ):
+
+            hybrid_score = min(
+                hybrid_score,
+                0.55
+            )
+
+        # ----------------------------------------------------
+        # Degree requirement without degree evidence.
+        # ----------------------------------------------------
+
+        if (
+            requirement.get("education_fields")
+            and
+            education_match["score"] == 0
+        ):
+
+            hybrid_score = min(
+                hybrid_score,
+                0.45
+            )
 
         hybrid_score = max(
-
-            hybrid_score,
-
-            explicit_score * 0.75
-        )
-
-
-        hybrid_score = min(
-            hybrid_score,
-            1.0
-        )
-
-
-        # =====================================================
-        # BEST EVIDENCE
-        # =====================================================
-
-        best_evidence = (
-            self.select_best_evidence(
-
-                requirement,
-
-                resume_chunks,
-
-                semantic_scores
-            )
-        )
-
-
-        # =====================================================
-        # ASSESSMENT
-        # =====================================================
-
-        assessment = (
-            self.get_assessment(
-
+            0.0,
+            min(
                 hybrid_score,
-
-                category,
-
-                explicit_score
+                1.0
             )
         )
 
+        # ----------------------------------------------------
+        # Best evidence
+        # ----------------------------------------------------
 
-        # =====================================================
-        # RETURN RESULT
-        # =====================================================
+        best_evidence = self.select_best_evidence(
+            resume_chunks,
+            semantic_scores,
+            requirement
+        )
+
+        # ----------------------------------------------------
+        # Assessment
+        # ----------------------------------------------------
+
+        assessment = self.get_assessment(
+            hybrid_score,
+            category,
+            requirement
+        )
 
         return {
 
@@ -1381,17 +1197,11 @@ class HybridMatcher:
 
             "skill_match": skill_match,
 
-            "education_match": (
-                education_match
-            ),
+            "education_match": education_match,
 
-            "experience_match": (
-                experience_match
-            ),
+            "experience_match": experience_match,
 
-            "concept_match": (
-                concept_match
-            ),
+            "concept_match": concept_match,
 
             "weights": weights,
 

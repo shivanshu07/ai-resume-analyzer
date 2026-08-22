@@ -1,39 +1,47 @@
 import numpy as np
-import json
-from pathlib import Path
 
 from src.extraction.pdf_parser import PDFParser
-
-from src.preprocessing.cleaner import TextCleaner
-from src.preprocessing.chunker import SemanticChunker
-
-from src.utils.file_handler import FileHandler
-
 from src.extraction.jd_parser import JobDescriptionParser
 from src.extraction.requirement_extractor import RequirementExtractor
 
-from src.preprocessing.requirement_normalizer import RequirementNormalizer
+from src.preprocessing.cleaner import TextCleaner
+from src.preprocessing.chunker import SemanticChunker
+from src.preprocessing.requirement_normalizer import (
+    RequirementNormalizer
+)
 
 from src.llm.embedder import TextEmbedder
 from src.llm.matcher import ResumeJDMatcher
 
 from src.evaluation.hybrid_scorer import HybridMatcher
-
 from src.evaluation.analysis import ResumeAnalysisEngine
+
+from src.utils.file_handler import FileHandler
+
 
 # ============================================================
 # FILE PATHS
 # ============================================================
 
-PDF_PATH = "data/raw/resume/resume.pdf"
+PDF_PATH = (
+    "data/raw/resume/resume.pdf"
+)
 
-RAW_TEXT_PATH = "data/processed/resume_raw.txt"
+RAW_TEXT_PATH = (
+    "data/processed/resume_raw.txt"
+)
 
-CLEAN_TEXT_PATH = "data/processed/resume_clean.txt"
+CLEAN_TEXT_PATH = (
+    "data/processed/resume_clean.txt"
+)
 
-CHUNKS_PATH = "data/processed/resume_chunks.json"
+CHUNKS_PATH = (
+    "data/processed/resume_chunks.json"
+)
 
-JD_PATH = "data/raw/job_description/job_description.txt"
+JD_PATH = (
+    "data/raw/job_description/job_description.txt"
+)
 
 JD_REQUIREMENTS_PATH = (
     "data/processed/jd_requirements.json"
@@ -59,6 +67,7 @@ ATS_ANALYSIS_PATH = (
     "data/processed/ats_analysis.json"
 )
 
+
 # ============================================================
 # INITIALIZE COMPONENTS
 # ============================================================
@@ -77,9 +86,13 @@ jd_parser = JobDescriptionParser(
     JD_PATH
 )
 
-requirement_extractor = RequirementExtractor()
+requirement_extractor = (
+    RequirementExtractor()
+)
 
-requirement_normalizer = RequirementNormalizer()
+requirement_normalizer = (
+    RequirementNormalizer()
+)
 
 embedder = TextEmbedder()
 
@@ -89,58 +102,49 @@ matcher = ResumeJDMatcher(
 
 hybrid_scorer = HybridMatcher()
 
+analysis_engine = (
+    ResumeAnalysisEngine()
+)
+
 
 # ============================================================
-# HELPER
+# HELPER: COSINE SIMILARITY
 # ============================================================
 
 def calculate_semantic_scores(
     requirement_embedding,
     resume_embeddings
 ):
-    """
-    Calculate cosine similarity between one JD requirement
-    embedding and every resume chunk embedding.
-
-    Returns:
-        list[float]
-    """
 
     query = np.asarray(
         requirement_embedding,
-        dtype=float
-    )
+        dtype=np.float32
+    ).reshape(-1)
 
     matrix = np.asarray(
         resume_embeddings,
-        dtype=float
+        dtype=np.float32
     )
 
-    # --------------------------------------------------------
-    # Ensure correct dimensions
-    # --------------------------------------------------------
-
     if matrix.ndim == 1:
-        matrix = matrix.reshape(1, -1)
+        matrix = matrix.reshape(
+            1,
+            -1
+        )
 
-    query = query.reshape(-1)
-
-    # --------------------------------------------------------
-    # Check dimensions
-    # --------------------------------------------------------
+    if matrix.ndim != 2:
+        raise ValueError(
+            "Resume embeddings must be a 2D matrix."
+        )
 
     if matrix.shape[1] != query.shape[0]:
 
         raise ValueError(
             "Embedding dimension mismatch: "
             f"resume embeddings have dimension "
-            f"{matrix.shape[1]}, while JD embedding has "
-            f"dimension {query.shape[0]}."
+            f"{matrix.shape[1]}, while JD embedding "
+            f"has dimension {query.shape[0]}."
         )
-
-    # --------------------------------------------------------
-    # Calculate norms
-    # --------------------------------------------------------
 
     query_norm = np.linalg.norm(
         query
@@ -151,15 +155,13 @@ def calculate_semantic_scores(
         axis=1
     )
 
-    # --------------------------------------------------------
-    # Prevent division by zero
-    # --------------------------------------------------------
-
     if query_norm == 0:
 
         return [
             0.0
-            for _ in range(len(matrix))
+            for _ in range(
+                len(matrix)
+            )
         ]
 
     matrix_norms = np.where(
@@ -168,14 +170,18 @@ def calculate_semantic_scores(
         matrix_norms
     )
 
-    # --------------------------------------------------------
-    # Cosine similarity
-    # --------------------------------------------------------
-
     scores = (
         matrix @ query
     ) / (
-        matrix_norms * query_norm
+        matrix_norms
+        *
+        query_norm
+    )
+
+    scores = np.clip(
+        scores,
+        -1.0,
+        1.0
     )
 
     return [
@@ -187,11 +193,115 @@ def calculate_semantic_scores(
     ]
 
 
+# ============================================================
+# HELPER: VALIDATE INPUTS
+# ============================================================
+
+def validate_pipeline_inputs(
+    requirements,
+    jd_embeddings,
+    chunks,
+    resume_embeddings
+):
+
+    if not requirements:
+        raise ValueError(
+            "No normalized JD requirements were generated."
+        )
+
+    if not chunks:
+        raise ValueError(
+            "No resume chunks were generated."
+        )
+
+    if jd_embeddings is None:
+        raise ValueError(
+            "JD embeddings could not be loaded."
+        )
+
+    if resume_embeddings is None:
+        raise ValueError(
+            "Resume embeddings could not be loaded."
+        )
+
+    if len(requirements) != len(
+        jd_embeddings
+    ):
+
+        raise ValueError(
+            "Requirement/embedding mismatch: "
+            f"{len(requirements)} requirements but "
+            f"{len(jd_embeddings)} JD embeddings."
+        )
+
+    if len(chunks) != len(
+        resume_embeddings
+    ):
+
+        raise ValueError(
+            "Resume chunk/embedding mismatch: "
+            f"{len(chunks)} chunks but "
+            f"{len(resume_embeddings)} resume embeddings."
+        )
+
+
+# ============================================================
+# HELPER: STANDARDIZE CHUNKS
+# ============================================================
+
+def build_resume_evidence_chunks(
+    chunks
+):
+
+    output = []
+
+    for index, chunk in enumerate(
+        chunks
+    ):
+
+        if not isinstance(
+            chunk,
+            dict
+        ):
+
+            raise TypeError(
+                f"Resume chunk {index} "
+                "is not a dictionary."
+            )
+
+        output.append(
+            {
+                **chunk,
+
+                "section": str(
+                    chunk.get(
+                        "section",
+                        "UNKNOWN"
+                    )
+                ),
+
+                "text": str(
+                    chunk.get(
+                        "text",
+                        ""
+                    )
+                ),
+
+                "chunk_id": str(
+                    chunk.get(
+                        "chunk_id",
+                        f"resume_{index + 1:03d}"
+                    )
+                )
+            }
+        )
+
+    return output
 
 
 # ============================================================
 # DAY 2
-# RESUME PROCESSING PIPELINE
+# RESUME PROCESSING
 # ============================================================
 
 print(
@@ -208,18 +318,15 @@ print(
 )
 
 
-# ------------------------------------------------------------
-# 1. Extract text from resume PDF
-# ------------------------------------------------------------
-
 raw_text = parser.extract_text(
     PDF_PATH
 )
 
+if not raw_text.strip():
 
-# ------------------------------------------------------------
-# 2. Save raw extracted text
-# ------------------------------------------------------------
+    raise ValueError(
+        "No text could be extracted from the resume PDF."
+    )
 
 handler.save_text(
     raw_text,
@@ -227,29 +334,38 @@ handler.save_text(
 )
 
 
-# ------------------------------------------------------------
-# 3. Clean text and detect sections
-# ------------------------------------------------------------
-
 sections = cleaner.clean(
     raw_text
 )
 
+if not sections:
 
-# ------------------------------------------------------------
-# 4. Reconstruct cleaned text
-# ------------------------------------------------------------
+    raise ValueError(
+        "No resume sections were detected."
+    )
+
 
 cleaned_lines = []
 
 for section in sections:
 
     cleaned_lines.append(
-        section["section"]
+        str(
+            section.get(
+                "section",
+                ""
+            )
+        )
     )
 
     cleaned_lines.extend(
-        section["content"]
+        [
+            str(line)
+            for line in section.get(
+                "content",
+                []
+            )
+        ]
     )
 
     cleaned_lines.append("")
@@ -259,29 +375,25 @@ clean_text = "\n".join(
     cleaned_lines
 ).strip()
 
-
-# ------------------------------------------------------------
-# 5. Save cleaned text
-# ------------------------------------------------------------
-
 handler.save_text(
     clean_text,
     CLEAN_TEXT_PATH
 )
 
 
-# ------------------------------------------------------------
-# 6. Create semantic chunks
-# ------------------------------------------------------------
-
 chunks = chunker.create_chunks(
     sections
 )
 
+chunks = build_resume_evidence_chunks(
+    chunks
+)
 
-# ------------------------------------------------------------
-# 7. Save resume chunks
-# ------------------------------------------------------------
+if not chunks:
+
+    raise ValueError(
+        "No resume chunks were created."
+    )
 
 handler.save_json(
     chunks,
@@ -290,7 +402,6 @@ handler.save_json(
 
 
 # ============================================================
-# DAY 3
 # RESUME EMBEDDINGS
 # ============================================================
 
@@ -308,21 +419,16 @@ print(
 )
 
 
-resume_texts = []
-
-for chunk in chunks:
-
-    resume_texts.append(
-        chunk["text"]
-    )
-
+resume_texts = [
+    chunk["text"]
+    for chunk in chunks
+]
 
 resume_embeddings = (
     embedder.generate_embeddings(
         resume_texts
     )
 )
-
 
 embedder.save_embeddings(
     resume_embeddings,
@@ -349,25 +455,13 @@ print(
 )
 
 
-# ------------------------------------------------------------
-# 8. Load and parse job description
-# ------------------------------------------------------------
-
 parsed_jd = jd_parser.parse()
 
-
-# ------------------------------------------------------------
-# 9. Extract JD sections
-# ------------------------------------------------------------
-
-jd_sections = requirement_extractor.extract(
-    parsed_jd["lines"]
+jd_sections = (
+    requirement_extractor.extract(
+        parsed_jd["lines"]
+    )
 )
-
-
-# ------------------------------------------------------------
-# 10. Build structured requirements
-# ------------------------------------------------------------
 
 requirements = (
     requirement_extractor
@@ -376,11 +470,6 @@ requirements = (
     )
 )
 
-
-# ------------------------------------------------------------
-# 11. Normalize requirements
-# ------------------------------------------------------------
-
 normalized_requirements = (
     requirement_normalizer
     .normalize_all(
@@ -388,10 +477,11 @@ normalized_requirements = (
     )
 )
 
+if not normalized_requirements:
 
-# ------------------------------------------------------------
-# 12. Save normalized JD requirements
-# ------------------------------------------------------------
+    raise ValueError(
+        "No normalized JD requirements were generated."
+    )
 
 handler.save_json(
     normalized_requirements,
@@ -400,25 +490,37 @@ handler.save_json(
 
 
 # ============================================================
-# DAY 3
-# JOB DESCRIPTION EMBEDDINGS
+# JD EMBEDDINGS
 # ============================================================
 
-jd_texts = []
+print(
+    "\n"
+    + "=" * 60
+)
 
-for requirement in normalized_requirements:
+print(
+    "JOB DESCRIPTION EMBEDDINGS"
+)
 
-    jd_texts.append(
-        requirement["original_text"]
+print(
+    "=" * 60
+)
+
+
+jd_texts = [
+    requirement.get(
+        "original_text",
+        ""
     )
-
+    for requirement
+    in normalized_requirements
+]
 
 jd_embeddings = (
     embedder.generate_embeddings(
         jd_texts
     )
 )
-
 
 embedder.save_embeddings(
     jd_embeddings,
@@ -427,7 +529,6 @@ embedder.save_embeddings(
 
 
 # ============================================================
-# DAY 4
 # LOAD EMBEDDINGS
 # ============================================================
 
@@ -441,6 +542,14 @@ jd_embeddings_loaded = (
     embedder.load_embeddings(
         JD_EMBEDDINGS_PATH
     )
+)
+
+
+validate_pipeline_inputs(
+    normalized_requirements,
+    jd_embeddings_loaded,
+    chunks,
+    resume_embeddings_loaded
 )
 
 
@@ -474,8 +583,7 @@ match_results = matcher.match_all(
     resume_embeddings_loaded
 )
 
-
-matcher.save_results(
+handler.save_json(
     match_results,
     MATCH_RESULTS_PATH
 )
@@ -483,7 +591,7 @@ matcher.save_results(
 
 # ============================================================
 # DAY 5
-# HYBRID SCORING
+# HYBRID MATCHING
 # ============================================================
 
 print(
@@ -503,40 +611,19 @@ print(
 hybrid_results = []
 
 
-# ------------------------------------------------------------
-# IMPORTANT:
-#
-# normalized_requirements is a LIST.
-#
-# match_requirement() expects ONE requirement DICTIONARY.
-#
-# Therefore we process every requirement separately.
-# ------------------------------------------------------------
-
 for index, requirement in enumerate(
     normalized_requirements
 ):
 
-    requirement_number = index + 1
-
     print(
         f"\nProcessing requirement "
-        f"{requirement_number}/"
+        f"{index + 1}/"
         f"{len(normalized_requirements)}"
     )
-
-    # --------------------------------------------------------
-    # Get the embedding belonging to THIS requirement
-    # --------------------------------------------------------
 
     requirement_embedding = (
         jd_embeddings_loaded[index]
     )
-
-    # --------------------------------------------------------
-    # Calculate semantic similarity between this JD
-    # requirement and EVERY resume chunk.
-    # --------------------------------------------------------
 
     semantic_scores = (
         calculate_semantic_scores(
@@ -545,31 +632,29 @@ for index, requirement in enumerate(
         )
     )
 
-    # --------------------------------------------------------
-    # Hybrid matching
-    # --------------------------------------------------------
+    result = (
+        hybrid_scorer
+        .match_requirement(
 
-    result = hybrid_scorer.match_requirement(
+            requirement=requirement,
 
-        requirement=requirement,
+            resume_chunks=chunks,
 
-        resume_chunks=chunks,
+            resume_sections=chunks,
 
-        resume_sections=chunks,
-
-        semantic_scores=semantic_scores
+            semantic_scores=semantic_scores
+        )
     )
 
-    # --------------------------------------------------------
-    # Add requirement metadata to result
-    # --------------------------------------------------------
-
     result["requirement_id"] = (
-        requirement_number
+        index + 1
     )
 
     result["requirement"] = (
-        requirement["original_text"]
+        requirement.get(
+            "original_text",
+            ""
+        )
     )
 
     result["category"] = (
@@ -598,18 +683,15 @@ for index, requirement in enumerate(
     )
 
 
-# ============================================================
-# SAVE HYBRID RESULTS
-# ============================================================
-
 handler.save_json(
     hybrid_results,
     HYBRID_RESULTS_PATH
 )
 
+
 # ============================================================
 # DAY 6
-# ATS SCORE + RESUME GAP ANALYSIS
+# ATS + GAP ANALYSIS
 # ============================================================
 
 print(
@@ -618,26 +700,13 @@ print(
 )
 
 print(
-    "DAY 6 - ATS SCORE + GAP ANALYSIS"
+    "DAY 6 - ATS ANALYSIS"
 )
 
 print(
     "=" * 60
 )
 
-
-# ------------------------------------------------------------
-# Initialize Day-6 analysis engine
-# ------------------------------------------------------------
-
-analysis_engine = (
-    ResumeAnalysisEngine()
-)
-
-
-# ------------------------------------------------------------
-# Analyze hybrid matching results
-# ------------------------------------------------------------
 
 ats_analysis = (
     analysis_engine.analyze(
@@ -645,230 +714,9 @@ ats_analysis = (
     )
 )
 
-
-# ------------------------------------------------------------
-# Save final ATS analysis
-# ------------------------------------------------------------
-
 handler.save_json(
     ats_analysis,
     ATS_ANALYSIS_PATH
-)
-
-
-
-
-# ============================================================
-# OUTPUT
-# ============================================================
-
-print(
-    "\n"
-    + "=" * 60
-)
-
-print(
-    "RESUME PROCESSING COMPLETED"
-)
-
-print(
-    "=" * 60
-)
-
-print(
-    f"Characters extracted: "
-    f"{len(raw_text)}"
-)
-
-print(
-    f"Characters after cleaning: "
-    f"{len(clean_text)}"
-)
-
-print(
-    f"Resume sections detected: "
-    f"{len(sections)}"
-)
-
-print(
-    f"Resume chunks created: "
-    f"{len(chunks)}"
-)
-
-
-print(
-    "\nDetected resume sections:"
-)
-
-for section in sections:
-
-    print(
-        f"  - {section['section']}"
-    )
-
-
-# ============================================================
-# JD INFORMATION
-# ============================================================
-
-print(
-    "\n"
-    + "=" * 60
-)
-
-print(
-    "JOB DESCRIPTION PROCESSING COMPLETED"
-)
-
-print(
-    "=" * 60
-)
-
-print(
-    f"JD lines extracted: "
-    f"{len(parsed_jd['lines'])}"
-)
-
-print(
-    f"Structured requirements: "
-    f"{len(requirements)}"
-)
-
-
-print(
-    "\nExtracted JD sections:"
-)
-
-for section, items in jd_sections.items():
-
-    print(
-        f"\n{section.upper()}"
-    )
-
-    if not items:
-
-        print(
-            "  - None"
-        )
-
-        continue
-
-    for item in items:
-
-        print(
-            f"  - {item}"
-        )
-
-
-# ============================================================
-# NORMALIZED REQUIREMENTS
-# ============================================================
-
-print(
-    "\n"
-    + "=" * 60
-)
-
-print(
-    "NORMALIZED REQUIREMENTS"
-)
-
-print(
-    "=" * 60
-)
-
-
-for index, requirement in enumerate(
-    normalized_requirements,
-    start=1
-):
-
-    print(
-        f"\nRequirement {index}"
-    )
-
-    print(
-        f"  Original: "
-        f"{requirement['original_text']}"
-    )
-
-    print(
-        f"  Category: "
-        f"{requirement['category']}"
-    )
-
-    print(
-        f"  Importance: "
-        f"{requirement['importance']}"
-    )
-
-    print(
-        f"  Skills: "
-        f"{requirement['skills']}"
-    )
-
-    print(
-        f"  Education: "
-        f"{requirement.get('education_fields', [])}"
-    )
-
-    print(
-        f"  Concepts: "
-        f"{requirement.get('concepts', [])}"
-    )
-
-    print(
-        f"  Experience: "
-        f"{requirement['experience']}"
-    )
-
-
-# ============================================================
-# EMBEDDING INFORMATION
-# ============================================================
-
-print(
-    "\n"
-    + "=" * 60
-)
-
-print(
-    "EMBEDDING GENERATION COMPLETED"
-)
-
-print(
-    "=" * 60
-)
-
-print(
-    f"Resume embeddings: "
-    f"{len(resume_embeddings)}"
-)
-
-print(
-    f"JD embeddings: "
-    f"{len(jd_embeddings)}"
-)
-
-print(
-    f"Embedding dimensions: "
-    f"{resume_embeddings.shape[1]}"
-)
-
-print(
-    "\nResume embeddings saved to:"
-)
-
-print(
-    f"  {RESUME_EMBEDDINGS_PATH}"
-)
-
-print(
-    "\nJD embeddings saved to:"
-)
-
-print(
-    f"  {JD_EMBEDDINGS_PATH}"
 )
 
 
@@ -892,49 +740,45 @@ print(
 
 for result in match_results:
 
+    best = result.get(
+        "best_match",
+        {}
+    )
+
     print(
         f"\nRequirement "
-        f"{result['requirement_id']}"
+        f"{result.get('requirement_id')}"
     )
 
     print(
         f"Category: "
-        f"{result['category']}"
+        f"{result.get('category')}"
     )
 
     print(
         f"Requirement: "
-        f"{result['requirement']}"
+        f"{result.get('requirement')}"
     )
 
     print(
         f"Best evidence section: "
-        f"{result['best_match']['section']}"
+        f"{best.get('section', 'N/A')}"
     )
 
     print(
         f"Resume chunk: "
-        f"{result['best_match']['chunk_id']}"
+        f"{best.get('chunk_id', 'N/A')}"
     )
 
     print(
         f"Similarity: "
-        f"{result['best_match']['similarity']}"
+        f"{best.get('similarity', 0.0)}"
     )
 
     print(
         f"Match level: "
-        f"{result['match_level']}"
+        f"{result.get('match_level', 'N/A')}"
     )
-
-
-print(
-    "\nMatch results saved to:"
-)
-
-print(
-    f"  {MATCH_RESULTS_PATH}"
-)
 
 
 # ============================================================
@@ -953,6 +797,7 @@ print(
 print(
     "=" * 60
 )
+
 
 print(
     f"Requirements processed: "
@@ -977,53 +822,45 @@ for result in hybrid_results:
 
     print(
         f"\nRequirement "
-        f"{result['requirement_id']}"
+        f"{result.get('requirement_id')}"
     )
 
     print(
         f"Category: "
-        f"{result['category']}"
+        f"{result.get('category')}"
+    )
+
+    print(
+        f"Semantic score: "
+        f"{result.get('semantic_score', 0.0)}"
     )
 
     print(
         f"Score: "
-        f"{result['hybrid_score']}"
+        f"{result.get('hybrid_score', 0.0)}"
     )
 
     print(
         f"Assessment: "
-        f"{result['assessment']}"
+        f"{result.get('assessment', 'N/A')}"
     )
 
     best = result.get(
-        "best_evidence"
+        "best_evidence",
+        {}
     )
 
     if best:
 
         print(
             f"Best evidence: "
-            f"{best['chunk_id']} "
-            f"({best['section']})"
+            f"{best.get('chunk_id', 'N/A')} "
+            f"({best.get('section', 'N/A')})"
         )
 
 
-print(
-    "\n"
-    + "=" * 60
-)
-
-print(
-    "DAY 5 COMPLETED SUCCESSFULLY"
-)
-
-print(
-    "=" * 60
-)
-
-
 # ============================================================
-# ATS STYLE OUTPUT
+# ATS SCORE
 # ============================================================
 
 print(
@@ -1116,7 +953,6 @@ print(
     "-" * 60
 )
 
-
 for category, data in (
     ats_analysis[
         "category_summary"
@@ -1130,14 +966,12 @@ for category, data in (
 
 
 # ============================================================
-# SKILL ANALYSIS
+# SKILLS
 # ============================================================
 
-skills = (
-    ats_analysis[
-        "skills"
-    ]
-)
+skills = ats_analysis[
+    "skills"
+]
 
 print(
     "\n"
@@ -1162,7 +996,6 @@ for skill in skills["matched"]:
         f"  + {skill}"
     )
 
-
 print(
     "\nMissing skills:"
 )
@@ -1175,14 +1008,12 @@ for skill in skills["missing"]:
 
 
 # ============================================================
-# CONCEPT ANALYSIS
+# CONCEPTS
 # ============================================================
 
-concepts = (
-    ats_analysis[
-        "concepts"
-    ]
-)
+concepts = ats_analysis[
+    "concepts"
+]
 
 print(
     "\n"
@@ -1207,7 +1038,6 @@ for concept in concepts["matched"]:
         f"  + {concept}"
     )
 
-
 print(
     "\nMissing concepts:"
 )
@@ -1220,14 +1050,12 @@ for concept in concepts["missing"]:
 
 
 # ============================================================
-# EDUCATION ANALYSIS
+# EDUCATION
 # ============================================================
 
-education = (
-    ats_analysis[
-        "education"
-    ]
-)
+education = ats_analysis[
+    "education"
+]
 
 print(
     "\n"
@@ -1259,14 +1087,12 @@ print(
 
 
 # ============================================================
-# EXPERIENCE ANALYSIS
+# EXPERIENCE
 # ============================================================
 
-experience = (
-    ats_analysis[
-        "experience"
-    ]
-)
+experience = ats_analysis[
+    "experience"
+]
 
 print(
     "\n"
@@ -1301,11 +1127,9 @@ print(
 # PRIORITY GAPS
 # ============================================================
 
-priority_gaps = (
-    ats_analysis[
-        "priority_gaps"
-    ]
-)
+priority_gaps = ats_analysis[
+    "priority_gaps"
+]
 
 print(
     "\n"
@@ -1327,34 +1151,33 @@ for index, gap in enumerate(
 ):
 
     print(
-        f"\n{index}. "
-        f"Requirement "
-        f"{gap['requirement_id']}"
+        f"\n{index}. Requirement "
+        f"{gap.get('requirement_id')}"
     )
 
     print(
         f"   Importance: "
-        f"{gap['importance']}"
+        f"{gap.get('importance')}"
     )
 
     print(
         f"   Assessment: "
-        f"{gap['assessment']}"
+        f"{gap.get('assessment')}"
     )
 
     print(
         f"   Score: "
-        f"{gap['hybrid_score']}"
+        f"{gap.get('hybrid_score', 0.0)}"
     )
 
     print(
         f"   Requirement: "
-        f"{gap['requirement']}"
+        f"{gap.get('requirement', '')}"
     )
 
 
 # ============================================================
-# SAVE LOCATION
+# FINAL
 # ============================================================
 
 print(

@@ -11,25 +11,32 @@
             ]
         },
         "education_match": {
-            "score": 0.4,
-            "matched": [],
-            "related": [],
-            "missing": [
+            "score": 0.4286,
+            "matched": [
                 "Statistics",
                 "Data Science",
+                "Engineering"
+            ],
+            "related": [],
+            "missing": [
                 "Mathematics",
                 "Physics",
                 "Economics",
-                "Operations Research",
-                "Engineering"
+                "Operations Research"
             ],
-            "degree_level": "bachelor"
+            "degree_level": "bachelor",
+            "required_degree_level": "bachelor",
+            "degree_level_match": true
         },
         "experience_match": {
             "score": 0.0,
             "required": [],
-            "estimated_years": 0.0,
-            "evidence": []
+            "required_years": 0.0,
+            "estimated_years": 20.0,
+            "evidence": [
+                "Professional work experience present",
+                "Estimated professional experience: 20.00 years"
+            ]
         },
         "concept_match": {
             "score": 0.0,
@@ -37,14 +44,14 @@
             "missing": []
         },
         "weights": {
-            "semantic": 0.4,
-            "skills": 0.25,
-            "education": 0.3,
-            "experience": 0.05,
+            "semantic": 0.15,
+            "skills": 0.05,
+            "education": 0.7,
+            "experience": 0.1,
             "concepts": 0.0
         },
-        "hybrid_score": 0.4115,
-        "assessment": "PARTIAL_ALIGNMENT",
+        "hybrid_score": 0.3874,
+        "assessment": "WEAK_ALIGNMENT",
         "best_evidence": {
             "chunk_id": "resume_001",
             "section": "SUMMARY",
@@ -69,20 +76,26 @@
             ]
         },
         "education_match": {
-            "score": 0.0,
-            "matched": [],
-            "related": [],
-            "missing": [
+            "score": 1.0,
+            "matched": [
                 "Statistics",
                 "Data Science"
             ],
-            "degree_level": "bachelor"
+            "related": [],
+            "missing": [],
+            "degree_level": "bachelor",
+            "required_degree_level": "unknown",
+            "degree_level_match": true
         },
         "experience_match": {
             "score": 0.0,
             "required": [],
-            "estimated_years": 0.0,
-            "evidence": []
+            "required_years": 0.0,
+            "estimated_years": 20.0,
+            "evidence": [
+                "Professional work experience present",
+                "Estimated professional experience: 20.00 years"
+            ]
         },
         "concept_match": {
             "score": 0.0,
@@ -90,14 +103,14 @@
             "missing": []
         },
         "weights": {
-            "semantic": 0.4,
-            "skills": 0.25,
-            "education": 0.3,
-            "experience": 0.05,
+            "semantic": 0.15,
+            "skills": 0.05,
+            "education": 0.7,
+            "experience": 0.1,
             "concepts": 0.0
         },
-        "hybrid_score": 0.375,
-        "assessment": "PARTIAL_ALIGNMENT",
+        "hybrid_score": 0.8095,
+        "assessment": "STRONG_ALIGNMENT",
         "best_evidence": {
             "chunk_id": "resume_001",
             "section": "SUMMARY",
@@ -120,22 +133,29 @@
             "missing": []
         },
         "education_match": {
-            "score": 0.0,
-            "matched": [],
+            "score": 0.125,
+            "matched": [
+                "Statistics"
+            ],
             "related": [],
             "missing": [
-                "Statistics",
                 "Mathematics",
                 "Economics",
                 "Bioinformatics"
             ],
-            "degree_level": "bachelor"
+            "degree_level": "bachelor",
+            "required_degree_level": "master",
+            "degree_level_match": false
         },
         "experience_match": {
             "score": 0.0,
             "required": [],
-            "estimated_years": 0.0,
-            "evidence": []
+            "required_years": 0.0,
+            "estimated_years": 20.0,
+            "evidence": [
+                "Professional work experience present",
+                "Estimated professional experience: 20.00 years"
+            ]
         },
         "concept_match": {
             "score": 0.0,
@@ -143,19 +163,19 @@
             "missing": []
         },
         "weights": {
-            "semantic": 0.4,
-            "skills": 0.3,
-            "education": 0.1,
-            "experience": 0.15,
-            "concepts": 0.05
+            "semantic": 0.15,
+            "skills": 0.0,
+            "education": 0.8,
+            "experience": 0.05,
+            "concepts": 0.0
         },
-        "hybrid_score": 0.75,
-        "assessment": "STRONG_ALIGNMENT",
+        "hybrid_score": 0.1587,
+        "assessment": "NO_ALIGNMENT",
         "best_evidence": {
-            "chunk_id": "resume_001",
-            "section": "SUMMARY",
-            "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
-            "similarity": 0.3914
+            "chunk_id": "resume_006",
+            "section": "EDUCATION",
+            "text": "Indraprastha Institute of Information Technology, Delhi\n2020 - 2024 Bachelor of Technology in Computer Science and Artificial Intelligence\nKIIT World School, New Delhi\n2004 - 2018 Senior Secondary School Education",
+            "similarity": 0.2917
         },
         "requirement_id": 3,
         "requirement": "Master's degree in Statistics, Mathematics, Bioinformatics, Economics, another quantitative field, or equivalent practical experience.",
@@ -166,32 +186,37 @@
     {
         "semantic_score": 0.6309,
         "skill_match": {
-            "score": 1.0,
+            "score": 0.6667,
             "matched": [
                 "Python",
                 "R",
                 "SQL",
-                "Statistical Analysis",
-                "Data Analytics",
-                "Database"
+                "Data Analytics"
             ],
-            "missing": []
+            "missing": [
+                "Statistical Analysis",
+                "Database"
+            ]
         },
         "education_match": {
             "score": 0.0,
             "matched": [],
             "related": [],
             "missing": [],
-            "degree_level": "bachelor"
+            "degree_level": "bachelor",
+            "required_degree_level": "phd",
+            "degree_level_match": false
         },
         "experience_match": {
             "score": 1.0,
             "required": [
                 "2 years"
             ],
-            "estimated_years": 2.0,
+            "required_years": 2.0,
+            "estimated_years": 20.0,
             "evidence": [
-                "Professional work experience present"
+                "Professional work experience present",
+                "Estimated professional experience: 20.00 years"
             ]
         },
         "concept_match": {
@@ -202,14 +227,14 @@
             ]
         },
         "weights": {
-            "semantic": 0.4,
-            "skills": 0.3,
-            "education": 0.1,
-            "experience": 0.15,
-            "concepts": 0.05
+            "semantic": 0.2,
+            "skills": 0.35,
+            "education": 0.0,
+            "experience": 0.3,
+            "concepts": 0.15
         },
-        "hybrid_score": 0.75,
-        "assessment": "STRONG_ALIGNMENT",
+        "hybrid_score": 0.6595,
+        "assessment": "PARTIAL_ALIGNMENT",
         "best_evidence": {
             "chunk_id": "resume_001",
             "section": "SUMMARY",
@@ -225,19 +250,19 @@
     {
         "semantic_score": 0.5849,
         "skill_match": {
-            "score": 0.7,
+            "score": 0.6,
             "matched": [
                 "Python",
                 "R",
                 "SQL",
                 "Machine Learning",
                 "Artificial Intelligence",
-                "Data Analytics",
-                "Database"
+                "Data Analytics"
             ],
             "missing": [
                 "MATLAB",
                 "Statistical Methods",
+                "Database",
                 "Marketing Analytics"
             ]
         },
@@ -246,13 +271,19 @@
             "matched": [],
             "related": [],
             "missing": [],
-            "degree_level": "bachelor"
+            "degree_level": "bachelor",
+            "required_degree_level": "unknown",
+            "degree_level_match": true
         },
         "experience_match": {
             "score": 0.0,
             "required": [],
-            "estimated_years": 0.0,
-            "evidence": []
+            "required_years": 0.0,
+            "estimated_years": 20.0,
+            "evidence": [
+                "Professional work experience present",
+                "Estimated professional experience: 20.00 years"
+            ]
         },
         "concept_match": {
             "score": 0.0,
@@ -260,14 +291,14 @@
             "missing": []
         },
         "weights": {
-            "semantic": 0.4,
-            "skills": 0.3,
-            "education": 0.1,
-            "experience": 0.15,
-            "concepts": 0.05
+            "semantic": 0.3,
+            "skills": 0.4,
+            "education": 0.0,
+            "experience": 0.1,
+            "concepts": 0.2
         },
-        "hybrid_score": 0.525,
-        "assessment": "STRONG_ALIGNMENT",
+        "hybrid_score": 0.4155,
+        "assessment": "WEAK_ALIGNMENT",
         "best_evidence": {
             "chunk_id": "resume_001",
             "section": "SUMMARY",
@@ -283,13 +314,13 @@
     {
         "semantic_score": 0.4831,
         "skill_match": {
-            "score": 0.75,
+            "score": 0.5,
             "matched": [
                 "Machine Learning",
-                "Artificial Intelligence",
-                "Modeling"
+                "Artificial Intelligence"
             ],
             "missing": [
+                "Modeling",
                 "Problem Scoping"
             ]
         },
@@ -298,13 +329,19 @@
             "matched": [],
             "related": [],
             "missing": [],
-            "degree_level": "bachelor"
+            "degree_level": "bachelor",
+            "required_degree_level": "unknown",
+            "degree_level_match": true
         },
         "experience_match": {
             "score": 0.0,
             "required": [],
-            "estimated_years": 0.0,
-            "evidence": []
+            "required_years": 0.0,
+            "estimated_years": 20.0,
+            "evidence": [
+                "Professional work experience present",
+                "Estimated professional experience: 20.00 years"
+            ]
         },
         "concept_match": {
             "score": 1.0,
@@ -314,14 +351,14 @@
             "missing": []
         },
         "weights": {
-            "semantic": 0.4,
-            "skills": 0.3,
-            "education": 0.1,
-            "experience": 0.15,
-            "concepts": 0.05
+            "semantic": 0.3,
+            "skills": 0.4,
+            "education": 0.0,
+            "experience": 0.1,
+            "concepts": 0.2
         },
-        "hybrid_score": 0.6562,
-        "assessment": "STRONG_ALIGNMENT",
+        "hybrid_score": 0.5449,
+        "assessment": "PARTIAL_ALIGNMENT",
         "best_evidence": {
             "chunk_id": "resume_001",
             "section": "SUMMARY",
@@ -348,20 +385,26 @@
             ]
         },
         "education_match": {
-            "score": 0.0,
-            "matched": [],
-            "related": [],
-            "missing": [
+            "score": 1.0,
+            "matched": [
                 "Statistics",
                 "Data Science"
             ],
-            "degree_level": "bachelor"
+            "related": [],
+            "missing": [],
+            "degree_level": "bachelor",
+            "required_degree_level": "unknown",
+            "degree_level_match": true
         },
         "experience_match": {
             "score": 0.0,
             "required": [],
-            "estimated_years": 0.0,
-            "evidence": []
+            "required_years": 0.0,
+            "estimated_years": 20.0,
+            "evidence": [
+                "Professional work experience present",
+                "Estimated professional experience: 20.00 years"
+            ]
         },
         "concept_match": {
             "score": 0.0,
@@ -372,19 +415,19 @@
             ]
         },
         "weights": {
-            "semantic": 0.4,
-            "skills": 0.2,
+            "semantic": 0.25,
+            "skills": 0.1,
             "education": 0.0,
-            "experience": 0.15,
-            "concepts": 0.25
+            "experience": 0.2,
+            "concepts": 0.45
         },
-        "hybrid_score": 0.375,
-        "assessment": "PARTIAL_ALIGNMENT",
+        "hybrid_score": 0.1641,
+        "assessment": "NO_ALIGNMENT",
         "best_evidence": {
-            "chunk_id": "resume_001",
-            "section": "SUMMARY",
-            "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
-            "similarity": 0.3408
+            "chunk_id": "resume_003",
+            "section": "WORK EXPERIENCE",
+            "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+            "similarity": 0.4562
         },
         "requirement_id": 7,
         "requirement": "Lead data science aspects of client engagements in the area of marketing effectiveness and marketing portfolio management - with deep knowledge of ML and statistics.",
@@ -395,24 +438,30 @@
     {
         "semantic_score": 0.4816,
         "skill_match": {
-            "score": 1.0,
-            "matched": [
+            "score": 0.0,
+            "matched": [],
+            "missing": [
                 "Modeling"
-            ],
-            "missing": []
+            ]
         },
         "education_match": {
             "score": 0.0,
             "matched": [],
             "related": [],
             "missing": [],
-            "degree_level": "bachelor"
+            "degree_level": "bachelor",
+            "required_degree_level": "unknown",
+            "degree_level_match": true
         },
         "experience_match": {
             "score": 0.0,
             "required": [],
-            "estimated_years": 0.0,
-            "evidence": []
+            "required_years": 0.0,
+            "estimated_years": 20.0,
+            "evidence": [
+                "Professional work experience present",
+                "Estimated professional experience: 20.00 years"
+            ]
         },
         "concept_match": {
             "score": 0.3333,
@@ -425,19 +474,19 @@
             ]
         },
         "weights": {
-            "semantic": 0.4,
-            "skills": 0.2,
+            "semantic": 0.25,
+            "skills": 0.1,
             "education": 0.0,
-            "experience": 0.15,
-            "concepts": 0.25
+            "experience": 0.2,
+            "concepts": 0.45
         },
-        "hybrid_score": 0.5,
-        "assessment": "PARTIAL_ALIGNMENT",
+        "hybrid_score": 0.2704,
+        "assessment": "WEAK_ALIGNMENT",
         "best_evidence": {
-            "chunk_id": "resume_001",
-            "section": "SUMMARY",
-            "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
-            "similarity": 0.3007
+            "chunk_id": "resume_003",
+            "section": "WORK EXPERIENCE",
+            "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+            "similarity": 0.4816
         },
         "requirement_id": 8,
         "requirement": "Collaborate with customers to solve their problems with the best statistical techniques by developing an end-to-end modeling framework. Engage important stakeholders to assess data and model readiness and be able to scale a proof-of-concept to a larger solution.",
@@ -457,33 +506,39 @@
             "matched": [],
             "related": [],
             "missing": [],
-            "degree_level": "bachelor"
+            "degree_level": "bachelor",
+            "required_degree_level": "unknown",
+            "degree_level_match": true
         },
         "experience_match": {
             "score": 0.0,
             "required": [],
-            "estimated_years": 0.0,
-            "evidence": []
+            "required_years": 0.0,
+            "estimated_years": 20.0,
+            "evidence": [
+                "Professional work experience present",
+                "Estimated professional experience: 20.00 years"
+            ]
         },
         "concept_match": {
-            "score": 0.25,
+            "score": 0.5,
             "matched": [
-                "Business Insights"
+                "Business Insights",
+                "Business Processes"
             ],
             "missing": [
                 "Decision Making",
-                "Business Processes",
                 "Strategic Insights"
             ]
         },
         "weights": {
-            "semantic": 0.4,
-            "skills": 0.2,
+            "semantic": 0.25,
+            "skills": 0.1,
             "education": 0.0,
-            "experience": 0.15,
-            "concepts": 0.25
+            "experience": 0.2,
+            "concepts": 0.45
         },
-        "hybrid_score": 0.2488,
+        "hybrid_score": 0.3414,
         "assessment": "WEAK_ALIGNMENT",
         "best_evidence": {
             "chunk_id": "resume_003",
@@ -505,42 +560,49 @@
             "missing": []
         },
         "education_match": {
-            "score": 0.0,
-            "matched": [],
-            "related": [],
-            "missing": [
+            "score": 1.0,
+            "matched": [
                 "Engineering"
             ],
-            "degree_level": "bachelor"
+            "related": [],
+            "missing": [],
+            "degree_level": "bachelor",
+            "required_degree_level": "unknown",
+            "degree_level_match": true
         },
         "experience_match": {
             "score": 0.0,
             "required": [],
-            "estimated_years": 0.0,
-            "evidence": []
+            "required_years": 0.0,
+            "estimated_years": 20.0,
+            "evidence": [
+                "Professional work experience present",
+                "Estimated professional experience: 20.00 years"
+            ]
         },
         "concept_match": {
-            "score": 0.0,
-            "matched": [],
+            "score": 0.5,
+            "matched": [
+                "Product Engineering Collaboration"
+            ],
             "missing": [
-                "Product Engineering Collaboration",
                 "Innovation"
             ]
         },
         "weights": {
-            "semantic": 0.4,
-            "skills": 0.2,
+            "semantic": 0.25,
+            "skills": 0.1,
             "education": 0.0,
-            "experience": 0.15,
-            "concepts": 0.25
+            "experience": 0.2,
+            "concepts": 0.45
         },
-        "hybrid_score": 0.1474,
+        "hybrid_score": 0.3171,
         "assessment": "WEAK_ALIGNMENT",
         "best_evidence": {
-            "chunk_id": "resume_001",
-            "section": "SUMMARY",
-            "text": "Data and AI engineer with experience delivering enterprise reporting and data solutions across SAP HR, Finance, and Treasury systems. Skilled in Python, SQL, machine learning, and deep learning, with hands-on experience building predictive models and data-driven applications. Google Advanced Data Analytics Professional Certificate holder with strong foundations in statistics and enterprise data engineering.",
-            "similarity": 0.3686
+            "chunk_id": "resume_003",
+            "section": "WORK EXPERIENCE",
+            "text": "Technical Lead - HCL Technologies Ltd.\nSep 2024 - Present\n- Designed and delivered 15+ enterprise reporting and analytics solutions by extracting, transforming, and validating HR, Finance, and Treasury data, converting raw enterprise data into business-ready insights.\n- Managed the enterprise data pipeline lifecycle, including data extraction, validation, transformation, testing, and migration across Development, Quality, and Staging environments to ensure reliable and accurate reporting.\n- Collaborated with 4-5 cross-functional business and functional teams over multi-week to multi-month engagements to translate reporting requirements into accurate, data-driven analytical solutions.",
+            "similarity": 0.3685
         },
         "requirement_id": 10,
         "requirement": "Collaborate with Product/Engineering teams to increase capabilities of our Applied DS team, employing methods which create opportunities for scale, helping to drive innovation.",
@@ -560,32 +622,37 @@
             "matched": [],
             "related": [],
             "missing": [],
-            "degree_level": "bachelor"
+            "degree_level": "bachelor",
+            "required_degree_level": "unknown",
+            "degree_level_match": true
         },
         "experience_match": {
             "score": 0.0,
             "required": [],
-            "estimated_years": 0.0,
-            "evidence": []
+            "required_years": 0.0,
+            "estimated_years": 20.0,
+            "evidence": [
+                "Professional work experience present",
+                "Estimated professional experience: 20.00 years"
+            ]
         },
         "concept_match": {
-            "score": 0.5,
-            "matched": [
-                "Data Structures"
-            ],
+            "score": 0.0,
+            "matched": [],
             "missing": [
+                "Data Structures",
                 "Metrics"
             ]
         },
         "weights": {
-            "semantic": 0.4,
-            "skills": 0.2,
+            "semantic": 0.25,
+            "skills": 0.1,
             "education": 0.0,
-            "experience": 0.15,
-            "concepts": 0.25
+            "experience": 0.2,
+            "concepts": 0.45
         },
-        "hybrid_score": 0.375,
-        "assessment": "PARTIAL_ALIGNMENT",
+        "hybrid_score": 0.1075,
+        "assessment": "NO_ALIGNMENT",
         "best_evidence": {
             "chunk_id": "resume_003",
             "section": "WORK EXPERIENCE",

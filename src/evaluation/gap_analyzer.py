@@ -3,17 +3,15 @@ from typing import Any, Dict, List
 
 class ResumeGapAnalyzer:
     """
-    Analyzes Day-5 hybrid matching results and converts
-    requirement-level evidence into candidate-level
-    strengths and gaps.
+    Converts requirement-level matching results into:
+
+        - skill matches/gaps
+        - concept matches/gaps
+        - education analysis
+        - experience analysis
+        - requirement summaries
+        - priority gaps
     """
-
-    def __init__(self):
-        pass
-
-    # ========================================================
-    # SAFE LIST CONVERSION
-    # ========================================================
 
     @staticmethod
     def as_list(
@@ -21,7 +19,6 @@ class ResumeGapAnalyzer:
     ) -> List[str]:
 
         if value is None:
-
             return []
 
         if isinstance(
@@ -51,42 +48,34 @@ class ResumeGapAnalyzer:
             str(value).strip()
         ]
 
-    # ========================================================
-    # UNIQUE VALUES
-    # ========================================================
-
     @staticmethod
     def unique(
         values: List[str]
     ) -> List[str]:
 
         seen = set()
-
         output = []
 
         for value in values:
 
-            cleaned = str(
+            value = str(
                 value
             ).strip()
 
-            if not cleaned:
+            if not value:
                 continue
 
-            key = cleaned.lower()
+            key = value.lower()
 
             if key not in seen:
 
                 seen.add(key)
-
-                output.append(
-                    cleaned
-                )
+                output.append(value)
 
         return output
 
     # ========================================================
-    # SKILL ANALYSIS
+    # SKILLS
     # ========================================================
 
     def analyze_skills(
@@ -95,25 +84,24 @@ class ResumeGapAnalyzer:
     ) -> Dict[str, List[str]]:
 
         matched = []
-
         missing = []
 
         for result in results:
 
-            skill_match = result.get(
+            data = result.get(
                 "skill_match",
                 {}
             )
 
             if not isinstance(
-                skill_match,
+                data,
                 dict
             ):
                 continue
 
             matched.extend(
                 self.as_list(
-                    skill_match.get(
+                    data.get(
                         "matched"
                     )
                 )
@@ -121,7 +109,7 @@ class ResumeGapAnalyzer:
 
             missing.extend(
                 self.as_list(
-                    skill_match.get(
+                    data.get(
                         "missing"
                     )
                 )
@@ -134,11 +122,6 @@ class ResumeGapAnalyzer:
         missing = self.unique(
             missing
         )
-
-        # ----------------------------------------------------
-        # If something appears in both lists, matched evidence
-        # takes precedence.
-        # ----------------------------------------------------
 
         matched_lower = {
             item.lower()
@@ -158,7 +141,7 @@ class ResumeGapAnalyzer:
         }
 
     # ========================================================
-    # CONCEPT ANALYSIS
+    # CONCEPTS
     # ========================================================
 
     def analyze_concepts(
@@ -167,25 +150,24 @@ class ResumeGapAnalyzer:
     ) -> Dict[str, List[str]]:
 
         matched = []
-
         missing = []
 
         for result in results:
 
-            concept_match = result.get(
+            data = result.get(
                 "concept_match",
                 {}
             )
 
             if not isinstance(
-                concept_match,
+                data,
                 dict
             ):
                 continue
 
             matched.extend(
                 self.as_list(
-                    concept_match.get(
+                    data.get(
                         "matched"
                     )
                 )
@@ -193,7 +175,7 @@ class ResumeGapAnalyzer:
 
             missing.extend(
                 self.as_list(
-                    concept_match.get(
+                    data.get(
                         "missing"
                     )
                 )
@@ -225,7 +207,7 @@ class ResumeGapAnalyzer:
         }
 
     # ========================================================
-    # EDUCATION ANALYSIS
+    # EDUCATION
     # ========================================================
 
     def analyze_education(
@@ -234,29 +216,26 @@ class ResumeGapAnalyzer:
     ) -> Dict[str, Any]:
 
         matched = []
-
         related = []
-
         missing = []
-
         degree_levels = []
 
         for result in results:
 
-            education = result.get(
+            data = result.get(
                 "education_match",
                 {}
             )
 
             if not isinstance(
-                education,
+                data,
                 dict
             ):
                 continue
 
             matched.extend(
                 self.as_list(
-                    education.get(
+                    data.get(
                         "matched"
                     )
                 )
@@ -264,7 +243,7 @@ class ResumeGapAnalyzer:
 
             related.extend(
                 self.as_list(
-                    education.get(
+                    data.get(
                         "related"
                     )
                 )
@@ -272,22 +251,19 @@ class ResumeGapAnalyzer:
 
             missing.extend(
                 self.as_list(
-                    education.get(
+                    data.get(
                         "missing"
                     )
                 )
             )
 
-            degree_level = education.get(
+            level = data.get(
                 "degree_level"
             )
 
-            if degree_level:
-
+            if level:
                 degree_levels.append(
-                    str(
-                        degree_level
-                    ).strip()
+                    str(level)
                 )
 
         return {
@@ -306,7 +282,7 @@ class ResumeGapAnalyzer:
         }
 
     # ========================================================
-    # EXPERIENCE ANALYSIS
+    # EXPERIENCE
     # ========================================================
 
     def analyze_experience(
@@ -315,27 +291,25 @@ class ResumeGapAnalyzer:
     ) -> Dict[str, Any]:
 
         required = []
-
         evidence = []
-
-        estimated_years = []
+        estimated = []
 
         for result in results:
 
-            experience = result.get(
+            data = result.get(
                 "experience_match",
                 {}
             )
 
             if not isinstance(
-                experience,
+                data,
                 dict
             ):
                 continue
 
             required.extend(
                 self.as_list(
-                    experience.get(
+                    data.get(
                         "required"
                     )
                 )
@@ -343,13 +317,13 @@ class ResumeGapAnalyzer:
 
             evidence.extend(
                 self.as_list(
-                    experience.get(
+                    data.get(
                         "evidence"
                     )
                 )
             )
 
-            years = experience.get(
+            years = data.get(
                 "estimated_years"
             )
 
@@ -357,18 +331,9 @@ class ResumeGapAnalyzer:
                 years,
                 (int, float)
             ):
-
-                estimated_years.append(
+                estimated.append(
                     float(years)
                 )
-
-        maximum_estimated_years = (
-            max(
-                estimated_years
-            )
-            if estimated_years
-            else 0.0
-        )
 
         return {
             "required": self.unique(
@@ -378,25 +343,24 @@ class ResumeGapAnalyzer:
                 evidence
             ),
             "estimated_years": (
-                maximum_estimated_years
+                max(estimated)
+                if estimated
+                else 0.0
             )
         }
 
     # ========================================================
-    # REQUIREMENT ANALYSIS
+    # REQUIREMENTS
     # ========================================================
 
     def analyze_requirements(
         self,
         results: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    ) -> Dict[str, List[Dict[str, Any]]]:
 
         strengths = []
-
         partial = []
-
         weak = []
-
         missing = []
 
         for result in results:
@@ -406,69 +370,47 @@ class ResumeGapAnalyzer:
                     "assessment",
                     ""
                 )
-            ).strip().upper()
-
-            requirement = result.get(
-                "requirement",
-                ""
-            )
-
-            requirement_id = result.get(
-                "requirement_id"
-            )
-
-            category = result.get(
-                "category",
-                "other"
-            )
-
-            importance = result.get(
-                "importance",
-                "medium"
-            )
-
-            score = result.get(
-                "hybrid_score",
-                0.0
-            )
-
-            evidence = result.get(
-                "best_evidence",
-                {}
-            )
+            ).upper()
 
             item = {
-                "requirement_id": requirement_id,
-                "requirement": requirement,
-                "category": category,
-                "importance": importance,
-                "hybrid_score": score,
-                "best_evidence": evidence
+                "requirement_id": result.get(
+                    "requirement_id"
+                ),
+                "requirement": result.get(
+                    "requirement",
+                    ""
+                ),
+                "category": result.get(
+                    "category",
+                    "other"
+                ),
+                "importance": result.get(
+                    "importance",
+                    "medium"
+                ),
+                "hybrid_score": float(
+                    result.get(
+                        "hybrid_score",
+                        0.0
+                    )
+                ),
+                "best_evidence": result.get(
+                    "best_evidence",
+                    {}
+                )
             }
 
             if assessment == "STRONG_ALIGNMENT":
-
-                strengths.append(
-                    item
-                )
+                strengths.append(item)
 
             elif assessment == "PARTIAL_ALIGNMENT":
-
-                partial.append(
-                    item
-                )
+                partial.append(item)
 
             elif assessment == "WEAK_ALIGNMENT":
-
-                weak.append(
-                    item
-                )
+                weak.append(item)
 
             elif assessment == "NO_ALIGNMENT":
-
-                missing.append(
-                    item
-                )
+                missing.append(item)
 
         return {
             "strengths": strengths,
@@ -485,27 +427,18 @@ class ResumeGapAnalyzer:
         self,
         results: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
-        """
-        Prioritizes gaps using:
 
-            importance
-            +
-            assessment
-            +
-            hybrid score
-        """
-
-        importance_priority = {
-            "high": 3,
-            "medium": 2,
-            "low": 1
+        importance_weight = {
+            "high": 3.0,
+            "medium": 2.0,
+            "low": 1.0
         }
 
-        assessment_priority = {
-            "NO_ALIGNMENT": 3,
-            "WEAK_ALIGNMENT": 2,
-            "PARTIAL_ALIGNMENT": 1,
-            "STRONG_ALIGNMENT": 0
+        assessment_weight = {
+            "NO_ALIGNMENT": 3.0,
+            "WEAK_ALIGNMENT": 2.0,
+            "PARTIAL_ALIGNMENT": 1.0,
+            "STRONG_ALIGNMENT": 0.0
         }
 
         gaps = []
@@ -529,55 +462,70 @@ class ResumeGapAnalyzer:
                 )
             ).lower()
 
-            importance_score = (
-                importance_priority.get(
-                    importance,
-                    2
-                )
-            )
-
-            assessment_score = (
-                assessment_priority.get(
-                    assessment,
-                    0
-                )
-            )
-
-            hybrid_score = float(
+            score = float(
                 result.get(
                     "hybrid_score",
                     0.0
                 )
             )
 
+            # Explicitly use hybrid_score.
+            # This prevents the old KeyError.
             priority_score = (
-                importance_score * 10
+                importance_weight.get(
+                    importance,
+                    2.0
+                )
+                *
+                10.0
                 +
-                assessment_score * 5
+                assessment_weight.get(
+                    assessment,
+                    1.0
+                )
+                *
+                5.0
                 +
-                (1 - hybrid_score) * 5
+                (
+                    1.0
+                    -
+                    max(
+                        0.0,
+                        min(
+                            score,
+                            1.0
+                        )
+                    )
+                )
+                *
+                5.0
             )
 
-            gaps.append({
-                "requirement_id": result.get(
-                    "requirement_id"
-                ),
-                "requirement": result.get(
-                    "requirement",
-                    ""
-                ),
-                "category": result.get(
-                    "category",
-                    "other"
-                ),
-                "importance": importance,
-                "assessment": assessment,
-                "hybrid_score": hybrid_score,
-                "priority_score": round(
-                    priority_score,
-                    2
-                )
-            })
+            gaps.append(
+                {
+                    "requirement_id": result.get(
+                        "requirement_id"
+                    ),
+                    "requirement": result.get(
+                        "requirement",
+                        ""
+                    ),
+                    "category": result.get(
+                        "category",
+                        "other"
+                    ),
+                    "importance": importance,
+                    "assessment": assessment,
+                    "hybrid_score": round(
+                        score,
+                        4
+                    ),
+                    "priority_score": round(
+                        priority_score,
+                        2
+                    )
+                }
+            )
 
         gaps.sort(
             key=lambda item: item[
@@ -589,7 +537,7 @@ class ResumeGapAnalyzer:
         return gaps
 
     # ========================================================
-    # FULL GAP ANALYSIS
+    # FULL ANALYSIS
     # ========================================================
 
     def analyze(
@@ -597,40 +545,28 @@ class ResumeGapAnalyzer:
         results: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
 
-        skills = self.analyze_skills(
-            results
-        )
-
-        concepts = self.analyze_concepts(
-            results
-        )
-
-        education = self.analyze_education(
-            results
-        )
-
-        experience = self.analyze_experience(
-            results
-        )
-
-        requirements = self.analyze_requirements(
-            results
-        )
-
-        priority_gaps = self.identify_priority_gaps(
-            results
-        )
-
         return {
-            "skills": skills,
+            "skills": self.analyze_skills(
+                results
+            ),
 
-            "concepts": concepts,
+            "concepts": self.analyze_concepts(
+                results
+            ),
 
-            "education": education,
+            "education": self.analyze_education(
+                results
+            ),
 
-            "experience": experience,
+            "experience": self.analyze_experience(
+                results
+            ),
 
-            "requirements": requirements,
+            "requirements": self.analyze_requirements(
+                results
+            ),
 
-            "priority_gaps": priority_gaps
+            "priority_gaps": self.identify_priority_gaps(
+                results
+            )
         }
