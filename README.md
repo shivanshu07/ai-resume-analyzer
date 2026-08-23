@@ -1,209 +1,47 @@
 # AI Resume Analyzer
 
-An AI-powered Resume Analyzer built with Python that analyzes how well a resume matches a specific Job Description (JD).
+An AI-powered resume analysis system that evaluates how well a resume matches a given job description using PDF parsing, text cleaning, section detection, semantic embeddings, structured requirement extraction, hybrid matching, ATS-style scoring, and gap analysis.
 
-The current implementation uses NLP, semantic embeddings, structured requirement extraction, and hybrid matching to move beyond simple keyword-based resume screening.
-
-## Current Scope
-
-The project currently processes:
-
-- One resume PDF
-- One job description
-
-and produces:
-
-- Structured resume sections and chunks
-- Structured and normalized JD requirements
-- Requirement-level resume–JD matching results
-- Semantic, skill, concept, education, and experience matching evidence
-
-The system is being developed incrementally, with the core processing and matching pipeline completed before adding the final UI and LLM feedback layers.
+The project is designed as a focused, reproducible prototype using one resume and one job description. It uses pretrained NLP models rather than training an LLM from scratch.
 
 ---
 
-## 1. Project Roadmap
+## 1. Project Overview
 
-```text
-DAY 1
-Project Setup
-     |
-     v
-DAY 2
-Resume Processing
-     |
-     v
-DAY 3
-Job Description Processing
-     |
-     v
-DAY 4
-Semantic Matching
-     |
-     v
-DAY 5
-Hybrid Matching
-     |
-     v
-NEXT
-ATS Score + Resume Gap Analysis
-     |
-     v
-FINAL
-LLM Feedback + FastAPI + Streamlit + Evaluation
-```
+The goal of the project is to answer:
+
+> How well does a candidate's resume match a particular job description, and what are the most important gaps?
+
+The system processes both the resume and job description and produces:
+
+- Resume text extraction
+- Resume section detection
+- Resume chunk generation
+- Job-description requirement extraction
+- Requirement categorization
+- Semantic similarity scores
+- Hybrid requirement matching
+- Skill analysis
+- Concept analysis
+- Education analysis
+- Experience analysis
+- Priority gap identification
+- Overall ATS-style match score
+
+The current implementation is intended as a proof-of-concept AI Resume Analyzer rather than a production ATS.
 
 ---
 
-# 2. Project Structure
+## 2. Key Features
 
-```text
-AI-Resume-Analyzer/
-|
-├── app/
-│   └── main.py
-|
-├── data/
-│   ├── raw/
-│   │   ├── resume/
-│   │   │   └── resume.pdf
-│   │   |
-│   │   └── jd/
-│   │       └── job_description.txt
-│   |
-│   └── processed/
-│       ├── resume_raw.txt
-│       ├── resume_clean.txt
-│       ├── resume_chunks.json
-│       ├── jd_requirements.json
-│       └── hybrid_results.json
-|
-├── src/
-│   ├── extraction/
-│   │   ├── pdf_parser.py
-│   │   ├── jd_parser.py
-│   │   └── requirement_extractor.py
-│   |
-│   ├── preprocessing/
-│   │   ├── cleaner.py
-│   │   ├── chunker.py
-│   │   └── requirement_normalizer.py
-│   |
-│   ├── evaluation/
-│   │   ├── embedder.py
-│   │   ├── matcher.py
-│   │   └── hybrid_scorer.py
-│   |
-│   └── utils/
-│       └── file_handler.py
-|
-├── requirements.txt
-├── README.md
-└── .gitignore
-```
+### Resume Processing
 
-> The exact structure may evolve as additional application and evaluation components are added.
+- PDF resume parsing
+- Text cleaning and normalization
+- Resume section detection
+- Section-based chunking
 
----
-
-# 3. Day 1 — Project Setup
-
-The first stage established the Python environment and project structure.
-
-## Create the project
-
-```bash
-mkdir AI-Resume-Analyzer
-cd AI-Resume-Analyzer
-```
-
-## Create a virtual environment
-
-### Windows
-
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-```
-
-### macOS / Linux
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-## Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-Dependencies are maintained in `requirements.txt`.
-
----
-
-# 4. Day 2 — Resume Processing
-
-The resume-processing pipeline converts the PDF into structured information.
-
-```text
-resume.pdf
-    |
-    v
-PDF Parser
-    |
-    v
-Raw Text
-    |
-    v
-Text Cleaner
-    |
-    v
-Section Detection
-    |
-    v
-Semantic Chunker
-    |
-    v
-resume_chunks.json
-```
-
-## 4.1 PDF extraction
-
-Input:
-
-```text
-data/raw/resume/resume.pdf
-```
-
-Raw extracted text:
-
-```text
-data/processed/resume_raw.txt
-```
-
-The raw file preserves the text extracted from the PDF before further processing.
-
-## 4.2 Text cleaning
-
-The cleaning stage handles issues such as:
-
-- Extra whitespace
-- Empty lines
-- Formatting artifacts
-- Inconsistent spacing
-- Unnecessary characters
-
-Output:
-
-```text
-data/processed/resume_clean.txt
-```
-
-## 4.3 Section detection
-
-The resume is divided into meaningful sections such as:
+Recognized sections include:
 
 ```text
 SUMMARY
@@ -214,345 +52,72 @@ EDUCATION
 CERTIFICATIONS & LANGUAGES
 ```
 
-A section-aware representation allows the matching stage to distinguish between different types of evidence.
+### Job Description Processing
 
-## 4.4 Semantic chunking
+The job description is converted into structured requirements such as:
 
-Large sections are divided into manageable chunks.
+- Required skills
+- Preferred skills
+- Responsibilities
+- Education requirements
+- Experience requirements
+- Other requirements
 
 Example:
 
-```json
-{
-    "section": "SKILLS",
-    "text": "Programming: Python, SQL...",
-    "chunk_id": "resume_002"
-}
-```
-
-Output:
-
-```text
-data/processed/resume_chunks.json
-```
-
----
-
-# 5. Day 3 — Job Description Processing
-
-The JD pipeline converts unstructured job-description text into structured requirements.
-
-```text
-Job Description
-       |
-       v
-JD Parser
-       |
-       v
-JD Lines
-       |
-       v
-Requirement Extractor
-       |
-       v
-Requirement Normalizer
-       |
-       v
-jd_requirements.json
-```
-
-## 5.1 JD parsing
-
-The JD parser converts the description into logical lines and identifies sections such as:
-
-```text
-Minimum qualifications
-Preferred qualifications
-About the job
-Responsibilities
-```
-
-## 5.2 Requirement extraction
-
-Requirements are categorized into:
-
-```text
-required
-preferred
-responsibility
-education
-other
-```
-
-This prevents unrelated job-description text from being treated as a candidate requirement.
-
-## 5.3 Requirement normalization
-
-A single JD sentence may contain multiple pieces of information.
-
-For example:
-
-```text
-2 years of experience using analytics to solve product
-or business problems, coding (e.g., Python, R, SQL)...
-```
-
-is converted into structured information such as:
-
-```json
-{
-    "original_text": "...",
-    "category": "preferred",
-    "importance": "medium",
-    "skills": [
-        "Python",
-        "R",
-        "SQL",
-        "Statistical Analysis",
-        "Data Analytics",
-        "Database"
-    ],
-    "education_fields": [],
-    "experience": [
-        "2 years"
-    ],
-    "concepts": [
-        "Business Problems"
-    ]
-}
-```
-
-The normalized requirements are saved to:
-
-```text
-data/processed/jd_requirements.json
-```
-
-Each requirement can contain:
-
-- Original text
-- Category
-- Importance
-- Skills
-- Education fields
-- Experience
-- Concepts
-
-This structured representation is the input to the matching stage.
-
----
-
-# 6. Day 4 — Semantic Matching
-
-Once both the resume and JD are structured, semantic matching compares their meaning.
-
-Inputs:
-
-```text
-resume_chunks.json
-+
-jd_requirements.json
-```
-
-Conceptually:
-
-```text
-Resume Chunk
-     |
-     v
-Embedding Model
-     |
-     v
-Resume Vector
-     |
-     | similarity
-     v
-JD Requirement Vector
-     ^
-     |
-Embedding Model
-     ^
-     |
-JD Requirement
-```
-
-Semantic similarity is useful when the resume and JD use different wording but describe related concepts.
-
-For example:
-
-```text
-JD:
-develop statistical models
-
-Resume:
-built predictive machine learning models
-```
-
-These expressions may be semantically related even without an exact keyword match.
-
----
-
-# 7. Day 5 — Hybrid Matching
-
-Semantic similarity alone is not sufficient.
-
-A resume may be semantically related to a requirement but still miss explicit skills or evidence.
-
-The current hybrid approach combines:
-
-```text
-Semantic Similarity
-        +
-Skill Matching
-        +
-Concept Matching
-        +
-Education Matching
-        +
-Experience Matching
-        +
-Resume Evidence
-```
-
-This makes the final result more explainable and reduces the limitations of purely keyword-based or purely semantic matching.
-
----
-
-# 8. Skill Matching
-
-For example, suppose the JD requires:
-
-```text
-Python
-R
-SQL
-Machine Learning
-Marketing Analytics
-```
-
-and the resume contains:
-
-```text
-Python
-SQL
-Machine Learning
-```
-
-The analyzer can distinguish:
-
-```text
-Matched:
-Python
-SQL
-Machine Learning
-
-Missing:
-R
-Marketing Analytics
-```
-
-This is important because semantic similarity should not incorrectly treat a related skill as an explicit skill match.
-
----
-
-# 9. Concept Matching
-
-Some JD requirements describe broader capabilities rather than individual technologies.
-
-Examples include:
-
-```text
-Customer Collaboration
-Stakeholder Management
-Proof of Concept
-Business Insights
-Decision Making
-Strategic Insights
-```
-
-The system therefore evaluates concepts in addition to individual skills.
-
----
-
-# 10. Education Matching
-
-Education requirements are evaluated separately.
-
-For example:
-
-```text
-JD:
-
-Bachelor's degree in Statistics, Data Science,
-Mathematics, Physics, Economics, Operations Research,
-Engineering, or a related quantitative field.
-```
-
-The resume may contain:
-
-```text
-Bachelor of Technology in Computer Science
-and Artificial Intelligence
-```
-
-The education information is evaluated as education evidence rather than being treated as an ordinary skill.
-
----
-
-# 11. Experience Matching
-
-Experience requirements are also evaluated separately.
-
-For example:
-
-```text
-2 years of experience using analytics
-to solve product or business problems
-```
-
-The system can use resume evidence such as:
-
-```text
-Technical Lead
-Sep 2024 - Present
-
-Designed and delivered enterprise reporting
-and analytics solutions...
-```
-
-This allows the analyzer to assess whether the resume provides supporting experience evidence.
-
----
-
-# 12. Evidence Identification
-
-The matcher does not only produce a score.
-
-It also identifies supporting resume evidence where available.
-
-For example:
-
 ```text
 Requirement:
-Experience with Python, SQL and Machine Learning
+Experience in data science, statistics, or a related field.
 
-Resume evidence:
-Programming: Python, SQL
+Category:
+required
 
-Machine Learning:
-Scikit-learn, Regression, Classification,
-Clustering, Model Evaluation
+Importance:
+high
+
+Skills:
+Statistics
+Data Science
 ```
-
-This makes the result easier to inspect and explain.
 
 ---
 
-# 13. Requirement-Level Assessment
+## 3. AI / NLP Components
 
-Each JD requirement receives an assessment.
+The project uses the pretrained Sentence Transformer:
 
-The current pipeline uses classifications such as:
+```text
+all-MiniLM-L6-v2
+```
+
+The model converts resume chunks and job-description requirements into numerical embeddings.
+
+The current embedding dimension is:
+
+```text
+384
+```
+
+Semantic similarity is calculated between requirements and resume chunks.
+
+---
+
+## 4. Hybrid Matching
+
+Semantic similarity alone is not sufficient for resume evaluation.
+
+Different requirement types use different evidence:
+
+| Requirement type | Most relevant resume evidence |
+|---|---|
+| Education | EDUCATION |
+| Skills | SKILLS |
+| Years of experience | WORK EXPERIENCE |
+| Responsibilities | WORK EXPERIENCE |
+| Business concepts | WORK EXPERIENCE / SUMMARY |
+| Technical concepts | SKILLS / PROJECTS / EXPERIENCE |
+
+The hybrid layer combines semantic evidence with structured evidence and produces assessments such as:
 
 ```text
 STRONG_ALIGNMENT
@@ -561,487 +126,771 @@ WEAK_ALIGNMENT
 NO_ALIGNMENT
 ```
 
-A result can contain information such as:
-
-```text
-Requirement
-    |
-    +-- Score
-    +-- Assessment
-    +-- Matched Skills
-    +-- Missing Skills
-    +-- Matched Concepts
-    +-- Missing Concepts
-    +-- Best Evidence
-```
-
-The purpose is to explain why a requirement was or was not satisfied instead of returning only a single overall number.
-
 ---
 
-# 14. Generated Files
+## 5. ATS-Style Analysis
 
-The current pipeline produces the following files under:
-
-```text
-data/processed/
-```
-
-## `resume_raw.txt`
-
-Raw text extracted from the resume PDF.
-
-```text
-resume.pdf
-    |
-    v
-resume_raw.txt
-```
-
-## `resume_clean.txt`
-
-Cleaned and section-aware resume text.
-
-```text
-resume_raw.txt
-    |
-    v
-resume_clean.txt
-```
-
-## `resume_chunks.json`
-
-Structured resume chunks.
+The system generates an ATS-style score and category scores.
 
 Example:
 
-```json
-{
-    "section": "PROJECTS",
-    "text": "Book Recommender System...",
-    "chunk_id": "resume_004"
-}
+```text
+Overall ATS Score: 45.60/100
+Interpretation: Weak Match
 ```
 
-## `jd_requirements.json`
+Category scores include:
 
-Normalized job-description requirements.
-
-Example:
-
-```json
-{
-    "original_text": "...",
-    "category": "preferred",
-    "importance": "medium",
-    "skills": [
-        "Python",
-        "R",
-        "SQL"
-    ],
-    "education_fields": [],
-    "experience": [
-        "2 years"
-    ],
-    "concepts": [
-        "Business Problems"
-    ]
-}
+```text
+required
+preferred
+responsibility
 ```
 
-## `hybrid_results.json`
-
-Requirement-level resume–JD matching results.
-
-This is the primary output of the current matching stage.
+The score is an internal project metric and is not the proprietary score of any recruiting platform.
 
 ---
 
-# 15. Running the Current Project
+## 6. Skill Analysis
 
-Place the input files at:
+The system extracts skills from the job description and compares them against the resume.
+
+Example:
+
+```text
+Matched skills:
+
++ Statistics
++ Python
++ R
++ SQL
++ Data Analytics
++ Machine Learning
++ Artificial Intelligence
+```
+
+It also identifies missing skills:
+
+```text
+Missing skills:
+
+- Data Science
+- Statistical Analysis
+- Database
+- MATLAB
+- Statistical Methods
+- Marketing Analytics
+- Modeling
+- Problem Scoping
+- Marketing Effectiveness
+```
+
+---
+
+## 7. Concept Analysis
+
+The analyzer also evaluates concepts that may not be simple technical skills.
+
+Example matched concepts:
+
+```text
++ Business Insights
++ Stakeholder Management
++ Business Processes
++ Product Engineering Collaboration
+```
+
+Potential gaps include:
+
+```text
+- Client Engagement
+- Customer Collaboration
+- Proof of Concept
+- Decision Making
+- Strategic Insights
+- Innovation
+- Metrics
+```
+
+This is useful for roles emphasizing business impact, client interaction, stakeholder management, or product collaboration.
+
+---
+
+## 8. Education and Experience Analysis
+
+Education requirements are analyzed separately from general semantic similarity.
+
+Example:
+
+```text
+Matched:
+Statistics
+Data Science
+Engineering
+```
+
+Experience requirements are extracted and compared against estimated professional experience.
+
+Example:
+
+```text
+Required experience:
+2 years
+
+Estimated experience:
+2.0 years
+```
+
+---
+
+## 9. Priority Gaps
+
+The analyzer ranks important requirements that are weakly supported by the resume.
+
+Example:
+
+```text
+PRIORITY GAPS
+
+1. Requirement 1
+   Importance: high
+   Assessment: WEAK_ALIGNMENT
+
+2. Requirement 11
+   Importance: medium
+   Assessment: NO_ALIGNMENT
+
+3. Requirement 3
+   Importance: medium
+   Assessment: NO_ALIGNMENT
+```
+
+This makes the output actionable for resume improvement.
+
+---
+
+## 10. Project Architecture
+
+A simplified project structure is:
+
+```text
+AI-Resume-Analyzer/
+│
+├── app/
+│   └── main.py
+│
+├── data/
+│   ├── raw/
+│   │   ├── resume/
+│   │   └── job_description/
+│   │
+│   └── processed/
+│
+├── src/
+│   ├── preprocessing/
+│   │   ├── pdf_parser.py
+│   │   ├── cleaner.py
+│   │   └── chunker.py
+│   │
+│   ├── embeddings/
+│   │   └── embedding_generator.py
+│   │
+│   ├── matching/
+│   │   ├── semantic_matcher.py
+│   │   └── hybrid_matcher.py
+│   │
+│   ├── analysis/
+│   │   ├── ats_scorer.py
+│   │   └── gap_analyzer.py
+│   │
+│   └── jd_parser.py
+│
+├── utils/
+│   ├── file_handler.py
+│   └── helper.py
+│
+├── requirements.txt
+├── README.md
+└── .gitignore
+```
+
+The exact directory names may differ slightly depending on the current repository version.
+
+---
+
+## 11. Utility Files
+
+### `utils/file_handler.py`
+
+Provides reusable functions for:
+
+- saving text
+- loading text
+- saving JSON
+- loading JSON
+- creating parent directories when required
+
+### `utils/helper.py`
+
+Contains common utility functionality such as creating directories when they do not already exist.
+
+---
+
+## 12. End-to-End Data Flow
+
+```text
+Resume PDF
+    │
+    ▼
+PDF Parser
+    │
+    ▼
+Text Cleaning
+    │
+    ▼
+Section Detection
+    │
+    ▼
+Resume Chunking
+    │
+    ▼
+Resume Embeddings
+    │
+    │
+    │
+Job Description
+    │
+    ▼
+JD Parser
+    │
+    ▼
+Requirement Extraction
+    │
+    ▼
+Requirement Normalization
+    │
+    ▼
+JD Embeddings
+    │
+    └──────────────┐
+                   ▼
+             Semantic Matching
+                   │
+                   ▼
+             Hybrid Matching
+                   │
+                   ▼
+             ATS Scoring
+                   │
+                   ▼
+             Gap Analysis
+                   │
+                   ▼
+             Final Results
+```
+
+---
+
+## 13. Input Data
+
+The current project intentionally uses a small evaluation setup.
+
+### Resume
+
+Place the resume PDF in:
+
+```text
+data/raw/resume/
+```
+
+Example:
 
 ```text
 data/raw/resume/resume.pdf
-data/raw/jd/job_description.txt
 ```
 
-Then activate the virtual environment and run:
+### Job Description
+
+Place the job description in:
+
+```text
+data/raw/job_description/
+```
+
+Example:
+
+```text
+data/raw/job_description/job_description.txt
+```
+
+The exact filenames and paths must match those expected by the current `app/main.py`.
+
+---
+
+## 14. Installation and Reproduction
+
+### Step 1 — Clone the repository
+
+```bash
+git clone <your-github-repository-url>
+cd AI-Resume-Analyzer
+```
+
+### Step 2 — Create a virtual environment
+
+Windows:
+
+```bash
+python -m venv venv
+```
+
+Git Bash:
+
+```bash
+source venv/Scripts/activate
+```
+
+Command Prompt:
+
+```cmd
+venv\Scripts\activate
+```
+
+PowerShell:
+
+```powershell
+venv\Scripts\Activate.ps1
+```
+
+### Step 3 — Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Step 4 — Add the evaluation files
+
+Put the resume and job description in their expected `data/raw/` locations.
+
+### Step 5 — Run the application
+
+From the project root:
 
 ```bash
 python -m app.main
 ```
 
-The pipeline processes the resume and JD and generates the structured and matching outputs under:
+Running it as a module is recommended so that package imports work correctly.
+
+---
+
+## 15. First Model Run
+
+On the first execution, Sentence Transformers may download:
+
+```text
+all-MiniLM-L6-v2
+```
+
+A Hugging Face warning about an unauthenticated request may appear. This is not an application error. For the current prototype, a Hugging Face token is not required for normal model use.
+
+---
+
+## 16. Expected Pipeline Output
+
+A successful execution displays stages similar to:
+
+```text
+============================================================
+RESUME PROCESSING
+============================================================
+
+============================================================
+RESUME EMBEDDING GENERATION
+============================================================
+
+============================================================
+JOB DESCRIPTION PROCESSING
+============================================================
+
+============================================================
+JOB DESCRIPTION EMBEDDINGS
+============================================================
+
+============================================================
+SEMANTIC MATCHING
+============================================================
+
+============================================================
+HYBRID MATCHING
+============================================================
+
+============================================================
+DAY 6 - ATS ANALYSIS
+============================================================
+```
+
+Resume processing may report:
+
+```text
+Characters extracted: 3183
+Characters after cleaning: 2978
+Resume sections detected: 6
+Resume chunks created: 7
+```
+
+Exact values depend on the input documents.
+
+---
+
+## 17. Generated Files
+
+Processed artifacts are generated under:
 
 ```text
 data/processed/
 ```
 
----
+Important files include:
 
-# 16. Expected Processing Flow
+### `resume_embeddings.json`
 
-A successful run should approximately follow:
+Vector representations of resume chunks.
 
-```text
-============================================================
-RESUME PROCESSING COMPLETED
-============================================================
+### `jd_embeddings.json`
 
-Resume sections detected
-Resume chunks created
+Vector representations of job requirements.
 
+### `match_results.json`
 
-============================================================
-JOB DESCRIPTION PROCESSING COMPLETED
-============================================================
+Semantic matching results.
 
-JD lines extracted
-Structured requirements
+### `hybrid_results.json`
 
+Requirement-level hybrid scores and assessments.
 
-============================================================
-NORMALIZED REQUIREMENTS
-============================================================
+### `ats_analysis.json`
 
-Requirement 1
-Requirement 2
-...
-Requirement N
+Final analysis containing:
 
-
-============================================================
-MATCHING
-============================================================
-
-Resume <-> Job Description semantic matching
-Hybrid scoring
-Requirement assessment
-
-
-============================================================
-PROCESSING COMPLETED
-============================================================
-```
-
-The exact number of sections, chunks, and requirements depends on the supplied resume and JD.
+- ATS score
+- category scores
+- matched skills
+- missing skills
+- matched concepts
+- missing concepts
+- education analysis
+- experience analysis
+- priority gaps
 
 ---
 
-# 17. Important Design Decision
+## 18. Reproducing the Current Results
 
-The initial implementation intentionally uses:
+To reproduce the current evaluation as closely as possible:
 
-```text
-One Resume
-+
-One Job Description
+1. Use the same resume.
+2. Use the same job description.
+3. Use the repository's `requirements.txt`.
+4. Use the same Python environment/version where possible.
+5. Use `all-MiniLM-L6-v2`.
+6. Run from the repository root.
+7. Execute:
+
+```bash
+python -m app.main
 ```
 
-instead of immediately building a large dataset.
+Then inspect:
 
-This allows the core pipeline to be developed and validated first.
+```text
+data/processed/resume_embeddings.json
+data/processed/jd_embeddings.json
+data/processed/match_results.json
+data/processed/hybrid_results.json
+data/processed/ats_analysis.json
+```
 
-Future versions can expand to:
+For reproducibility, keep the input documents, model, dependencies, and scoring configuration fixed.
+
+---
+
+## 19. Example Evaluation
+
+A representative semantic matching run produced scores such as:
+
+```text
+Requirement 1: 0.4162
+Requirement 2: 0.5633
+Requirement 4: 0.6309
+Requirement 5: 0.5849
+Requirement 6: 0.4831
+```
+
+A recent calibrated run produced an overall ATS-style score in the mid-40s out of 100.
+
+The exact score can change when the implementation, scoring configuration, resume, or job description changes.
+
+These results are prototype evaluation output, not an authoritative hiring decision.
+
+---
+
+## 20. Semantic vs Hybrid Scores
+
+Semantic similarity measures how similar the language of a requirement is to resume text:
+
+```text
+Requirement
+    ↓
+Sentence Transformer
+    ↓
+384-dimensional embedding
+    ↓
+Cosine similarity
+```
+
+The hybrid score incorporates additional structured evidence.
+
+Therefore:
+
+```text
+Semantic Score ≠ Hybrid Score
+```
+
+A requirement can have moderate semantic similarity while having weak structured evidence, or vice versa.
+
+---
+
+## 21. Important Design Considerations
+
+Different requirement types should use different evidence.
+
+### Education
+
+```text
+EDUCATION
+```
+
+### Skills
+
+```text
+SKILLS
+PROJECTS
+WORK EXPERIENCE
+```
+
+### Experience
+
+```text
+WORK EXPERIENCE
+```
+
+### Responsibilities
+
+```text
+WORK EXPERIENCE
+PROJECTS
+SUMMARY
+```
+
+This requirement-aware evidence strategy is important for avoiding misleading hybrid scores.
+
+---
+
+## 22. Limitations
+
+### Single-resume evaluation
+
+The current scope uses one resume and one job description. It is not a statistically validated ATS benchmark.
+
+### Pretrained embedding model
+
+The project uses `all-MiniLM-L6-v2` rather than a domain-specific resume/job matching model.
+
+### Semantic similarity is not qualification
+
+High semantic similarity does not necessarily mean that a candidate satisfies a requirement.
+
+For example, a Bachelor's degree may be semantically similar to a Master's-degree requirement even when the candidate does not possess the required Master's degree.
+
+### Ambiguous requirements
+
+Job descriptions can combine multiple conditions in one sentence. More advanced logical interpretation may therefore be necessary.
+
+### ATS score is an internal metric
+
+The generated score is an ATS-style score for this project. It is not equivalent to the proprietary scoring mechanism of Google, IBM, LinkedIn, Workday, Greenhouse, or another recruiting platform.
+
+---
+
+## 23. Development Roadmap
+
+### Phase 1 — Matching Improvements
+
+- Better requirement-aware weighting
+- Improved education matching
+- Better experience extraction
+- Better synonym handling
+- Improved skill normalization
+
+### Phase 2 — Advanced NLP
+
+- Cross-encoder reranking
+- Domain-specific embeddings
+- LLM-based requirement verification
+- Better logical requirement parsing
+
+### Phase 3 — Application
+
+- Streamlit dashboard
+- Resume upload interface
+- Job-description upload/paste interface
+- Visual ATS score
+- Skill-gap visualization
+- Requirement-by-requirement explanations
+
+### Phase 4 — Evaluation
 
 - Multiple resumes
 - Multiple job descriptions
-- Dataset-based evaluation
-- Model benchmarking
-- Batch processing
+- Ground-truth labels
+- Precision/recall evaluation
+- Ranking evaluation
+- Model comparison
 
 ---
 
-# 18. Why Hybrid Matching?
+## 24. Future LLM Integration
 
-A purely keyword-based system has limitations.
-
-For example:
+The architecture can later incorporate an LLM for deeper reasoning:
 
 ```text
-JD:
-statistical modeling
-
-Resume:
-predictive modeling using Scikit-learn
+Semantic Matching
+        +
+Structured Matching
+        +
+LLM Verification
+        ↓
+Final Assessment
 ```
 
-Keyword matching may fail to recognize the relationship.
+An LLM could verify whether the candidate actually demonstrates the required experience rather than simply checking whether similar words occur in the resume.
 
-However, semantic matching alone can also be misleading.
+Potential applications include:
 
-For example:
-
-```text
-JD:
-marketing analytics using MATLAB and SQL
-
-Resume:
-machine learning using Python and SQL
-```
-
-The concepts may be related, but the resume still does not explicitly demonstrate:
-
-```text
-MATLAB
-Marketing Analytics
-```
-
-Hybrid matching addresses this by combining:
-
-```text
-Semantic similarity
-+
-Explicit evidence
-```
+- transferable skills
+- equivalent experience
+- business impact
+- project relevance
+- leadership
+- client-facing experience
 
 ---
 
-# 19. Current Architecture
+## 25. Git Workflow
+
+After making changes:
+
+```bash
+git status
+git diff
+git add .
+git commit -m "Improve resume matching and ATS analysis"
+git push origin main
+```
+
+Avoid committing:
 
 ```text
-                +---------------------+
-                |     Resume PDF      |
-                +----------+----------+
-                           |
-                           v
-                  +-----------------+
-                  |   PDF Parser    |
-                  +--------+--------+
-                           |
-                           v
-                  +-----------------+
-                  | Text Cleaning   |
-                  +--------+--------+
-                           |
-                           v
-                  +-----------------+
-                  | Section Detect  |
-                  +--------+--------+
-                           |
-                           v
-                  +-----------------+
-                  | Semantic Chunker|
-                  +--------+--------+
-                           |
-                           v
-                 resume_chunks.json
-                           |
-                           |
-                           v
-                  +-----------------+
-                  | Semantic Matcher|
-                  +--------+--------+
-                           |
-                           |
-                           ^
-                           |
-                 jd_requirements.json
-                           ^
-                           |
-                  +-----------------+
-                  |   Normalizer    |
-                  +--------+--------+
-                           ^
-                           |
-                  +-----------------+
-                  | Requirement     |
-                  | Extractor       |
-                  +--------+--------+
-                           ^
-                           |
-                  +-----------------+
-                  |    JD Parser    |
-                  +--------+--------+
-                           ^
-                           |
-                  +-----------------+
-                  | Job Description |
-                  +-----------------+
-
-                           |
-                           v
-                  +-----------------+
-                  | Hybrid Scoring  |
-                  +--------+--------+
-                           |
-                           v
-                  hybrid_results.json
+venv/
+__pycache__/
+large model files
+temporary output files
+personal resume files
+API tokens
+.env
 ```
 
 ---
 
-# 20. Current Development Status
+## 26. Recommended `.gitignore`
 
-| Component | Status |
-|---|:---:|
-| Project setup | Complete |
-| Virtual environment | Complete |
-| Dependency management | Complete |
-| Resume PDF extraction | Complete |
-| Resume text cleaning | Complete |
-| Resume section detection | Complete |
-| Resume semantic chunking | Complete |
-| JD parsing | Complete |
-| JD requirement extraction | Complete |
-| Requirement normalization | Complete |
-| Skill extraction | Complete |
-| Education extraction | Complete |
-| Experience extraction | Complete |
-| Concept extraction | Complete |
-| Semantic embeddings | Complete |
-| Resume–JD semantic matching | Complete |
-| Explicit skill matching | Complete |
-| Concept matching | Complete |
-| Education matching | Complete |
-| Experience matching | Complete |
-| Hybrid scoring | Complete |
-| Requirement-level assessment | Complete |
-| Evidence identification | Complete |
-| ATS overall score | Next |
-| Resume gap analysis | Next |
-| AI resume recommendations | Planned |
-| LLM-powered feedback | Planned |
-| Resume tailoring | Planned |
-| FastAPI backend | Planned |
-| Streamlit UI | Planned |
-| DeepEval evaluation | Planned |
+```gitignore
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+.vscode/
+.idea/
+
+data/raw/
+```
+
+Whether `data/processed/` should be ignored depends on whether generated evaluation artifacts should be committed to GitHub.
 
 ---
 
-# 21. Next Development Stage
+## 27. Project Learning Outcomes
 
-The next stage will build on the completed requirement-level matching system.
+This project demonstrates practical experience with:
 
-Planned flow:
+- Python
+- PDF processing
+- Natural Language Processing
+- Sentence Transformers
+- Embeddings
+- Cosine similarity
+- Semantic search
+- Structured information extraction
+- Requirement normalization
+- Hybrid matching
+- ATS-style scoring
+- Gap analysis
+- JSON-based data pipelines
+- Modular Python architecture
+- Reproducible ML workflows
 
-```text
-hybrid_results.json
-        |
-        v
-Overall ATS Score
-        |
-        v
-Resume Strengths
-        |
-        v
-Resume Gaps
-        |
-        v
-Improvement Recommendations
-        |
-        v
-LLM-powered Explanation
-```
-
-After that, the project can be exposed through:
-
-```text
-FastAPI
-+
-Streamlit
-```
-
-and evaluated using:
-
-```text
-DeepEval
-```
+The project therefore goes beyond a simple keyword-based resume checker.
 
 ---
 
-# 22. Future End-to-End Architecture
+## 28. Summary
+
+The Resume Analyzer follows this pipeline:
 
 ```text
-                    USER
-                     |
-                     v
-             +---------------+
-             |   Streamlit   |
-             |      UI       |
-             +-------+-------+
-                     |
-                     v
-             +---------------+
-             |    FastAPI    |
-             |    Backend    |
-             +-------+-------+
-                     |
-          +----------+----------+
-          |                     |
-          v                     v
-    Resume Pipeline        JD Pipeline
-          |                     |
-          +----------+----------+
-                     |
-                     v
-              Hybrid Matching
-                     |
-                     v
-                ATS Scoring
-                     |
-                     v
-               LLM Analysis
-                     |
-                     v
-             Recommendations
-                     |
-                     v
-                   USER
+PDF Resume
+    ↓
+Parsing
+    ↓
+Cleaning
+    ↓
+Section Detection
+    ↓
+Chunking
+    ↓
+Embeddings
+    ↓
+Job Description Parsing
+    ↓
+Requirement Normalization
+    ↓
+Semantic Matching
+    ↓
+Hybrid Matching
+    ↓
+ATS Scoring
+    ↓
+Skill Analysis
+    ↓
+Concept Analysis
+    ↓
+Education Analysis
+    ↓
+Experience Analysis
+    ↓
+Priority Gap Analysis
 ```
 
----
-
-# 23. Conclusion
-
-The current version establishes the core intelligence required for a Resume Analyzer.
-
-The system can now:
-
-```text
-Read a resume
-     |
-     v
-Understand its sections
-     |
-     v
-Read a job description
-     |
-     v
-Extract structured requirements
-     |
-     v
-Understand skills and concepts
-     |
-     v
-Compare resume and JD semantically
-     |
-     v
-Check explicit evidence
-     |
-     v
-Evaluate individual requirements
-     |
-     v
-Identify matches and gaps
-     |
-     v
-Generate structured matching results
-```
-
-The next goal is to transform these requirement-level results into a complete candidate-facing analysis containing:
-
-- Overall ATS score
-- Resume strengths
-- Resume weaknesses
-- Missing skills
-- Requirement coverage
-- Actionable recommendations
-- AI-generated feedback
-
----
-
-## License
-
-This project is intended for educational and portfolio purposes.
+The project is currently a working AI/NLP prototype for resume-to-job-description analysis, with an architecture that can later support more advanced matching models, LLM reasoning, larger evaluation datasets, and a Streamlit interface.
