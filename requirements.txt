@@ -53,6 +53,7 @@ google-api-core==2.33.0
 google-api-python-client==2.198.0
 google-auth==2.56.2
 google-auth-httplib2==0.4.0
+google-genai==2.19.0
 google-generativeai==0.8.6
 googleapis-common-protos==1.75.0
 grpcio==1.83.0
@@ -158,7 +159,7 @@ pytest-repeat==0.9.4
 pytest-rerunfailures==16.4
 pytest-xdist==3.8.0
 python-dateutil==2.9.0.post0
-python-dotenv==1.2.2
+python-dotenv==1.2.3
 python-json-logger==4.1.0
 python-multipart==0.0.32
 pywin32==312

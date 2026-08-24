@@ -411,9 +411,6 @@ class HybridMatcher:
 
             if not found:
 
-                # Computer Science / AI / technology
-                # degrees are considered related to
-                # quantitative engineering requirements.
                 if (
                     normalized_field == "engineering"
                     and (
@@ -441,8 +438,6 @@ class HybridMatcher:
                 == required_degree_level
             )
 
-            # A higher degree satisfies a lower-level
-            # requirement.
             if (
                 required_degree_level == "bachelor"
                 and resume_degree_level in {
@@ -523,67 +518,228 @@ class HybridMatcher:
         resume_text: str
     ) -> float:
 
-        # Look for explicit ranges such as:
-        # Sep 2024 - Present
-        # 2023 - 2025
+        """
+        Estimate professional work experience.
 
-        current_year = 2026
+        This function receives ONLY the work experience
+        section, preventing dates from education, projects,
+        certifications, etc. from being counted.
+        """
 
-        total_months = 0
+        if not resume_text or not resume_text.strip():
+
+            return 0.0
+
+        month_pattern = (
+            r"(?:"
+            r"jan(?:uary)?|"
+            r"feb(?:ruary)?|"
+            r"mar(?:ch)?|"
+            r"apr(?:il)?|"
+            r"may|"
+            r"jun(?:e)?|"
+            r"jul(?:y)?|"
+            r"aug(?:ust)?|"
+            r"sep(?:tember)?|"
+            r"oct(?:ober)?|"
+            r"nov(?:ember)?|"
+            r"dec(?:ember)?"
+            r")"
+        )
 
         pattern = re.compile(
-            r"("
-            r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
-            r"\s+)?"
-            r"(20\d{2})"
-            r"\s*[-–]\s*"
-            r"("
-            r"(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)"
-            r"\s+)?"
-            r"(20\d{2}|present)"
-            ,
-            re.IGNORECASE
+            rf"""
+            (?P<start_month>{month_pattern})?
+            \s*
+            (?P<start_year>20\d{{2}})
+            \s*
+            [-–—]
+            \s*
+            (?P<end_month>{month_pattern})?
+            \s*
+            (?P<end_year>20\d{{2}}|present)
+            """,
+            re.IGNORECASE | re.VERBOSE
         )
+
+        current_year = 2026
+        current_month = 8
+
+        intervals = []
 
         for match in pattern.finditer(
             resume_text
         ):
 
             start_year = int(
-                match.group(2)
+                match.group("start_year")
             )
 
-            end_value = match.group(4)
+            start_month_name = match.group(
+                "start_month"
+            )
 
-            if end_value.lower() == "present":
+            end_year_value = match.group(
+                "end_year"
+            )
+
+            end_month_name = match.group(
+                "end_month"
+            )
+
+            if start_month_name:
+
+                start_month = {
+                    "jan": 1,
+                    "january": 1,
+                    "feb": 2,
+                    "february": 2,
+                    "mar": 3,
+                    "march": 3,
+                    "apr": 4,
+                    "april": 4,
+                    "may": 5,
+                    "jun": 6,
+                    "june": 6,
+                    "jul": 7,
+                    "july": 7,
+                    "aug": 8,
+                    "august": 8,
+                    "sep": 9,
+                    "september": 9,
+                    "oct": 10,
+                    "october": 10,
+                    "nov": 11,
+                    "november": 11,
+                    "dec": 12,
+                    "december": 12
+                }[
+                    start_month_name.lower()
+                ]
+
+            else:
+
+                start_month = 1
+
+            if end_year_value.lower() == "present":
 
                 end_year = current_year
+                end_month = current_month
 
             else:
 
                 end_year = int(
-                    end_value
+                    end_year_value
                 )
 
-            if end_year >= start_year:
+                if end_month_name:
 
-                total_months += (
-                    end_year - start_year
-                ) * 12
+                    end_month = {
+                        "jan": 1,
+                        "january": 1,
+                        "feb": 2,
+                        "february": 2,
+                        "mar": 3,
+                        "march": 3,
+                        "apr": 4,
+                        "april": 4,
+                        "may": 5,
+                        "jun": 6,
+                        "june": 6,
+                        "jul": 7,
+                        "july": 7,
+                        "aug": 8,
+                        "august": 8,
+                        "sep": 9,
+                        "september": 9,
+                        "oct": 10,
+                        "october": 10,
+                        "nov": 11,
+                        "november": 11,
+                        "dec": 12,
+                        "december": 12
+                    }[
+                        end_month_name.lower()
+                    ]
 
-        # If dates were not found, presence of
-        # professional experience still provides
-        # qualitative evidence.
-        if total_months == 0:
+                else:
+
+                    end_month = 12
+
+            start_total_months = (
+                start_year * 12
+                + start_month
+            )
+
+            end_total_months = (
+                end_year * 12
+                + end_month
+            )
+
+            if end_total_months >= start_total_months:
+
+                intervals.append(
+                    (
+                        start_total_months,
+                        end_total_months
+                    )
+                )
+
+        if not intervals:
 
             if re.search(
-                r"\bexperience\b|\btechnical lead\b|\bengineer\b",
+                r"\btechnical lead\b"
+                r"|\bengineer\b"
+                r"|\bdeveloper\b"
+                r"|\bdata scientist\b"
+                r"|\bdata analyst\b"
+                r"|\bprofessional experience\b",
                 resume_text,
                 re.IGNORECASE
             ):
+
                 return 1.0
 
             return 0.0
+
+        intervals.sort()
+
+        merged_intervals = []
+
+        current_start, current_end = intervals[0]
+
+        for start, end in intervals[1:]:
+
+            if start <= current_end + 1:
+
+                current_end = max(
+                    current_end,
+                    end
+                )
+
+            else:
+
+                merged_intervals.append(
+                    (
+                        current_start,
+                        current_end
+                    )
+                )
+
+                current_start = start
+                current_end = end
+
+        merged_intervals.append(
+            (
+                current_start,
+                current_end
+            )
+        )
+
+        total_months = sum(
+            end - start + 1
+            for start, end in merged_intervals
+        )
 
         return round(
             total_months / 12,
@@ -593,7 +749,8 @@ class HybridMatcher:
     def match_experience(
         self,
         experience: List[str],
-        resume_text: str
+        resume_text: str,
+        resume_sections: List[Dict[str, Any]]
     ) -> Dict[str, Any]:
 
         required_years = (
@@ -602,9 +759,49 @@ class HybridMatcher:
             )
         )
 
+        # Only use WORK EXPERIENCE section
+        experience_text = ""
+
+        for section in resume_sections:
+
+            section_name = str(
+                section.get(
+                    "section",
+                    ""
+                )
+            ).strip().upper()
+
+            if section_name in {
+                "WORK EXPERIENCE",
+                "PROFESSIONAL EXPERIENCE",
+                "EXPERIENCE",
+                "WORK HISTORY",
+                "EMPLOYMENT HISTORY"
+            }:
+
+                content = section.get(
+                    "text",
+                    section.get(
+                        "content",
+                        ""
+                    )
+                )
+
+                if isinstance(content, list):
+
+                    content = "\n".join(
+                        str(item)
+                        for item in content
+                    )
+
+                experience_text += (
+                    str(content)
+                    + "\n"
+                )
+
         estimated_years = (
             self.estimate_resume_years(
-                resume_text
+                experience_text
             )
         )
 
@@ -798,10 +995,6 @@ class HybridMatcher:
             )
         )
 
-        # ----------------------------------------------------
-        # Required requirements are stricter.
-        # ----------------------------------------------------
-
         if category == "required":
 
             if score >= 0.72:
@@ -815,10 +1008,6 @@ class HybridMatcher:
 
             return "NO_ALIGNMENT"
 
-        # ----------------------------------------------------
-        # Preferred requirements
-        # ----------------------------------------------------
-
         if category == "preferred":
 
             if score >= 0.70:
@@ -831,10 +1020,6 @@ class HybridMatcher:
                 return "WEAK_ALIGNMENT"
 
             return "NO_ALIGNMENT"
-
-        # ----------------------------------------------------
-        # Responsibilities are harder to prove.
-        # ----------------------------------------------------
 
         if category == "responsibility":
 
@@ -886,22 +1071,10 @@ class HybridMatcher:
             )
         )
 
-        # ----------------------------------------------------
-        # Combine ALL resume text.
-        #
-        # This is important because skills may be in SKILLS,
-        # education in EDUCATION and experience in WORK
-        # EXPERIENCE.
-        # ----------------------------------------------------
-
         resume_text = "\n".join(
             str(chunk.get("text", ""))
             for chunk in resume_chunks
         )
-
-        # ----------------------------------------------------
-        # Explicit skill matching
-        # ----------------------------------------------------
 
         skill_match = self.find_skill_matches(
             self.normalize_list(
@@ -913,10 +1086,6 @@ class HybridMatcher:
             resume_text
         )
 
-        # ----------------------------------------------------
-        # Concept matching
-        # ----------------------------------------------------
-
         concept_match = self.match_concepts(
             self.normalize_list(
                 requirement.get(
@@ -926,10 +1095,6 @@ class HybridMatcher:
             ),
             resume_text
         )
-
-        # ----------------------------------------------------
-        # Education
-        # ----------------------------------------------------
 
         required_degree_level = (
             "unknown"
@@ -967,10 +1132,6 @@ class HybridMatcher:
             resume_text
         )
 
-        # ----------------------------------------------------
-        # Experience
-        # ----------------------------------------------------
-
         experience_match = self.match_experience(
             self.normalize_list(
                 requirement.get(
@@ -978,12 +1139,9 @@ class HybridMatcher:
                     []
                 )
             ),
-            resume_text
+            resume_text,
+            resume_sections
         )
-
-        # ----------------------------------------------------
-        # Semantic score
-        # ----------------------------------------------------
 
         semantic_score = max(
             semantic_scores
@@ -1007,8 +1165,6 @@ class HybridMatcher:
                 "education_fields"
             ):
 
-                # Degree requirements should primarily
-                # depend on education evidence.
                 weights = {
                     "semantic": 0.15,
                     "skills": 0.05,
@@ -1077,8 +1233,6 @@ class HybridMatcher:
 
         else:
 
-            # Responsibilities rely heavily on actual
-            # evidence of concepts and experience.
             weights = {
                 "semantic": 0.25,
                 "skills": 0.10,
@@ -1108,14 +1262,6 @@ class HybridMatcher:
             * weights["concepts"]
         )
 
-        # ----------------------------------------------------
-        # Critical evidence protection.
-        #
-        # If a requirement contains explicit skills and NONE
-        # are present, semantic similarity alone must not
-        # create a strong score.
-        # ----------------------------------------------------
-
         if (
             requirement.get("skills")
             and
@@ -1126,11 +1272,6 @@ class HybridMatcher:
                 hybrid_score,
                 0.45
             )
-
-        # ----------------------------------------------------
-        # Required experience cannot become strong merely
-        # through semantic similarity.
-        # ----------------------------------------------------
 
         if (
             requirement.get("experience")
@@ -1144,10 +1285,6 @@ class HybridMatcher:
                 hybrid_score,
                 0.55
             )
-
-        # ----------------------------------------------------
-        # Degree requirement without degree evidence.
-        # ----------------------------------------------------
 
         if (
             requirement.get("education_fields")
@@ -1168,19 +1305,11 @@ class HybridMatcher:
             )
         )
 
-        # ----------------------------------------------------
-        # Best evidence
-        # ----------------------------------------------------
-
         best_evidence = self.select_best_evidence(
             resume_chunks,
             semantic_scores,
             requirement
         )
-
-        # ----------------------------------------------------
-        # Assessment
-        # ----------------------------------------------------
 
         assessment = self.get_assessment(
             hybrid_score,
