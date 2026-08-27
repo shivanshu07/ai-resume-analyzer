@@ -17,26 +17,57 @@ class RequirementExtractor:
                 "required skills",
                 "required qualifications",
                 "basic qualifications",
-                "must have"
+                "must have",
+                "must haves",
+                "requirements",
+                "required",
+                "essential skills",
+                "essential requirements",
+                "qualifications",
+                "what you need",
+                "what you'll need",
+                "what you will need",
+                "your profile",
+                "your background",
+                "who you are"
             ],
 
             "preferred_skills": [
                 "preferred qualifications",
                 "preferred qualification",
                 "preferred skills",
-                "nice to have"
+                "nice to have",
+                "nice to haves",
+                "bonus points",
+                "good to have",
+                "desired skills",
+                "desired qualifications",
+                "additional qualifications",
+                "bonus skills",
+                "would be a plus",
+                "pluses"
             ],
 
             "responsibilities": [
                 "responsibilities",
                 "responsibility",
-                "key responsibilities"
+                "key responsibilities",
+                "what you'll do",
+                "what you will do",
+                "the role",
+                "your role",
+                "role overview",
+                "duties",
+                "day to day",
+                "in this role"
             ],
 
             "education": [
                 "education",
                 "educational qualification",
-                "educational qualifications"
+                "educational qualifications",
+                "academic qualifications",
+                "academic background"
             ]
         }
 
@@ -83,11 +114,28 @@ class RequirementExtractor:
             normalized
         ).strip()
 
+        # Section headings are short, standalone lines. Guarding
+        # on length avoids misclassifying a long bullet sentence
+        # that happens to contain a keyword (e.g. "...meets all
+        # requirements for...") as a section heading.
+        if len(normalized) > 60:
+            return None
+
         for section, keywords in self.section_keywords.items():
 
             for keyword in keywords:
 
                 if normalized == keyword:
+                    return section
+
+                # Whole-word substring match so headings like
+                # "Qualifications:" or "MINIMUM QUALIFICATIONS
+                # FOR THIS ROLE" are still caught, not just an
+                # exact string match.
+                if re.search(
+                    rf"\b{re.escape(keyword)}\b",
+                    normalized
+                ):
                     return section
 
         return None
@@ -219,18 +267,32 @@ class RequirementExtractor:
             # Extract content
             # ---------------------------------------------
 
-            if (
-                current_section is not None
-                and self.is_requirement_line(line)
-            ):
+            if not self.is_requirement_line(line):
+                continue
 
-                cleaned = self.clean_requirement(line)
+            cleaned = self.clean_requirement(line)
 
-                if cleaned:
+            if not cleaned:
+                continue
 
-                    sections[current_section].append(
-                        cleaned
-                    )
+            if current_section is not None:
+
+                sections[current_section].append(
+                    cleaned
+                )
+
+            else:
+
+                # No recognized heading is currently active --
+                # rather than silently dropping this line (which
+                # is how JDs with unrecognized heading wording
+                # used to end up with zero extracted
+                # requirements), keep it as a lower-confidence
+                # "other" requirement so the pipeline still has
+                # something to work with.
+                sections["other"].append(
+                    cleaned
+                )
 
         return sections
 
@@ -276,6 +338,19 @@ class RequirementExtractor:
                 "requirement": item,
                 "category": "education",
                 "importance": "high"
+            })
+
+        # Fallback bucket -- lines that appeared under no
+        # recognized heading. Kept as low-importance "other"
+        # requirements rather than dropped, so a JD with
+        # unfamiliar section wording still produces something
+        # for the pipeline to score instead of failing outright.
+        for item in sections["other"]:
+
+            requirements.append({
+                "requirement": item,
+                "category": "other",
+                "importance": "low"
             })
 
         return requirements
