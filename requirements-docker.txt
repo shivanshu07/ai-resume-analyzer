@@ -1,0 +1,18 @@
+# Runtime dependencies ONLY -- what app/api.py and the pipeline
+# actually import to run. Deliberately excludes dev/test-only
+# tools (deepeval, pytest, etc.) that live in your main
+# requirements.txt but that the running API never touches.
+#
+# This file exists specifically to avoid the version-resolution
+# conflicts that come from installing your full Windows dev
+# environment (via pip freeze) into a Linux container.
+
+fastapi
+uvicorn[standard]
+python-multipart
+openai
+sentence-transformers
+numpy
+PyMuPDF
+loguru
+python-dotenv

@@ -1,0 +1,31 @@
+# Never bake secrets into the image -- pass them at runtime via
+# `docker run --env-file .env` or your platform's secrets manager.
+.env
+.env.*
+
+# Local virtual environment / caches
+venv/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# Version control
+.git/
+.gitignore
+
+# Generated data -- these are outputs of running the pipeline,
+# not inputs it needs to start. Keeping them out avoids baking
+# stale processed data or logs into the image.
+data/processed/
+logs/
+outputs/
+
+# IDE / OS cruft
+.vscode/
+.idea/
+.DS_Store
+
+# Docs not needed inside the running container
+README.md
