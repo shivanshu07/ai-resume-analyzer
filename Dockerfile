@@ -12,6 +12,16 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends build-essential \
     && rm -rf /var/lib/apt/lists/*
 
+# Install PyTorch's CPU-only build FIRST, explicitly, before
+# sentence-transformers pulls it in as a transitive dependency.
+# A plain `pip install sentence-transformers` installs the full
+# CUDA-enabled torch build by default -- hundreds of MB of GPU
+# libraries that are never used on CPU-only hosting (like
+# Render's free tier), but that still bloat both the image and
+# runtime memory. This is very likely what pushed the container
+# over Render's 512MB limit.
+RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
+
 # Install Python dependencies first, separately from app code, so
 # Docker's layer cache skips this (slow) step on every rebuild
 # unless requirements-docker.txt actually changed.
@@ -29,8 +39,17 @@ RUN pip install --no-cache-dir -r requirements-docker.txt
 # at container startup. Without this, every container start (and
 # every reload during development) re-downloads ~90MB from
 # Hugging Face, which is slow and fails outright in any network-
-# restricted deployment environment.
+# restricted deployment environment. This step NEEDS network
+# access, so it must run before offline mode is turned on below.
 RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+
+# Only now, AFTER the model is already downloaded and cached in
+# this image layer, turn off Hugging Face Hub network calls for
+# runtime. This stops the app from pinging HF Hub on every
+# container start (removes the "unauthenticated requests" warning
+# you saw, and avoids any startup network dependency).
+ENV HF_HUB_OFFLINE=1
+ENV TRANSFORMERS_OFFLINE=1
 
 # Now copy the rest of the application code.
 COPY . .
