@@ -1,0 +1,28 @@
+# Dependencies for CI (GitHub Actions) test runs.
+#
+# Built the same way as requirements-docker.txt: a clean,
+# minimal list rather than the full requirements.txt, because
+# requirements.txt has a real version conflict (click is
+# pinned to 8.4.2, but deepeval requires click<8.4.0 while
+# huggingface-hub requires click>=8.4.2 -- mutually exclusive).
+# That conflict reproduces identically on Linux CI runners, not
+# just in Docker, so it needs the same fix here.
+#
+# If your actual pytest suite imports something not listed
+# here, the CI run will fail with a clean ModuleNotFoundError
+# naming exactly what's missing -- add it below and re-push.
+
+fastapi
+uvicorn[standard]
+python-multipart
+openai
+sentence-transformers
+numpy
+PyMuPDF
+loguru
+python-dotenv
+
+# Test tooling
+pytest
+deepeval
+click>=8.0.0,<8.4.0
