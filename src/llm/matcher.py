@@ -1,4 +1,5 @@
 import json
+import faiss
 import numpy as np
 
 
@@ -79,8 +80,44 @@ class ResumeJDMatcher:
         return float(similarity)
 
     # ========================================================
-    # Determine relevant evidence sections
+    # Build a FAISS vector index over resume chunk embeddings
     # ========================================================
+
+    def build_faiss_index(
+        self,
+        resume_embeddings
+    ):
+        """
+        Build a FAISS index over the resume's chunk embeddings.
+
+        Uses IndexFlatIP (inner product) rather than an
+        approximate index: embedder.py generates embeddings
+        with normalize_embeddings=True, so inner product on
+        normalized vectors is mathematically identical to
+        cosine similarity -- this is an EXACT search, not an
+        approximation, so scores match the previous brute-force
+        implementation exactly, not just approximately.
+
+        Built once per resume and reused across every JD
+        requirement lookup in match_all, rather than being
+        rebuilt per requirement.
+        """
+
+        embeddings = np.asarray(
+            resume_embeddings,
+            dtype=np.float32
+        )
+
+        if embeddings.ndim == 1:
+            embeddings = embeddings.reshape(1, -1)
+
+        dimension = embeddings.shape[1]
+
+        index = faiss.IndexFlatIP(dimension)
+
+        index.add(embeddings)
+
+        return index
 
     def get_preferred_sections(
         self,
@@ -295,57 +332,58 @@ class ResumeJDMatcher:
         requirement,
         jd_embedding,
         resume_chunks,
-        resume_embeddings
+        resume_embeddings,
+        faiss_index=None
     ):
+
+        # ----------------------------------------------------
+        # Use a FAISS vector index instead of a manual Python
+        # loop over every chunk. If no index was passed in
+        # (e.g. calling this method standalone rather than via
+        # match_all), build one on the fly so this method still
+        # works exactly as before on its own.
+        # ----------------------------------------------------
+
+        index = (
+            faiss_index
+            if faiss_index is not None
+            else self.build_faiss_index(resume_embeddings)
+        )
+
+        query = np.asarray(
+            jd_embedding,
+            dtype=np.float32
+        ).reshape(1, -1)
+
+        num_chunks = len(resume_chunks)
+
+        similarities, chunk_indices = index.search(
+            query,
+            num_chunks
+        )
+
+        # FAISS IndexFlatIP.search already returns results
+        # sorted by descending similarity, so no separate sort
+        # step is needed here (unlike the old manual-loop
+        # version, which had to sort afterward).
 
         matches = []
 
-        # ----------------------------------------------------
-        # Calculate semantic similarity against every chunk
-        # ----------------------------------------------------
+        for rank in range(num_chunks):
 
-        for index, chunk in enumerate(
-            resume_chunks
-        ):
+            chunk_index = int(chunk_indices[0][rank])
+            similarity = float(similarities[0][rank])
 
-            similarity = (
-                self.cosine_similarity(
-                    jd_embedding,
-                    resume_embeddings[index]
-                )
-            )
+            chunk = resume_chunks[chunk_index]
 
             matches.append(
                 {
-                    "chunk_id": chunk[
-                        "chunk_id"
-                    ],
-
-                    "section": chunk[
-                        "section"
-                    ],
-
-                    "text": chunk[
-                        "text"
-                    ],
-
-                    "similarity": round(
-                        similarity,
-                        4
-                    )
+                    "chunk_id": chunk["chunk_id"],
+                    "section": chunk["section"],
+                    "text": chunk["text"],
+                    "similarity": round(similarity, 4)
                 }
             )
-
-        # ----------------------------------------------------
-        # Highest similarity first
-        # ----------------------------------------------------
-
-        matches.sort(
-            key=lambda x: x[
-                "similarity"
-            ],
-            reverse=True
-        )
 
         # ----------------------------------------------------
         # Select evidence intelligently
@@ -442,9 +480,19 @@ class ResumeJDMatcher:
         resume_embeddings
     ):
 
+        # ----------------------------------------------------
+        # Build the FAISS index ONCE per resume, then reuse it
+        # across every JD requirement -- this is the actual
+        # efficiency change versus the old version, which
+        # implicitly recomputed similarity from scratch for
+        # every single requirement.
+        # ----------------------------------------------------
+
+        index = self.build_faiss_index(resume_embeddings)
+
         results = []
 
-        for index, requirement in enumerate(
+        for index_position, requirement in enumerate(
             requirements
         ):
 
@@ -452,15 +500,17 @@ class ResumeJDMatcher:
 
                 requirement,
 
-                jd_embeddings[index],
+                jd_embeddings[index_position],
 
                 resume_chunks,
 
-                resume_embeddings
+                resume_embeddings,
+
+                faiss_index=index
             )
 
             result["requirement_id"] = (
-                index + 1
+                index_position + 1
             )
 
             results.append(

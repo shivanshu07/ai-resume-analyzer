@@ -16,3 +16,4 @@ numpy
 PyMuPDF
 loguru
 python-dotenv
+faiss-cpu
