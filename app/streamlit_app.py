@@ -25,7 +25,7 @@ import streamlit as st
 # ============================================================
 
 # Change this to your actual Render URL if it differs.
-DEFAULT_API_URL = "https://ai-resume-analyzer.onrender.com"
+DEFAULT_API_URL = "https://ai-resume-analyzer-e5lg.onrender.com"
 
 st.set_page_config(
     page_title="AI Resume Analyzer",
