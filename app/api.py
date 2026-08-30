@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from src.pipeline import ResumeAnalysisPipeline
 from src.llm.gap_explainer import LLMGapExplainer
@@ -42,6 +42,15 @@ app = FastAPI(
 # every call.
 pipeline = ResumeAnalysisPipeline()
 gap_explainer = LLMGapExplainer()
+
+
+@app.get("/", include_in_schema=False)
+def root():
+
+    # Anyone opening the bare URL (e.g. a recruiter clicking a
+    # link on your resume) gets sent straight to Swagger UI
+    # instead of landing on a blank 404 page.
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/health")
