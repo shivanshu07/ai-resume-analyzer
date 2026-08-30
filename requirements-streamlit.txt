@@ -1,0 +1,9 @@
+# Minimal dependencies for the Streamlit frontend only.
+# This is a thin HTTP client -- it does NOT need sentence-
+# transformers, torch, PyMuPDF, or anything else the backend
+# API needs. Kept separate from requirements.txt for the same
+# reason requirements-docker.txt is separate: avoids pulling in
+# unrelated dev/test dependencies and their version conflicts.
+
+streamlit
+requests

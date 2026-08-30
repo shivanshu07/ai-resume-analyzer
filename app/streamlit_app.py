@@ -1,38 +1,31 @@
-import sys
-from pathlib import Path
+"""
+Streamlit frontend for the AI Resume Analyzer API.
 
-# ============================================================
-# PROJECT ROOT
-# ============================================================
+This is a THIN CLIENT: all the actual work (PDF parsing,
+embedding, hybrid scoring, LLM gap explanation) happens in the
+deployed FastAPI service. This file only collects input, calls
+the API over HTTP, and renders the JSON response in a readable
+way -- so a recruiter or interviewer doesn't have to read raw
+JSON off Swagger UI to understand what the tool does.
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+Run locally:
+    streamlit run streamlit_app.py
 
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+Deploy free on Streamlit Community Cloud:
+    share.streamlit.io -> New app -> point at this file in
+    your GitHub repo. No server to manage.
+"""
 
-
-import tempfile
-
-import numpy as np
+import requests
 import streamlit as st
 
 
-from src.extraction.pdf_parser import PDFParser
-from src.extraction.jd_parser import JobDescriptionParser
-from src.extraction.requirement_extractor import RequirementExtractor
-
-from src.preprocessing.cleaner import TextCleaner
-from src.preprocessing.chunker import SemanticChunker
-from src.preprocessing.requirement_normalizer import RequirementNormalizer
-
-from src.llm.embedder import TextEmbedder
-from src.llm.matcher import ResumeJDMatcher
-
-from src.evaluation.hybrid_scorer import HybridMatcher
-from src.evaluation.analysis import ResumeAnalysisEngine
 # ============================================================
-# PAGE CONFIGURATION
+# CONFIG
 # ============================================================
+
+# Change this to your actual Render URL if it differs.
+DEFAULT_API_URL = "https://ai-resume-analyzer.onrender.com"
 
 st.set_page_config(
     page_title="AI Resume Analyzer",
@@ -40,1256 +33,355 @@ st.set_page_config(
     layout="wide"
 )
 
-
-# ============================================================
-# INITIALIZE COMPONENTS
-# ============================================================
-
-@st.cache_resource
-def initialize_components():
-
-    return {
-        "pdf_parser": PDFParser(),
-
-        "cleaner": TextCleaner(),
-
-        "chunker": SemanticChunker(
-            max_characters=1800
-        ),
-
-        "requirement_extractor":
-            RequirementExtractor(),
-
-        "requirement_normalizer":
-            RequirementNormalizer(),
-
-        "embedder":
-            TextEmbedder(),
-
-        "matcher":
-            ResumeJDMatcher(
-                similarity_threshold=0.35
-            ),
-
-        "hybrid_scorer":
-            HybridMatcher(),
-
-        "analysis_engine":
-            ResumeAnalysisEngine()
-    }
-
-
-components = initialize_components()
+ASSESSMENT_STYLE = {
+    "STRONG_ALIGNMENT": ("🟢", "Strong"),
+    "PARTIAL_ALIGNMENT": ("🟡", "Partial"),
+    "WEAK_ALIGNMENT": ("🟠", "Weak"),
+    "NO_ALIGNMENT": ("🔴", "Missing"),
+}
 
 
 # ============================================================
-# HELPER FUNCTIONS
+# HELPERS
 # ============================================================
 
-def calculate_semantic_scores(
-    requirement_embedding,
-    resume_embeddings
-):
-    """
-    Calculate cosine similarity between one JD
-    requirement embedding and every resume chunk.
-    """
+def interpretation_color(score: float) -> str:
 
-    query = np.asarray(
-        requirement_embedding,
-        dtype=float
+    if score >= 80:
+        return "green"
+
+    if score >= 65:
+        return "blue"
+
+    if score >= 50:
+        return "orange"
+
+    return "red"
+
+
+def render_matched_missing(container, title, block):
+
+    with container:
+
+        st.markdown(f"**{title}**")
+
+        matched = block.get("matched", [])
+        missing = block.get("missing", [])
+
+        if matched:
+            st.markdown("✅ " + ", ".join(matched))
+
+        if missing:
+            st.markdown("❌ " + ", ".join(missing))
+
+        if not matched and not missing:
+            st.caption("No data")
+
+
+def render_results(payload: dict) -> None:
+
+    ats = payload.get("ats_analysis", payload)
+
+    score = ats.get("overall_ats_score", 0.0)
+    interpretation = ats.get("score_interpretation", "")
+
+    color = interpretation_color(score)
+
+    st.markdown(
+        f"### Overall Match: "
+        f":{color}[{score:.1f} / 100 -- {interpretation}]"
     )
-
-    matrix = np.asarray(
-        resume_embeddings,
-        dtype=float
-    )
-
-    if matrix.ndim == 1:
-        matrix = matrix.reshape(1, -1)
-
-    query = query.reshape(-1)
-
-    if matrix.shape[1] != query.shape[0]:
-
-        raise ValueError(
-            "Embedding dimension mismatch."
-        )
-
-    query_norm = np.linalg.norm(
-        query
-    )
-
-    matrix_norms = np.linalg.norm(
-        matrix,
-        axis=1
-    )
-
-    if query_norm == 0:
-
-        return [
-            0.0
-            for _ in range(len(matrix))
-        ]
-
-    matrix_norms = np.where(
-        matrix_norms == 0,
-        1e-12,
-        matrix_norms
-    )
-
-    scores = (
-        matrix @ query
-    ) / (
-        matrix_norms * query_norm
-    )
-
-    return [
-        round(
-            float(score),
-            4
-        )
-        for score in scores
-    ]
-
-
-def save_uploaded_file(
-    uploaded_file,
-    suffix
-):
-    """
-    Save a Streamlit uploaded file temporarily.
-    """
-
-    temporary_file = tempfile.NamedTemporaryFile(
-        delete=False,
-        suffix=suffix
-    )
-
-    temporary_file.write(
-        uploaded_file.getvalue()
-    )
-
-    temporary_file.close()
-
-    return temporary_file.name
-
-
-# ============================================================
-# COMPLETE ANALYSIS PIPELINE
-# ============================================================
-
-def run_analysis(
-    resume_file,
-    jd_file
-):
-
-    pdf_parser = components["pdf_parser"]
-    cleaner = components["cleaner"]
-    chunker = components["chunker"]
-
-    requirement_extractor = (
-        components["requirement_extractor"]
-    )
-
-    requirement_normalizer = (
-        components["requirement_normalizer"]
-    )
-
-    embedder = components["embedder"]
-    matcher = components["matcher"]
-    hybrid_scorer = components["hybrid_scorer"]
-
-    analysis_engine = (
-        components["analysis_engine"]
-    )
+    st.progress(min(max(score / 100, 0.0), 1.0))
 
     # --------------------------------------------------------
-    # Temporary files
+    # Category breakdown
     # --------------------------------------------------------
 
-    resume_path = save_uploaded_file(
-        resume_file,
-        ".pdf"
-    )
-
-    jd_path = save_uploaded_file(
-        jd_file,
-        ".txt"
-    )
-
-    try:
-
-        # ====================================================
-        # STEP 1 — RESUME PDF EXTRACTION
-        # ====================================================
-
-        with st.status(
-            "Processing resume...",
-            expanded=True
-        ) as status:
-
-            st.write(
-                "Extracting text from PDF..."
-            )
-
-            raw_resume_text = (
-                pdf_parser.extract_text(
-                    resume_path
-                )
-            )
-
-            if not raw_resume_text.strip():
-
-                raise ValueError(
-                    "No text could be extracted "
-                    "from the uploaded resume."
-                )
-
-            # =================================================
-            # STEP 2 — RESUME CLEANING
-            # =================================================
-
-            st.write(
-                "Cleaning resume text..."
-            )
-
-            sections = cleaner.clean(
-                raw_resume_text
-            )
-
-            if not sections:
-
-                raise ValueError(
-                    "No resume sections were detected."
-                )
-
-            # =================================================
-            # STEP 3 — RESUME CHUNKING
-            # =================================================
-
-            st.write(
-                "Creating semantic resume chunks..."
-            )
-
-            chunks = chunker.create_chunks(
-                sections
-            )
-
-            if not chunks:
-
-                raise ValueError(
-                    "No resume chunks were created."
-                )
-
-            # =================================================
-            # STEP 4 — RESUME EMBEDDINGS
-            # =================================================
-
-            st.write(
-                "Generating resume embeddings..."
-            )
-
-            resume_texts = [
-                chunk["text"]
-                for chunk in chunks
-            ]
-
-            resume_embeddings = (
-                embedder.generate_embeddings(
-                    resume_texts
-                )
-            )
-
-            # =================================================
-            # STEP 5 — JD PARSING
-            # =================================================
-
-            st.write(
-                "Parsing job description..."
-            )
-
-            jd_parser = JobDescriptionParser(
-                jd_path
-            )
-
-            parsed_jd = jd_parser.parse()
-
-            if not parsed_jd["lines"]:
-
-                raise ValueError(
-                    "The uploaded job description "
-                    "contains no readable text."
-                )
-
-            # =================================================
-            # STEP 6 — REQUIREMENT EXTRACTION
-            # =================================================
-
-            st.write(
-                "Extracting job requirements..."
-            )
-
-            jd_sections = (
-                requirement_extractor.extract(
-                    parsed_jd["lines"]
-                )
-            )
-
-            requirements = (
-                requirement_extractor
-                .build_requirement_objects(
-                    jd_sections
-                )
-            )
-
-            if not requirements:
-
-                raise ValueError(
-                    "No job requirements could "
-                    "be extracted from the JD."
-                )
-
-            # =================================================
-            # STEP 7 — REQUIREMENT NORMALIZATION
-            # =================================================
-
-            st.write(
-                "Normalizing requirements..."
-            )
-
-            normalized_requirements = (
-                requirement_normalizer
-                .normalize_all(
-                    requirements
-                )
-            )
-
-            # =================================================
-            # STEP 8 — JD EMBEDDINGS
-            # =================================================
-
-            st.write(
-                "Generating job-description embeddings..."
-            )
-
-            jd_texts = [
-                requirement["original_text"]
-                for requirement
-                in normalized_requirements
-            ]
-
-            jd_embeddings = (
-                embedder.generate_embeddings(
-                    jd_texts
-                )
-            )
-
-            # =================================================
-            # STEP 9 — SEMANTIC MATCHING
-            # =================================================
-
-            st.write(
-                "Performing semantic matching..."
-            )
-
-            match_results = (
-                matcher.match_all(
-                    normalized_requirements,
-                    jd_embeddings,
-                    chunks,
-                    resume_embeddings
-                )
-            )
-
-            # =================================================
-            # STEP 10 — HYBRID MATCHING
-            # =================================================
-
-            st.write(
-                "Performing hybrid matching..."
-            )
-
-            hybrid_results = []
-
-            for index, requirement in enumerate(
-                normalized_requirements
-            ):
-
-                semantic_scores = (
-                    calculate_semantic_scores(
-                        jd_embeddings[index],
-                        resume_embeddings
-                    )
-                )
-
-                result = (
-                    hybrid_scorer.match_requirement(
-                        requirement=requirement,
-                        resume_chunks=chunks,
-                        resume_sections=chunks,
-                        semantic_scores=semantic_scores
-                    )
-                )
-
-                result["requirement_id"] = (
-                    index + 1
-                )
-
-                result["requirement"] = (
-                    requirement["original_text"]
-                )
-
-                result["category"] = (
-                    requirement.get(
-                        "category",
-                        "preferred"
-                    )
-                )
-
-                result["importance"] = (
-                    requirement.get(
-                        "importance",
-                        "medium"
-                    )
-                )
-
-                result["requirement_type"] = (
-                    requirement.get(
-                        "category",
-                        "preferred"
-                    )
-                )
-
-                hybrid_results.append(
-                    result
-                )
-
-            # =================================================
-            # STEP 11 — ATS + GAP ANALYSIS
-            # =================================================
-
-            st.write(
-                "Calculating ATS score and resume gaps..."
-            )
-
-            final_analysis = (
-                analysis_engine.analyze(
-                    hybrid_results
-                )
-            )
-
-            status.update(
-                label="Analysis completed successfully.",
-                state="complete",
-                expanded=False
-            )
-
-        return {
-            "sections": sections,
-            "chunks": chunks,
-            "requirements": normalized_requirements,
-            "match_results": match_results,
-            "hybrid_results": hybrid_results,
-            "analysis": final_analysis
-        }
-
-    finally:
-
-        # ----------------------------------------------------
-        # Remove temporary files
-        # ----------------------------------------------------
-
-        Path(resume_path).unlink(
-            missing_ok=True
-        )
-
-        Path(jd_path).unlink(
-            missing_ok=True
-        )
-
-
-# ============================================================
-# DISPLAY HELPERS
-# ============================================================
-
-def display_list(
-    values,
-    empty_message="None"
-):
-
-    if not values:
-
-        st.caption(
-            empty_message
-        )
-
-        return
-
-    for value in values:
-
-        st.write(
-            f"• {value}"
-        )
-
-
-def assessment_label(
-    assessment
-):
-
-    mapping = {
-        "STRONG_ALIGNMENT":
-            "Strong Alignment",
-
-        "PARTIAL_ALIGNMENT":
-            "Partial Alignment",
-
-        "WEAK_ALIGNMENT":
-            "Weak Alignment",
-
-        "NO_ALIGNMENT":
-            "No Alignment"
-    }
-
-    return mapping.get(
-        str(assessment).upper(),
-        str(assessment)
-    )
-
-
-# ============================================================
-# HEADER
-# ============================================================
-
-st.title(
-    "📄 AI Resume Analyzer"
-)
-
-st.markdown(
-    """
-### Resume ↔ Job Description Analysis
-
-Upload a resume and a job description to run the complete
-NLP and semantic matching pipeline.
-
-The analyzer evaluates:
-
-- Resume structure
-- JD requirements
-- Semantic similarity
-- Explicit skills
-- Concepts
-- Education
-- Experience
-- ATS-style score
-- Resume strengths
-- Resume gaps
-- Priority gaps
-"""
-)
-
-
-# ============================================================
-# INPUT SECTION
-# ============================================================
-
-st.header(
-    "1. Upload Documents"
-)
-
-col1, col2 = st.columns(2)
-
-with col1:
-
-    resume_file = st.file_uploader(
-        "Upload Resume",
-        type=["pdf"],
-        help="Upload the candidate's resume as a PDF."
-    )
-
-with col2:
-
-    jd_file = st.file_uploader(
-        "Upload Job Description",
-        type=["txt"],
-        help="Upload the job description as a .txt file."
-    )
-
-
-# ============================================================
-# INPUT PREVIEW
-# ============================================================
-
-if jd_file:
-
-    st.subheader(
-        "Job Description Preview"
-    )
-
-    jd_preview = jd_file.getvalue().decode(
-        "utf-8",
-        errors="replace"
-    )
-
-    st.text_area(
-        "JD content",
-        jd_preview,
-        height=200,
-        disabled=True
-    )
-
-
-# ============================================================
-# ANALYZE BUTTON
-# ============================================================
-
-analyze_button = st.button(
-    "🚀 Analyze Resume",
-    type="primary",
-    use_container_width=True
-)
-
-
-if analyze_button:
-
-    if resume_file is None:
-
-        st.error(
-            "Please upload a resume PDF."
-        )
-
-        st.stop()
-
-    if jd_file is None:
-
-        st.error(
-            "Please upload a job description TXT file."
-        )
-
-        st.stop()
-
-    try:
-
-        with st.spinner(
-            "Running complete resume analysis..."
-        ):
-
-            results = run_analysis(
-                resume_file,
-                jd_file
-            )
-
-        st.session_state["results"] = results
-
-    except Exception as error:
-
-        st.error(
-            "Analysis failed."
-        )
-
-        st.exception(error)
-
-        st.stop()
-
-
-# ============================================================
-# RESULTS
-# ============================================================
-
-if "results" in st.session_state:
-
-    results = st.session_state["results"]
-
-    analysis = results["analysis"]
-
-    hybrid_results = results["hybrid_results"]
-
-    # ========================================================
-    # ATS SCORE
-    # ========================================================
-
-    st.divider()
-
-    st.header(
-        "2. ATS Match Score"
-    )
-
-    score = analysis[
-        "overall_ats_score"
-    ]
-
-    interpretation = analysis[
-        "score_interpretation"
-    ]
-
-    score_col, interpretation_col = (
-        st.columns(2)
-    )
-
-    with score_col:
-
-        st.metric(
-            "Overall ATS-style Score",
-            f"{score:.2f}/100"
-        )
-
-    with interpretation_col:
-
-        st.metric(
-            "Interpretation",
-            interpretation
-        )
-
-    st.caption(
-        "This is a project-specific ATS-style score, "
-        "not an official ATS score from a hiring platform."
-    )
-
-    # ========================================================
-    # REQUIREMENT SUMMARY
-    # ========================================================
-
-    st.header(
-        "3. Requirement Coverage"
-    )
-
-    summary = analysis[
-        "requirement_summary"
-    ]
-
-    c1, c2, c3, c4 = st.columns(4)
-
-    with c1:
-
-        st.metric(
-            "Strong",
-            summary.get("strong", 0)
-        )
-
-    with c2:
-
-        st.metric(
-            "Partial",
-            summary.get("partial", 0)
-        )
-
-    with c3:
-
-        st.metric(
-            "Weak",
-            summary.get("weak", 0)
-        )
-
-    with c4:
-
-        st.metric(
-            "No Alignment",
-            summary.get(
-                "no_alignment",
-                0
-            )
-        )
-
-    # ========================================================
-    # CATEGORY SCORES
-    # ========================================================
-
-    st.header(
-        "4. Match by Requirement Category"
-    )
-
-    category_summary = analysis[
-        "category_summary"
-    ]
+    category_summary = ats.get("category_summary", {})
 
     if category_summary:
 
-        category_columns = st.columns(
-            len(category_summary)
-        )
+        st.markdown("#### By Category")
 
-        for column, (
-            category,
-            category_data
-        ) in zip(
-            category_columns,
+        cols = st.columns(len(category_summary))
+
+        for col, (category, info) in zip(
+            cols,
             category_summary.items()
         ):
 
-            with column:
+            col.metric(
+                label=category.replace("_", " ").title(),
+                value=f"{info.get('score', 0):.1f}"
+            )
 
-                st.metric(
-                    category.title(),
-                    f"{category_data['score']:.1f}"
-                )
+    # --------------------------------------------------------
+    # Requirement summary badges
+    # --------------------------------------------------------
 
-                category_counts = (
-                    category_data[
-                        "summary"
-                    ]
-                )
+    summary = ats.get("requirement_summary", {})
 
-                st.caption(
-                    f"Strong: "
-                    f"{category_counts.get('strong', 0)} | "
-                    f"Partial: "
-                    f"{category_counts.get('partial', 0)} | "
-                    f"Weak: "
-                    f"{category_counts.get('weak', 0)}"
-                )
+    if summary:
 
-    # ========================================================
-    # SKILL ANALYSIS
-    # ========================================================
+        st.markdown("#### Requirement Breakdown")
 
-    st.header(
-        "5. Skills Analysis"
+        badge_cols = st.columns(4)
+
+        badge_cols[0].metric(
+            "🟢 Strong", summary.get("strong", 0)
+        )
+        badge_cols[1].metric(
+            "🟡 Partial", summary.get("partial", 0)
+        )
+        badge_cols[2].metric(
+            "🟠 Weak", summary.get("weak", 0)
+        )
+        badge_cols[3].metric(
+            "🔴 Missing", summary.get("no_alignment", 0)
+        )
+
+    # --------------------------------------------------------
+    # LLM summary, if present and non-null
+    # --------------------------------------------------------
+
+    llm_summary = ats.get("llm_summary")
+
+    if llm_summary:
+
+        st.markdown("#### 💡 Suggested Improvements")
+        st.info(llm_summary)
+
+    # --------------------------------------------------------
+    # Skills / concepts / education matched vs missing
+    # --------------------------------------------------------
+
+    st.markdown("#### Skills & Concepts")
+
+    skill_col, concept_col, edu_col = st.columns(3)
+
+    render_matched_missing(
+        skill_col, "Skills", ats.get("skills", {})
+    )
+    render_matched_missing(
+        concept_col, "Concepts", ats.get("concepts", {})
+    )
+    render_matched_missing(
+        edu_col, "Education", ats.get("education", {})
     )
 
-    skills = analysis[
-        "skills"
-    ]
+    # --------------------------------------------------------
+    # Priority gaps
+    # --------------------------------------------------------
 
-    skill_col1, skill_col2 = (
-        st.columns(2)
-    )
-
-    with skill_col1:
-
-        st.subheader(
-            "Matched Skills"
-        )
-
-        display_list(
-            skills.get("matched", [])
-        )
-
-    with skill_col2:
-
-        st.subheader(
-            "Missing Skills"
-        )
-
-        display_list(
-            skills.get("missing", [])
-        )
-
-    # ========================================================
-    # CONCEPT ANALYSIS
-    # ========================================================
-
-    st.header(
-        "6. Concept Analysis"
-    )
-
-    concepts = analysis[
-        "concepts"
-    ]
-
-    concept_col1, concept_col2 = (
-        st.columns(2)
-    )
-
-    with concept_col1:
-
-        st.subheader(
-            "Matched Concepts"
-        )
-
-        display_list(
-            concepts.get("matched", [])
-        )
-
-    with concept_col2:
-
-        st.subheader(
-            "Missing Concepts"
-        )
-
-        display_list(
-            concepts.get("missing", [])
-        )
-
-    # ========================================================
-    # EDUCATION
-    # ========================================================
-
-    st.header(
-        "7. Education Analysis"
-    )
-
-    education = analysis[
-        "education"
-    ]
-
-    education_col1, education_col2 = (
-        st.columns(2)
-    )
-
-    with education_col1:
-
-        st.subheader(
-            "Matched Education"
-        )
-
-        display_list(
-            education.get("matched", [])
-        )
-
-    with education_col2:
-
-        st.subheader(
-            "Education Gaps"
-        )
-
-        display_list(
-            education.get("missing", [])
-        )
-
-    # ========================================================
-    # EXPERIENCE
-    # ========================================================
-
-    st.header(
-        "8. Experience Analysis"
-    )
-
-    experience = analysis[
-        "experience"
-    ]
-
-    exp_col1, exp_col2 = (
-        st.columns(2)
-    )
-
-    with exp_col1:
-
-        st.metric(
-            "Estimated Experience",
-            f"{experience.get('estimated_years', 0):.1f} years"
-        )
-
-    with exp_col2:
-
-        required_experience = experience.get(
-            "required",
-            []
-        )
-
-        st.write(
-            "**Required:**"
-        )
-
-        display_list(
-            required_experience
-        )
-
-    if experience.get("evidence"):
-
-        st.subheader(
-            "Experience Evidence"
-        )
-
-        display_list(
-            experience["evidence"]
-        )
-
-    # ========================================================
-    # PRIORITY GAPS
-    # ========================================================
-
-    st.header(
-        "9. Priority Gaps"
-    )
-
-    priority_gaps = analysis[
-        "priority_gaps"
-    ]
+    priority_gaps = ats.get("priority_gaps", [])
 
     if priority_gaps:
 
-        for index, gap in enumerate(
-            priority_gaps,
-            start=1
-        ):
+        st.markdown("#### Top Priority Gaps")
 
-            if isinstance(
-                gap,
-                dict
+        for gap in priority_gaps[:5]:
+
+            emoji, label = ASSESSMENT_STYLE.get(
+                gap.get("assessment", ""),
+                ("⚪", "Unknown")
+            )
+
+            requirement_preview = gap.get("requirement", "")[:90]
+
+            with st.expander(
+                f"{emoji} [{label}] {requirement_preview}"
             ):
 
-                requirement = gap.get(
-                    "requirement",
-                    "Unknown requirement"
+                st.write(
+                    f"**Category:** {gap.get('category', 'N/A')}"
+                )
+                st.write(
+                    f"**Importance:** "
+                    f"{gap.get('importance', 'N/A')}"
+                )
+                st.write(
+                    f"**Hybrid score:** "
+                    f"{gap.get('hybrid_score', 0):.2f}"
                 )
 
-                st.warning(
-                    f"**{index}.** {requirement}"
-                )
+    with st.expander("Raw JSON response"):
+        st.json(payload)
 
-            else:
 
-                st.warning(
-                    f"**{index}.** {gap}"
-                )
+# ============================================================
+# SIDEBAR -- API CONFIG
+# ============================================================
+
+st.sidebar.header("⚙️ Settings")
+
+api_url = st.sidebar.text_input(
+    "API base URL",
+    value=DEFAULT_API_URL,
+    help=(
+        "Your deployed FastAPI service. Change this to "
+        "http://localhost:8000 to test against a local run "
+        "instead of the live deployment."
+    )
+)
+
+include_llm_summary = st.sidebar.checkbox(
+    "Generate AI improvement summary",
+    value=True,
+    help=(
+        "Uses Groq to write a short natural-language summary "
+        "of the biggest gaps. Adds a few seconds of latency."
+    )
+)
+
+st.sidebar.caption(
+    "Note: the free-hosted API sleeps after 15 minutes of "
+    "inactivity. The first request after a while may take "
+    "30-60 seconds to wake it up."
+)
+
+
+# ============================================================
+# MAIN LAYOUT
+# ============================================================
+
+st.title("📄 AI Resume Analyzer")
+st.caption(
+    "Upload a resume and a job description to see how well "
+    "they align, requirement by requirement."
+)
+
+left, right = st.columns([1, 1.4])
+
+with left:
+
+    st.markdown("#### 1. Upload your resume")
+
+    resume_file = st.file_uploader(
+        "Resume (PDF)",
+        type=["pdf"]
+    )
+
+    st.markdown("#### 2. Add the job description")
+
+    jd_mode = st.radio(
+        "How would you like to provide the JD?",
+        ["Paste text", "Upload a .txt file"],
+        horizontal=True
+    )
+
+    jd_text = None
+    jd_file = None
+
+    if jd_mode == "Paste text":
+
+        jd_text = st.text_area(
+            "Job description",
+            height=250,
+            placeholder="Paste the full job description here..."
+        )
 
     else:
 
-        st.success(
-            "No high-priority gaps were identified."
+        jd_file = st.file_uploader(
+            "Job description (.txt)",
+            type=["txt"]
         )
 
-    # ========================================================
-    # REQUIREMENT DETAILS
-    # ========================================================
-
-    st.header(
-        "10. Requirement-by-Requirement Analysis"
+    analyze_clicked = st.button(
+        "🔍 Analyze",
+        type="primary",
+        use_container_width=True
     )
 
-    for result in hybrid_results:
+with right:
 
-        requirement_id = result.get(
-            "requirement_id",
-            ""
+    if not analyze_clicked:
+
+        st.info(
+            "Upload a resume and a job description, then click "
+            "**Analyze** to see your results here."
         )
 
-        requirement = result.get(
-            "requirement",
-            ""
-        )
+    else:
 
-        score = float(
-            result.get(
-                "hybrid_score",
-                0.0
-            )
-        )
+        if resume_file is None:
 
-        assessment = result.get(
-            "assessment",
-            ""
-        )
+            st.error("Please upload a resume PDF first.")
 
-        with st.expander(
-            f"Requirement {requirement_id} — "
-            f"{assessment_label(assessment)}"
-        ):
+        elif jd_mode == "Paste text" and not jd_text:
 
-            st.write(
-                requirement
-            )
+            st.error("Please paste a job description.")
 
-            detail_col1, detail_col2, detail_col3 = (
-                st.columns(3)
-            )
+        elif jd_mode == "Upload a .txt file" and jd_file is None:
 
-            with detail_col1:
+            st.error("Please upload a job description file.")
 
-                st.metric(
-                    "Hybrid Score",
-                    f"{score:.3f}"
+        else:
+
+            files = {
+                "resume": (
+                    resume_file.name,
+                    resume_file.getvalue(),
+                    "application/pdf"
+                )
+            }
+
+            if jd_file is not None:
+
+                files["job_description_file"] = (
+                    jd_file.name,
+                    jd_file.getvalue(),
+                    "text/plain"
                 )
 
-            with detail_col2:
+            form_data = {
+                "include_llm_summary": str(
+                    include_llm_summary
+                ).lower()
+            }
 
-                st.write(
-                    "**Category**"
-                )
+            if jd_text:
+                form_data["job_description"] = jd_text
 
-                st.write(
-                    result.get(
-                        "category",
-                        "N/A"
-                    ).title()
-                )
+            with st.spinner(
+                "Analyzing... this can take 10-30 seconds, "
+                "longer if the server was asleep."
+            ):
 
-            with detail_col3:
+                try:
 
-                st.write(
-                    "**Importance**"
-                )
-
-                st.write(
-                    result.get(
-                        "importance",
-                        "N/A"
-                    ).title()
-                )
-
-            # ------------------------------------------------
-            # Skills
-            # ------------------------------------------------
-
-            skill_match = result.get(
-                "skill_match",
-                {}
-            )
-
-            if skill_match:
-
-                st.subheader(
-                    "Skill Evidence"
-                )
-
-                st.write(
-                    f"Score: "
-                    f"{skill_match.get('score', 0):.2f}"
-                )
-
-                matched = skill_match.get(
-                    "matched",
-                    []
-                )
-
-                missing = skill_match.get(
-                    "missing",
-                    []
-                )
-
-                if matched:
-
-                    st.write(
-                        "**Matched:** "
-                        + ", ".join(matched)
+                    response = requests.post(
+                        f"{api_url.rstrip('/')}/analyze",
+                        files=files,
+                        data=form_data,
+                        timeout=120
                     )
 
-                if missing:
+                    if response.status_code == 200:
 
-                    st.write(
-                        "**Missing:** "
-                        + ", ".join(missing)
+                        render_results(response.json())
+
+                    else:
+
+                        st.error(
+                            f"API returned an error "
+                            f"({response.status_code}): "
+                            f"{response.text}"
+                        )
+
+                except requests.exceptions.Timeout:
+
+                    st.error(
+                        "The request timed out. If the server "
+                        "was asleep (free-tier services sleep "
+                        "after inactivity), try again -- it "
+                        "should be faster the second time."
                     )
 
-            # ------------------------------------------------
-            # Concepts
-            # ------------------------------------------------
+                except requests.exceptions.ConnectionError:
 
-            concept_match = result.get(
-                "concept_match",
-                {}
-            )
-
-            if concept_match:
-
-                st.subheader(
-                    "Concept Evidence"
-                )
-
-                matched = concept_match.get(
-                    "matched",
-                    []
-                )
-
-                missing = concept_match.get(
-                    "missing",
-                    []
-                )
-
-                if matched:
-
-                    st.write(
-                        "**Matched:** "
-                        + ", ".join(matched)
+                    st.error(
+                        "Couldn't reach the API. Check that the "
+                        "API base URL in the sidebar is correct "
+                        "and the service is running."
                     )
-
-                if missing:
-
-                    st.write(
-                        "**Missing:** "
-                        + ", ".join(missing)
-                    )
-
-            # ------------------------------------------------
-            # Best Evidence
-            # ------------------------------------------------
-
-            evidence = result.get(
-                "best_evidence"
-            )
-
-            if evidence:
-
-                st.subheader(
-                    "Best Resume Evidence"
-                )
-
-                st.info(
-                    f"**Section:** "
-                    f"{evidence.get('section', 'N/A')}\n\n"
-                    f"{evidence.get('text', '')}"
-                )
-
-    # ========================================================
-    # PIPELINE INFORMATION
-    # ========================================================
-
-    with st.expander(
-        "🔍 Pipeline Information"
-    ):
-
-        st.write(
-            f"Resume sections detected: "
-            f"{len(results['sections'])}"
-        )
-
-        st.write(
-            f"Resume chunks created: "
-            f"{len(results['chunks'])}"
-        )
-
-        st.write(
-            f"JD requirements extracted: "
-            f"{len(results['requirements'])}"
-        )
-
-        st.write(
-            "Processing pipeline:"
-        )
-
-        st.code(
-            """
-Resume PDF
-    ↓
-PDF Parser
-    ↓
-Text Cleaner
-    ↓
-Semantic Chunker
-    ↓
-Resume Embeddings
-    ↓
-JD Parser
-    ↓
-Requirement Extractor
-    ↓
-Requirement Normalizer
-    ↓
-JD Embeddings
-    ↓
-Semantic Matching
-    ↓
-Hybrid Matching
-    ↓
-ATS Scoring
-    ↓
-Gap Analysis
-    ↓
-Final Analysis
-            """,
-            language="text"
-        )
-
-    # ========================================================
-    # RESET
-    # ========================================================
-
-    st.divider()
-
-    if st.button(
-        "🔄 Analyze Another Resume"
-    ):
-
-        del st.session_state["results"]
-
-        st.rerun()
