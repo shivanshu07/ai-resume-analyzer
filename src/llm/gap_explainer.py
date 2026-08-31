@@ -47,7 +47,7 @@ class LLMGapExplainer:
         model_name: Optional[str] = None,
         base_url: Optional[str] = None,
         max_gaps: int = 5,
-        max_tokens: int = 300
+        max_tokens: int = 500
     ) -> None:
 
         self.api_key = api_key or GROQ_API_KEY

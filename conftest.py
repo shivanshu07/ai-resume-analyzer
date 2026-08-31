@@ -23,3 +23,23 @@ ROOT_DIR = Path(__file__).resolve().parent
 
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
+
+
+def pytest_configure(config):
+    """
+    Silences one specific, known-harmless warning that comes
+    from INSIDE the deepeval library itself (deepeval/utils.py
+    calling the deprecated asyncio.get_event_loop() pattern),
+    not from any code in this repo. Confirmed as of deepeval
+    4.2.0 (the latest release available) that no upgrade fixes
+    this -- it's current, unresolved upstream behavior.
+
+    Scoped narrowly to this exact message + category + module
+    so it does NOT hide unrelated DeprecationWarnings that
+    might actually matter, from deepeval or anywhere else.
+    """
+
+    config.addinivalue_line(
+        "filterwarnings",
+        "ignore:There is no current event loop:DeprecationWarning:deepeval.utils"
+    )
