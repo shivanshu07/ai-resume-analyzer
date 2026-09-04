@@ -1,1187 +1,417 @@
 # AI Resume Analyzer
 
-An AI-powered resume analysis system that evaluates how well a resume matches a specific job description.
+An AI-powered resume analysis system that evaluates how well a resume matches a specific job description — combining semantic embeddings, FAISS vector search, structured rule-based matching, and an LLM-generated improvement summary into a single hybrid score with a requirement-by-requirement breakdown.
 
-The project combines **PDF parsing, text preprocessing, structured job-requirement extraction, semantic embeddings, semantic matching, hybrid scoring, ATS-style analysis, gap analysis, and a Streamlit interface** into a reproducible end-to-end pipeline.
+**[Try the live demo →](#https://ai-resume-analyzer-saawhwwh8kdi9w4vswsxpw.streamlit.app/)** &nbsp;|&nbsp; **[API docs →](#https://ai-resume-analyzer-e5lg.onrender.com)** &nbsp;|&nbsp; ![Tests](https://github.com/shivanshu07/ai-resume-analyzer/actions/workflows/tests.yml/badge.svg)
 
-> **Current project scope:** The system is designed around evaluating a resume against a job description using pretrained models. It does not require training a custom ML model.
+> Replace the two links above with your actual deployed URLs before publishing this README — see [Live Deployments](#live-deployments) below for where to find them.
 
 ---
 
-## 1. Project Overview
+## What it does
 
-The AI Resume Analyzer takes two primary inputs:
+Give it a resume (PDF) and a job description, and it returns:
 
-1. A **resume PDF**
-2. A **job description text file**
+- An overall **ATS-style alignment score** (0–100) with a plain-language interpretation
+- A **requirement-by-requirement breakdown** — which JD requirements are strongly met, partially met, weak, or missing entirely
+- **Matched vs. missing** skills, concepts, and education fields
+- A ranked list of **priority gaps** — the highest-impact things to fix first
+- An optional **LLM-generated summary** (via Groq) explaining, in plain English, what to actually change on the resume
 
-It processes both inputs and produces:
+Unlike a keyword-matching ATS screen, the scoring is hybrid: semantic similarity (does this resume chunk *mean* something related to this requirement?) combined with structured evidence (does the resume literally contain this skill, this degree, this many years of experience?). Neither signal alone is reliable — see [Why Hybrid Matching](#why-hybrid-matching) for why.
 
-- Extracted resume text
-- Cleaned resume text
-- Resume sections and chunks
-- Structured job requirements
-- Resume and job-description embeddings
-- Semantic similarity results
-- Hybrid matching scores
-- ATS-style overall score
-- Skill matches and gaps
-- Concept matches and gaps
-- Education alignment
-- Experience analysis
-- Priority gaps that require attention
+---
 
-The main processing pipeline is executed through:
+## Table of Contents
+
+1. [Architecture](#architecture)
+2. [Three ways to run it](#three-ways-to-run-it)
+3. [Local setup (CLI)](#local-setup-cli)
+4. [Running the API locally](#running-the-api-locally)
+5. [Running the Streamlit UI locally](#running-the-streamlit-ui-locally)
+6. [Running with Docker](#running-with-docker)
+7. [Live Deployments](#live-deployments)
+8. [Why there are four requirements files](#why-there-are-four-requirements-files)
+9. [Environment variables](#environment-variables)
+10. [Testing](#testing)
+11. [LLM Output Evaluation](#llm-output-evaluation)
+12. [CI/CD](#cicd)
+13. [Project structure](#project-structure)
+14. [Module responsibilities](#module-responsibilities)
+15. [Understanding the output](#understanding-the-output)
+16. [Why Hybrid Matching](#why-hybrid-matching)
+17. [Known limitations](#known-limitations)
+18. [Possible future improvements](#possible-future-improvements)
+
+---
+
+## Architecture
+
+The project has two independently deployable pieces talking over HTTP — not one monolithic script:
+
+```text
+┌─────────────────────┐         HTTP          ┌──────────────────────────┐
+│   Streamlit UI       │ ─────────────────────▶ │   FastAPI backend         │
+│   (Streamlit Cloud)  │ ◀───────────────────── │   (Docker, on Render)     │
+└─────────────────────┘        JSON            └──────────────────────────┘
+                                                            │
+                                                            ▼
+                                          ┌──────────────────────────────────┐
+                                          │  ResumeAnalysisPipeline            │
+                                          │                                    │
+                                          │  PDF/JD parsing → cleaning →       │
+                                          │  chunking → embedding (Sentence-   │
+                                          │  Transformers) → FAISS vector      │
+                                          │  search → hybrid scoring →         │
+                                          │  ATS/gap analysis                  │
+                                          └──────────────────────────────────┘
+                                                            │
+                                                            ▼
+                                          ┌──────────────────────────────────┐
+                                          │  LLMGapExplainer (optional)        │
+                                          │  → Groq API → plain-English        │
+                                          │    improvement summary             │
+                                          └──────────────────────────────────┘
+```
+
+The Streamlit app is a **thin client** — it doesn't import the pipeline directly, it calls the deployed API's `/analyze` endpoint over HTTP, the same way any other consumer could. This is a deliberate separation: the API is the actual product; the UI is one interface to it.
+
+---
+
+## Three ways to run it
+
+Pick whichever matches what you're trying to do:
+
+| Goal | How |
+|---|---|
+| Just see it work, no setup | Use the [live demo](#live-deployments) |
+| Hack on the pipeline itself | [Local CLI](#local-setup-cli) |
+| Hack on the API | [Local API](#running-the-api-locally) |
+| Hack on the UI | [Local Streamlit](#running-the-streamlit-ui-locally) |
+| Reproduce the exact deployed environment | [Docker](#running-with-docker) |
+
+---
+
+## Local setup (CLI)
+
+### Step 1 — Clone and create a virtual environment
+
+```bash
+git clone <YOUR_GITHUB_REPOSITORY_URL>
+cd AI-Resume-Analyzer
+
+python -m venv venv
+source venv/Scripts/activate   # Git Bash on Windows
+# venv\Scripts\activate        # Command Prompt on Windows
+# source venv/bin/activate     # macOS/Linux
+```
+
+### Step 2 — Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Step 3 — Add your input files
+
+```text
+data/raw/resume/resume.pdf
+data/raw/job_description/job_description.txt
+```
+
+### Step 4 — Run the pipeline
 
 ```bash
 python -m app.main
 ```
 
+This runs the full pipeline end to end and writes intermediate and final outputs to `data/processed/`, including `ats_analysis.json` — the main result.
+
 ---
 
-## 2. Current Architecture
+## Running the API locally
 
-The project is organized into application code, source modules, utilities, data, tests, configuration, and supporting files.
+```bash
+pip install fastapi "uvicorn[standard]" python-multipart openai
+uvicorn app.api:app --reload
+```
+
+Then open `http://127.0.0.1:8000/docs` for interactive Swagger UI, or `http://127.0.0.1:8000/health` to confirm it's up.
+
+`POST /analyze` accepts a resume PDF and a job description (as pasted text or an uploaded `.txt` file), and returns the same `ats_analysis` JSON the CLI produces — plus an optional `llm_summary` field if `include_llm_summary=true` is passed.
+
+---
+
+## Running the Streamlit UI locally
+
+```bash
+pip install -r requirements-streamlit.txt
+streamlit run streamlit_app.py
+```
+
+By default it points at the live deployed API (see [Live Deployments](#live-deployments)). To test against your own local API instead, change the "API base URL" field in the sidebar to `http://localhost:8000`.
+
+---
+
+## Running with Docker
+
+```bash
+docker build -t resume-analyzer .
+docker run --env-file .env -p 8000:8000 resume-analyzer
+```
+
+Then hit `http://localhost:8000/docs` exactly as with the local API. The embedding model is baked into the image at build time (not downloaded on every container start), and the image installs CPU-only PyTorch explicitly rather than the default CUDA build — both deliberate choices to keep the container's memory footprint small enough for free-tier hosting (see [Why there are four requirements files](#why-there-are-four-requirements-files)).
+
+---
+
+## Live Deployments
+
+| Component | Platform | Notes |
+|---|---|---|
+| FastAPI backend | [Render](https://render.com) (free tier) | `<YOUR_RENDER_URL>` |
+| Streamlit UI | [Streamlit Community Cloud](https://streamlit.io/cloud) (free) | `<YOUR_STREAMLIT_URL>` |
+
+**Fill in the two URLs above** — find them in your Render dashboard (top of the service page) and Streamlit Cloud dashboard respectively, then replace the placeholder links at the top of this README too.
+
+**Cold starts:** both platforms' free tiers sleep after a period of inactivity. The first request after a while can take 30–60 seconds to wake the service back up — this is expected behavior, not a bug. If a demo link seems unresponsive at first, give it a moment and try again.
+
+---
+
+## Why there are four requirements files
+
+This tripped up the Docker and CI setup more than once, so it's worth explaining rather than leaving implicit:
+
+| File | Used by | Why it's separate |
+|---|---|---|
+| `requirements.txt` | Local dev environment | The full, real dev environment — includes test/eval tooling like `deepeval` |
+| `requirements-docker.txt` | `Dockerfile` | Runtime-only deps. The full `requirements.txt` has a genuine version conflict (`click` is pinned to a version `deepeval` and `huggingface-hub` can't simultaneously satisfy) that has nothing to do with what the API needs to run |
+| `requirements-test.txt` | GitHub Actions CI | Same conflict, same fix, needed again because CI runs on a clean Linux environment, not your local one |
+| `app/requirements.txt` | Streamlit Community Cloud | Streamlit Cloud auto-detects a file named exactly `requirements.txt` in the same directory as the entrypoint script. Without this, it silently falls back to the repo-root `requirements.txt` and tries (and fails) to install the same conflicting dev dependencies |
+
+The short version: `requirements.txt` reflects everything installed in your local dev environment via `pip freeze`, which mixes real runtime dependencies with unrelated dev/test tooling. Each deployment target gets its own minimal, conflict-free list of only what it actually needs.
+
+---
+
+## Environment variables
+
+Create a `.env` file at the project root (never commit it):
+
+```env
+GROQ_API_KEY=your_groq_key_here
+```
+
+Get a free key at [console.groq.com/keys](https://console.groq.com/keys) — no credit card required. Used for the LLM gap-explanation summary and the LLM-judge evaluation tests. If unset, both features degrade gracefully (the summary field comes back `null`, evaluation tests skip) rather than breaking the rest of the pipeline.
+
+```env
+MODEL_NAME=openai/gpt-oss-120b
+```
+
+Optional override. Defaults to `openai/gpt-oss-120b` — Groq's current recommended free-tier model. (An earlier default, `llama-3.3-70b-versatile`, was deprecated by Groq on June 17, 2026 and no longer works; if you see a `model_not_found` error, this is why.)
+
+---
+
+## Testing
+
+```bash
+pytest -v
+```
+
+or, equivalently and more robustly regardless of how it's invoked:
+
+```bash
+python -m pytest -v
+```
+
+A root-level `conftest.py` ensures the repo root is always on `sys.path`, so `from src...` imports resolve correctly whether you run bare `pytest`, `python -m pytest`, or trigger tests from an IDE.
+
+Tests use a small, generic, safe-to-commit sample resume fixture (`tests/fixtures/sample_resume.pdf`) rather than any real private resume file.
+
+---
+
+## LLM Output Evaluation
+
+Deterministic code (PDF parsing, section detection, scoring math) is covered by regular `pytest` assertions. The LLM-generated gap summary is different — there's no single "correct" wording to assert against, so `tests/test_llm_eval.py` uses [`deepeval`](https://github.com/confident-ai/deepeval)'s `GEval` metric instead: an LLM-as-judge that scores the summary against a written rubric.
+
+Two things are checked:
+
+- **Groundedness** — does the summary avoid asserting false facts about the candidate's resume or the job's requirements? (Clearly-hedged illustrative examples, like "e.g., coursework in X" don't count as false claims — that's expected, useful advice, not hallucination.)
+- **Actionability** — does it give specific, resume-focused suggestions rather than generic career advice?
+
+The judge model is Groq (`src/llm/groq_eval_model.py`, a custom `DeepEvalBaseLLM` subclass), not OpenAI — evaluation runs on the same free tier as the rest of the project.
+
+```bash
+pytest tests/test_llm_eval.py -v -s
+```
+
+The `-s` flag is required to actually see the score — by default pytest only shows output for failing tests. Alternatively:
+
+```bash
+deepeval test run tests/test_llm_eval.py
+```
+
+uses deepeval's own CLI runner, which prints a results table without needing `-s`.
+
+---
+
+## CI/CD
+
+GitHub Actions (`.github/workflows/tests.yml`) runs the full `pytest` suite automatically on every push and pull request to `main`, using `requirements-test.txt`. `GROQ_API_KEY` is available in CI as a repository secret, so the LLM evaluation tests run for real in CI, not just locally.
+
+---
+
+## Project structure
 
 ```text
 AI-Resume-Analyzer/
 │
-├── .deepeval/
-├── .github/
 ├── app/
-│   ├── __init__.py
-│   ├── main.py
-│   └── streamlit_app.py
+│   ├── main.py                  # CLI entrypoint
+│   ├── api.py                   # FastAPI app
+│   └── requirements.txt         # Minimal deps, for Streamlit Cloud's auto-detection
+│
+├── streamlit_app.py             # Streamlit UI (thin HTTP client)
+├── .streamlit/config.toml       # UI theme
 │
 ├── config/
-│   ├── __init__.py
-│   └── settings.py
-│
-├── data/
-│   ├── processed/
-│   │   ├── ats_analysis.json
-│   │   ├── hybrid_results.json
-│   │   ├── jd_embeddings.json
-│   │   ├── jd_requirements.json
-│   │   ├── match_results.json
-│   │   ├── resume_chunks.json
-│   │   ├── resume_clean.txt
-│   │   ├── resume_embeddings.json
-│   │   └── resume_raw.txt
-│   │
-│   └── raw/
-│       ├── job_description/
-│       │   └── job_description.txt
-│       │
-│       └── resume/
-│           └── resume.pdf
+│   └── settings.py              # Env var loading, Groq config
 │
 ├── src/
-│   ├── __init__.py
-│   │
-│   ├── evaluation/
-│   │   ├── __init__.py
-│   │   ├── analysis.py
-│   │   ├── ats_scorer.py
-│   │   ├── gap_analyzer.py
-│   │   └── hybrid_scorer.py
+│   ├── pipeline.py              # ResumeAnalysisPipeline -- shared by CLI and API
 │   │
 │   ├── extraction/
-│   │   ├── __init__.py
-│   │   ├── jd_parser.py
 │   │   ├── pdf_parser.py
+│   │   ├── jd_parser.py
 │   │   └── requirement_extractor.py
 │   │
-│   ├── llm/
-│   │   ├── __init__.py
-│   │   ├── embedder.py
-│   │   └── matcher.py
+│   ├── preprocessing/
+│   │   ├── cleaner.py
+│   │   ├── chunker.py
+│   │   └── requirement_normalizer.py
 │   │
-│   └── preprocessing/
-│       ├── __init__.py
-│       ├── chunker.py
-│       ├── cleaner.py
-│       └── requirement_normalizer.py
-│
-├── utils/
-│   ├── __init__.py
-│   ├── file_handler.py
-│   ├── helper.py
-│   └── logger.py
+│   ├── llm/
+│   │   ├── embedder.py
+│   │   ├── matcher.py           # FAISS-backed semantic matching
+│   │   ├── gap_explainer.py     # Groq LLM summary generation
+│   │   └── groq_eval_model.py   # Groq judge for deepeval
+│   │
+│   ├── evaluation/
+│   │   ├── hybrid_scorer.py
+│   │   ├── ats_scorer.py
+│   │   ├── gap_analyzer.py
+│   │   └── analysis.py
+│   │
+│   └── utils/
+│       ├── file_handler.py
+│       ├── helper.py
+│       └── logger.py
 │
 ├── tests/
-│   ├── test_ats_analysis.py
+│   ├── fixtures/sample_resume.pdf
+│   ├── test_parser.py
 │   ├── test_cleaner.py
-│   ├── test_normalizer.py
-│   └── test_parser.py
+│   ├── test_llm_eval.py
+│   └── ...
 │
-├── .env
-├── .gitignore
-├── README.md
-├── requirements.txt
-└── venv/
+├── .github/workflows/tests.yml  # CI
+├── conftest.py                  # sys.path fix + warning filters
+├── Dockerfile
+├── .dockerignore
+├── requirements.txt             # Full local dev environment
+├── requirements-docker.txt      # Minimal, for Docker
+├── requirements-test.txt        # Minimal, for CI
+└── requirements-streamlit.txt   # Minimal, for local Streamlit dev
 ```
-
-> `venv/`, Python cache directories, and other generated/local files should normally not be committed to GitHub.
 
 ---
 
-# 3. Module Responsibilities
+## Module responsibilities
 
-## `app/`
+**`src/pipeline.py`** — `ResumeAnalysisPipeline`, the reusable class both `app/main.py` (CLI) and `app/api.py` (FastAPI) call into, so both entrypoints run the exact same logic rather than two versions that can drift apart. Loads the embedding model once at instantiation, not per request.
 
-### `app/main.py`
+**`src/extraction/pdf_parser.py`** — extracts raw text from the resume PDF via PyMuPDF.
 
-This is the main command-line orchestration layer.
+**`src/extraction/jd_parser.py`** — reads and lightly cleans the raw job description text.
 
-It coordinates the complete pipeline:
+**`src/extraction/requirement_extractor.py`** — splits the JD into structured requirements (required / preferred / responsibility / education / other), detecting section headings across a broad range of real-world phrasings ("Qualifications", "What You'll Do", "Nice to Have", etc.) rather than a narrow fixed list. Falls back to an "other" bucket instead of dropping content when no known heading matches.
+
+**`src/preprocessing/cleaner.py`** — normalizes extracted text and detects resume section boundaries (`SUMMARY`, `SKILLS`, `WORK EXPERIENCE`, `PROJECTS`, `EDUCATION`, etc.).
+
+**`src/preprocessing/chunker.py`** — splits cleaned resume sections into semantically coherent chunks (keeping each job/project together where possible) for embedding.
+
+**`src/preprocessing/requirement_normalizer.py`** — extracts structured fields (skills, education fields, experience, concepts) from each JD requirement's raw text via pattern matching.
+
+**`src/llm/embedder.py`** — generates normalized embeddings via `sentence-transformers` (`all-MiniLM-L6-v2`, 384 dimensions).
+
+**`src/llm/matcher.py`** — semantic matching between JD requirements and resume chunks. Uses a FAISS `IndexFlatIP` vector index (exact search, not approximate — since embeddings are pre-normalized, inner product is mathematically identical to cosine similarity, so this produces the same scores as brute-force search, just via a real vector index instead of a hand-rolled loop). The index is built once per resume and reused across every requirement lookup.
+
+**`src/llm/gap_explainer.py`** — `LLMGapExplainer`, calls Groq to generate a short natural-language summary of the top priority gaps. Degrades gracefully (returns `None`) if no API key is configured or the request fails, rather than breaking the rest of the response.
+
+**`src/llm/groq_eval_model.py`** — `GroqEvalModel`, a custom `DeepEvalBaseLLM` subclass so the evaluation test suite judges LLM output using Groq instead of defaulting to OpenAI.
+
+**`src/evaluation/hybrid_scorer.py`** — combines semantic similarity with structured evidence (skills, education, experience, concepts) into a single per-requirement score and assessment (`STRONG_ALIGNMENT` / `PARTIAL_ALIGNMENT` / `WEAK_ALIGNMENT` / `NO_ALIGNMENT`).
+
+**`src/evaluation/ats_scorer.py`** — aggregates requirement-level scores into an overall weighted ATS-style score and interpretation.
+
+**`src/evaluation/gap_analyzer.py`** — produces matched/missing skill, concept, and education lists, plus a priority-ranked list of the gaps most worth addressing.
+
+**`src/evaluation/analysis.py`** — `ResumeAnalysisEngine`, combines ATS scoring and gap analysis into the final `ats_analysis` output.
+
+---
+
+## Understanding the output
+
+**Overall score:**
 
 ```text
-Resume PDF
-    ↓
-PDF parsing
-    ↓
-Text cleaning
-    ↓
-Section detection / chunking
-    ↓
-Resume embeddings
-    ↓
-Job description parsing
-    ↓
-Requirement extraction
-    ↓
-Requirement normalization
-    ↓
-JD embeddings
-    ↓
-Semantic matching
-    ↓
-Hybrid matching
-    ↓
-ATS scoring
-    ↓
-Gap analysis
-    ↓
-JSON outputs
+Overall ATS Score: 45.6/100
+Interpretation: Weak Match
 ```
 
-Run it with:
+An analytical score produced by this project's own scoring logic — **not** a real employer ATS system's score, and not a prediction of whether an application will be rejected or accepted. Use it to identify what to improve, not as a pass/fail signal.
 
-```bash
-python -m app.main
-```
-
----
-
-### `app/streamlit_app.py`
-
-Provides the Streamlit-based interface for interacting with the resume analysis system.
-
-Run with:
-
-```bash
-streamlit run app/streamlit_app.py
-```
-
----
-
-# 4. Configuration
-
-## `config/settings.py`
-
-Contains project configuration and settings used by the application.
-
-This keeps configuration separate from the processing logic.
-
----
-
-# 5. Source Modules
-
-## 5.1 Extraction
-
-The extraction layer converts the raw resume and job description into usable text and structured requirements.
-
-### `src/extraction/pdf_parser.py`
-
-Responsible for extracting text from the resume PDF.
-
-Input:
+**Per-requirement:**
 
 ```text
-data/raw/resume/resume.pdf
-```
-
-Output:
-
-```text
-data/processed/resume_raw.txt
-```
-
----
-
-### `src/extraction/jd_parser.py`
-
-Responsible for reading and processing the job description.
-
-Input:
-
-```text
-data/raw/job_description/job_description.txt
-```
-
-The extracted job description is passed to the requirement extraction stage.
-
----
-
-### `src/extraction/requirement_extractor.py`
-
-Converts the job description into structured requirements.
-
-Requirements are categorized into areas such as:
-
-- Required skills
-- Preferred skills
-- Responsibilities
-- Education
-- Other requirements
-
-The resulting structured requirements are stored in:
-
-```text
-data/processed/jd_requirements.json
-```
-
----
-
-# 6. Preprocessing
-
-The preprocessing layer prepares extracted text for matching.
-
-## `src/preprocessing/cleaner.py`
-
-Cleans extracted resume/JD text.
-
-Typical processing includes normalization of whitespace and formatting artifacts produced during PDF/text extraction.
-
-Output:
-
-```text
-data/processed/resume_clean.txt
-```
-
----
-
-## `src/preprocessing/chunker.py`
-
-Divides the cleaned resume into meaningful sections/chunks.
-
-The current pipeline detects sections such as:
-
-```text
-SUMMARY
-SKILLS
-WORK EXPERIENCE
-PROJECTS
-EDUCATION
-CERTIFICATIONS & LANGUAGES
-```
-
-Output:
-
-```text
-data/processed/resume_chunks.json
-```
-
-Each chunk retains information about its resume section so that matching can identify the most relevant evidence.
-
----
-
-## `src/preprocessing/requirement_normalizer.py`
-
-Normalizes extracted job requirements into structured components.
-
-For example, a requirement can be represented using fields such as:
-
-```text
-category
-importance
-skills
-education
-concepts
-experience
-original requirement
-```
-
-This makes it possible to compare the JD requirements against different aspects of the resume.
-
----
-
-# 7. Embedding and Matching
-
-## `src/llm/embedder.py`
-
-Generates semantic embeddings using a pretrained sentence-transformer model.
-
-The current pipeline uses:
-
-```text
-all-MiniLM-L6-v2
-```
-
-The embedding dimension reported by the current pipeline is:
-
-```text
-384
-```
-
-Resume embeddings are saved to:
-
-```text
-data/processed/resume_embeddings.json
-```
-
-Job-description requirement embeddings are saved to:
-
-```text
-data/processed/jd_embeddings.json
-```
-
-The model is pretrained; this project does not train the embedding model.
-
----
-
-## `src/llm/matcher.py`
-
-Performs semantic matching between:
-
-- normalized job requirements
-- resume chunks
-
-The system identifies the resume chunk with the strongest semantic relationship to each requirement.
-
-The semantic matching output contains:
-
-- Requirement
-- Category
-- Best evidence section
-- Resume chunk
-- Similarity score
-- Match level
-
-Output:
-
-```text
-data/processed/match_results.json
-```
-
----
-
-# 8. Evaluation and Scoring
-
-## `src/evaluation/hybrid_scorer.py`
-
-Combines semantic similarity with structured resume/JD evidence.
-
-The purpose of hybrid matching is to avoid relying entirely on embedding similarity.
-
-The system considers multiple types of evidence, including:
-
-- semantic similarity
-- skills
-- education
-- concepts
-- experience
-- requirement category
-
-The output is:
-
-```text
-data/processed/hybrid_results.json
-```
-
-Each requirement receives a hybrid score and an assessment such as:
-
-```text
-STRONG_ALIGNMENT
-PARTIAL_ALIGNMENT
-WEAK_ALIGNMENT
-NO_ALIGNMENT
-```
-
----
-
-## `src/evaluation/ats_scorer.py`
-
-Calculates the overall ATS-style score from the requirement-level analysis.
-
-The output includes:
-
-- Overall ATS score
-- Interpretation
-- Requirement summary
-- Category scores
-
----
-
-## `src/evaluation/gap_analyzer.py`
-
-Identifies gaps between the resume and job description.
-
-The analysis covers areas such as:
-
-### Skills
-
-Matched skills and missing skills.
-
-Example:
-
-```text
-Matched:
-- Python
-- SQL
-- Statistics
-- Machine Learning
-
-Missing:
-- Marketing Analytics
-- Problem Scoping
-```
-
-### Concepts
-
-Matched and missing concepts such as:
-
-```text
-Business Insights
-Stakeholder Management
-Client Engagement
-Decision Making
-Innovation
-```
-
-### Education
-
-Checks whether the resume's education aligns with education-related requirements.
-
-### Experience
-
-Extracts experience requirements and estimates professional experience from the resume.
-
-### Priority Gaps
-
-Ranks the requirements that need the most attention.
-
----
-
-## `src/evaluation/analysis.py`
-
-Provides the higher-level analysis functionality used to bring together the scoring and gap-analysis results.
-
----
-
-# 9. Utilities
-
-## `utils/file_handler.py`
-
-Provides reusable methods for:
-
-- saving text
-- loading text
-- saving JSON
-- loading JSON
-
-It also creates parent directories automatically when saving files.
-
-This keeps file I/O logic separate from the application pipeline.
-
----
-
-## `utils/helper.py`
-
-Contains general helper functionality, including directory creation utilities.
-
----
-
-## `utils/logger.py`
-
-Contains project logging functionality.
-
----
-
-# 10. Input Files
-
-The current pipeline expects the following structure:
-
-```text
-data/raw/
-│
-├── job_description/
-│   └── job_description.txt
-│
-└── resume/
-    └── resume.pdf
-```
-
-## Resume
-
-Place the resume PDF at:
-
-```text
-data/raw/resume/resume.pdf
-```
-
-## Job Description
-
-Place the job description text at:
-
-```text
-data/raw/job_description/job_description.txt
-```
-
-The job description should contain the complete text of the target job posting.
-
----
-
-# 11. Installation
-
-## Step 1 — Clone the repository
-
-```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
-cd AI-Resume-Analyzer
-```
-
----
-
-## Step 2 — Create a virtual environment
-
-Windows:
-
-```bash
-python -m venv venv
-```
-
-Activate it in Git Bash:
-
-```bash
-source venv/Scripts/activate
-```
-
-Or in Command Prompt:
-
-```cmd
-venv\Scripts\activate
-```
-
----
-
-## Step 3 — Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-# 12. Environment Variables
-
-If the project configuration requires environment variables, create a `.env` file in the project root.
-
-Example:
-
-```text
-HF_TOKEN=your_huggingface_token
-```
-
-The current embedding pipeline can download the pretrained model without authentication, but Hugging Face may display a warning about unauthenticated requests and rate limits.
-
-If a Hugging Face token is used, keep it private.
-
-Do **not** commit `.env` to GitHub.
-
----
-
-# 13. Reproducing the Analysis
-
-After installation, make sure these two files exist:
-
-```text
-data/raw/resume/resume.pdf
-data/raw/job_description/job_description.txt
-```
-
-Then activate the virtual environment and run:
-
-```bash
-python -m app.main
-```
-
-The program will execute the complete pipeline.
-
----
-
-# 14. Expected Processing Stages
-
-When the pipeline runs, the console displays stages similar to:
-
-```text
-RESUME PROCESSING
-
-RESUME EMBEDDING GENERATION
-
-JOB DESCRIPTION PROCESSING
-
-JOB DESCRIPTION EMBEDDINGS
-
-SEMANTIC MATCHING
-
-HYBRID MATCHING
-
-DAY 6 - ATS ANALYSIS
-```
-
-The exact console output can vary depending on the input files and scoring implementation.
-
----
-
-# 15. Generated Output Files
-
-After a successful run, the following files are generated in:
-
-```text
-data/processed/
-```
-
-### `resume_raw.txt`
-
-Raw text extracted from the resume PDF.
-
-### `resume_clean.txt`
-
-Cleaned resume text.
-
-### `resume_chunks.json`
-
-Structured resume sections/chunks.
-
-### `jd_requirements.json`
-
-Structured job-description requirements.
-
-### `resume_embeddings.json`
-
-Embedding vectors generated from resume chunks.
-
-### `jd_embeddings.json`
-
-Embedding vectors generated from JD requirements.
-
-### `match_results.json`
-
-Semantic matching results.
-
-### `hybrid_results.json`
-
-Hybrid requirement-level matching results.
-
-### `ats_analysis.json`
-
-Final ATS-style analysis and gap analysis.
-
----
-
-# 16. Understanding the Results
-
-## Semantic Matching
-
-Semantic similarity measures how closely a resume chunk is related to a job requirement.
-
-Example:
-
-```text
-Similarity: 0.5633
-Match level: moderate
-```
-
-This is based on embedding similarity and should not be interpreted as a literal percentage probability of getting the job.
-
----
-
-## Hybrid Matching
-
-Hybrid matching combines semantic evidence with structured evidence.
-
-Example:
-
-```text
-Semantic score: 0.5633
-Score: 0.5527
+Semantic similarity: 0.5633
+Hybrid score: 0.5527
 Assessment: PARTIAL_ALIGNMENT
 ```
 
-The hybrid score is the project's primary requirement-level matching signal because it incorporates more information than semantic similarity alone.
+Hybrid score is the primary signal — it factors in more than raw embedding similarity alone (see below for why that matters).
+
+**Missing ≠ doesn't have.** If a skill or concept is reported missing, it means the resume's current *wording* didn't provide clear evidence for it — not necessarily that the candidate actually lacks it. This is a resume-wording problem to fix, not necessarily a skills gap.
 
 ---
 
-## ATS Score
+## Why Hybrid Matching
 
-The ATS score summarizes the requirement-level analysis.
+Semantic similarity alone can mislead in both directions:
 
-Example interpretation:
+- A resume mentioning `Python, SQL, Machine Learning` will look semantically related to almost any data-science requirement — even one that also needs `Marketing Analytics` or `Client Engagement`, which the resume never mentions and semantic similarity alone won't reliably flag as absent.
+- Conversely, an exact keyword match doesn't guarantee the requirement is actually satisfied in context.
 
-```text
-Overall ATS Score: 45.60/100
-Interpretation: Weak Match
-```
-
-The score is an **ATS-style project metric**, not an actual score produced by an employer's Applicant Tracking System.
+The hybrid layer combines semantic similarity with structured, explicit evidence (skills, education, experience, concepts) so the final score reflects more than "these two texts use similar words."
 
 ---
 
-# 17. Example Analysis
+## Known limitations
 
-For a sample resume/job-description pair, the system may produce output similar to:
-
-```text
-Overall ATS Score: 45.60/100
-Interpretation: Weak Match
-```
-
-It can also report:
-
-```text
-Strong alignment
-Partial alignment
-Weak alignment
-No alignment
-```
-
-along with:
-
-- required-category score
-- preferred-category score
-- responsibility score
-- matched skills
-- missing skills
-- matched concepts
-- missing concepts
-- education alignment
-- experience analysis
-- priority gaps
-
-The exact numbers depend on the resume and job description supplied as input.
+- **Single resume / single JD at a time** — not currently designed for batch comparison across many resumes or many jobs.
+- **Pretrained models only** — no custom-trained ranking model; `all-MiniLM-L6-v2` is general-purpose and may not capture highly specialized domain relationships.
+- **Heuristic scoring** — the ATS score is an engineered metric, not learned or calibrated against real hiring outcomes.
+- **Evidence quality depends on resume wording** — a strong candidate can still score lower than expected if relevant experience isn't phrased in terms that match the JD's terminology.
+- **LLM-judge evaluation has inherent noise** — GEval scores can vary slightly between runs of identical input, the same way the embedding model's own floating-point output has minor run-to-run variance. This is expected behavior for LLM-as-judge evaluation generally, not a defect.
 
 ---
 
-# 18. Running the Streamlit Interface
+## Possible future improvements
 
-The project also contains a Streamlit interface.
-
-Start it using:
-
-```bash
-streamlit run app/streamlit_app.py
-```
-
-This provides a graphical interface for interacting with the analysis pipeline.
-
-The command-line pipeline remains the reproducible backend workflow:
-
-```bash
-python -m app.main
-```
-
----
-
-# 19. Running Tests
-
-The project contains tests for important processing components.
-
-Run the test suite using:
-
-```bash
-pytest
-```
-
-Or:
-
-```bash
-python -m pytest
-```
-
-The current test files include:
-
-```text
-tests/test_parser.py
-tests/test_cleaner.py
-tests/test_normalizer.py
-tests/test_ats_analysis.py
-```
-
----
-
-# 20. Development Workflow
-
-A typical development workflow is:
-
-```text
-1. Update input resume/JD
-        ↓
-2. Run tests
-        ↓
-3. Run the main pipeline
-        ↓
-4. Inspect generated JSON files
-        ↓
-5. Review ATS analysis
-        ↓
-6. Modify processing/scoring logic if required
-        ↓
-7. Run tests again
-```
-
-Recommended commands:
-
-```bash
-python -m pytest
-python -m app.main
-```
-
----
-
-# 21. Reproducibility
-
-To reproduce the project's results as closely as possible:
-
-1. Use the same resume PDF.
-2. Use the same job description text.
-3. Use the same Python environment.
-4. Install the versions specified in `requirements.txt`.
-5. Use the same embedding model:
-   ```text
-   all-MiniLM-L6-v2
-   ```
-6. Run:
-   ```bash
-   python -m app.main
-   ```
-
-Because semantic embeddings and dependency versions can affect results, changing model or package versions may produce slightly different scores.
-
----
-
-# 22. Important Interpretation Notes
-
-### This is not a real employer ATS
-
-The project's ATS score is an analytical score created by this application.
-
-It should be used to understand:
-
-- resume/JD alignment
-- missing skills
-- missing concepts
-- education alignment
-- experience alignment
-- priority areas for resume improvement
-
-It should not be treated as a prediction of whether an employer will reject or select an application.
-
-### Semantic similarity is not keyword matching
-
-A requirement can receive semantic similarity even when the exact phrase does not appear in the resume.
-
-Conversely, an exact keyword match does not automatically mean the candidate satisfies the requirement.
-
-This is why the project uses a hybrid approach.
-
-### Missing evidence is different from actual lack of experience
-
-If the analyzer reports a missing skill or concept, it means that the current resume content did not provide sufficient evidence for the analyzer.
-
-It does not necessarily prove that the candidate lacks that skill.
-
----
-
-# 23. Project Technology Stack
-
-The project currently uses the following technologies/components:
-
-- **Python**
-- **FastAPI-related project architecture**
-- **Streamlit**
-- **Sentence Transformers**
-- **FAISS-related semantic-search architecture**
-- **Large Language Model / pretrained NLP components**
-- **PyMuPDF/PDF text extraction components**
-- **JSON-based intermediate outputs**
-- **pytest**
-- **Hugging Face pretrained embedding models**
-
-The exact installed package versions should be taken from:
-
-```text
-requirements.txt
-```
-
-rather than inferred from this README.
-
----
-
-# 24. Project Design
-
-The project follows a modular architecture:
-
-```text
-Input
-  │
-  ├── Resume PDF
-  │
-  └── Job Description
-          │
-          ▼
-     Extraction Layer
-          │
-          ▼
-   Preprocessing Layer
-          │
-          ▼
-   Requirement Normalization
-          │
-          ▼
-     Embedding Layer
-          │
-          ▼
-    Semantic Matching
-          │
-          ▼
-     Hybrid Scoring
-          │
-          ▼
-      ATS Scoring
-          │
-          ▼
-      Gap Analysis
-          │
-          ▼
-   JSON Results / UI
-```
-
-This separation allows individual components to be improved without rewriting the entire application.
-
----
-
-# 25. Why the Project Uses Hybrid Matching
-
-Pure semantic similarity can produce misleading results.
-
-For example, a resume may contain:
-
-```text
-Python
-SQL
-Machine Learning
-```
-
-and therefore appear semantically related to a requirement involving data science.
-
-However, the job may additionally require:
-
-```text
-Marketing Analytics
-Client Engagement
-Problem Scoping
-Product/Engineering Collaboration
-```
-
-Semantic similarity alone may not distinguish these missing requirements reliably.
-
-The hybrid layer therefore incorporates structured evidence from:
-
-- skills
-- concepts
-- education
-- experience
-- requirement category
-- semantic similarity
-
-This makes the final ATS-style analysis more interpretable.
-
----
-
-# 26. Current Project Limitations
-
-The current version is intentionally focused and has several limitations.
-
-### Single resume / JD evaluation
-
-The project is currently designed around evaluating one resume against one job description at a time.
-
-### Pretrained models
-
-The system uses pretrained models rather than training a custom resume-ranking model.
-
-### ATS score is heuristic
-
-The final score is an engineered analytical metric rather than a learned score calibrated against real hiring outcomes.
-
-### Semantic model limitations
-
-`all-MiniLM-L6-v2` is a general-purpose sentence embedding model and may not understand every domain-specific relationship, especially highly specialized job requirements.
-
-### Evidence quality
-
-The quality of the final analysis depends heavily on the quality of:
-
-- PDF text extraction
-- section detection
-- requirement extraction
-- requirement normalization
-- resume wording
-
-### Job-specific terminology
-
-A resume can be strong for a role while still receiving a lower score if important domain-specific terminology is not explicitly represented in the resume.
-
----
-
-# 27. Future Improvements
-
-Possible future improvements include:
-
-- Better resume section detection
-- More robust PDF parsing
-- Improved job-requirement extraction
-- Better handling of compound requirements
-- Domain-specific embedding models
-- Cross-encoder reranking
+- Cross-encoder reranking of top matches for higher precision
+- Batch comparison of one resume against multiple JDs (the FAISS index already makes this architecturally straightforward — it's currently rebuilt per-request rather than persisted, since that's all a single resume/JD comparison needs)
 - More sophisticated experience/date extraction
-- Improved education matching
-- LLM-based evidence verification
-- Explainable requirement-level recommendations
-- Resume rewriting recommendations
-- Multiple resume/JD comparisons
-- Historical evaluation against real job outcomes
-- More comprehensive automated tests
-- Production API deployment
-- Improved Streamlit dashboard
-- FAISS-based large-scale candidate/repository search
-
----
-
-# 28. GitHub Usage
-
-Before pushing the project to GitHub, verify that local/generated files are excluded where appropriate.
-
-In particular, avoid committing:
-
-```text
-venv/
-.env
-__pycache__/
-.pytest_cache/
-*.pyc
-```
-
-Generated analysis files under `data/processed/` may be committed if they are intentionally included as reproducible example outputs. Otherwise, they can be excluded and regenerated using:
-
-```bash
-python -m app.main
-```
-
----
-
-# 29. Quick Start
-
-For someone who wants to reproduce the project with minimal steps:
-
-```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
-cd AI-Resume-Analyzer
-
-python -m venv venv
-source venv/Scripts/activate
-
-pip install -r requirements.txt
-```
-
-Place:
-
-```text
-resume.pdf
-```
-
-at:
-
-```text
-data/raw/resume/resume.pdf
-```
-
-and:
-
-```text
-job_description.txt
-```
-
-at:
-
-```text
-data/raw/job_description/job_description.txt
-```
-
-Then run:
-
-```bash
-python -m app.main
-```
-
-Inspect:
-
-```text
-data/processed/ats_analysis.json
-```
-
-for the final ATS-style analysis.
-
-To run the UI:
-
-```bash
-streamlit run app/streamlit_app.py
-```
-
-To run tests:
-
-```bash
-pytest
-```
-
----
-
-# 30. Final Output
-
-The most important generated file is:
-
-```text
-data/processed/ats_analysis.json
-```
-
-It contains the consolidated ATS-style evaluation, including:
-
-- overall score
-- requirement-level alignment
-- category scores
-- matched skills
-- missing skills
-- matched concepts
-- missing concepts
-- education analysis
-- experience analysis
-- priority gaps
-
-The project therefore provides a complete pipeline from:
-
-**Resume + Job Description → Structured Requirements → Semantic Matching → Hybrid Matching → ATS Analysis → Actionable Gaps**
+- Domain-specific fine-tuned embeddings
+- Persisted evaluation score history / trend tracking (e.g., via Confident AI)
+- Resume rewriting suggestions with inline diffs, not just a text summary
 
 ---
 
@@ -1189,4 +419,4 @@ The project therefore provides a complete pipeline from:
 
 **Shivanshu Kumar**
 
-AI / Data Engineering project focused on practical application of NLP, semantic similarity, information extraction, and resume-to-job matching.
+[LinkedIn](https://linkedin.com/in/shivanshu19476) · [GitHub](https://github.com/shivanshu07)
