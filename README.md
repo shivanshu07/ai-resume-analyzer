@@ -2,7 +2,7 @@
 
 An AI-powered resume analysis system that evaluates how well a resume matches a specific job description — combining semantic embeddings, FAISS vector search, structured rule-based matching, and an LLM-generated improvement summary into a single hybrid score with a requirement-by-requirement breakdown.
 
-**[Try the live demo →](#https://ai-resume-analyzer-saawhwwh8kdi9w4vswsxpw.streamlit.app/)** &nbsp;|&nbsp; **[API docs →](#https://ai-resume-analyzer-e5lg.onrender.com)** &nbsp;|&nbsp; ![Tests](https://github.com/shivanshu07/ai-resume-analyzer/actions/workflows/tests.yml/badge.svg)
+**[Try the live demo →](https://ai-resume-analyzer-saawhwwh8kdi9w4vswsxpw.streamlit.app/)** &nbsp;|&nbsp; **[API docs →](https://ai-resume-analyzer-e5lg.onrender.com)** &nbsp;|&nbsp; ![Tests](https://github.com/shivanshu07/ai-resume-analyzer/actions/workflows/tests.yml/badge.svg)
 
 > Replace the two links above with your actual deployed URLs before publishing this README — see [Live Deployments](#live-deployments) below for where to find them.
 
