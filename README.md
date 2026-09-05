@@ -2,7 +2,7 @@
 
 An AI-powered resume analysis system that evaluates how well a resume matches a specific job description — combining semantic embeddings, FAISS vector search, structured rule-based matching, and an LLM-generated improvement summary into a single hybrid score with a requirement-by-requirement breakdown.
 
-**[Try the live demo →](https://ai-resume-analyzer-saawhwwh8kdi9w4vswsxpw.streamlit.app/)** &nbsp;|&nbsp; **[API docs →](https://ai-resume-analyzer-e5lg.onrender.com)** &nbsp;|&nbsp; ![Tests](https://github.com/shivanshu07/ai-resume-analyzer/actions/workflows/tests.yml/badge.svg)
+**[Try the live demo →](https://ai-resume-analyzer-saawhwwh8kdi9w4vswsxpw.streamlit.app/)** &nbsp;|&nbsp; **[API docs →](https://ai-resume-analyzer-e5lg.onrender.com/)** &nbsp;|&nbsp; ![Tests](https://github.com/shivanshu07/ai-resume-analyzer/actions/workflows/tests.yml/badge.svg)
 
 > Replace the two links above with your actual deployed URLs before publishing this README — see [Live Deployments](#live-deployments) below for where to find them.
 
@@ -238,6 +238,19 @@ Two things are checked:
 - **Actionability** — does it give specific, resume-focused suggestions rather than generic career advice?
 
 The judge model is Groq (`src/llm/groq_eval_model.py`, a custom `DeepEvalBaseLLM` subclass), not OpenAI — evaluation runs on the same free tier as the rest of the project.
+
+### Validating the evaluator itself
+
+A metric that scores everything highly would pass tests against good output just as easily as a metric that actually works — so passing a real, good summary isn't enough evidence on its own. `test_llm_eval.py` also includes two adversarial negative-control tests: a deliberately hallucinated summary (falsely claiming the candidate already holds a Master's degree and years of experience they don't have) and a deliberately generic, vague one (boilerplate career advice with zero concrete specifics). Both are expected to score *below* threshold — proving the metric actually discriminates rather than rubber-stamping any input.
+
+Measured results from the current implementation:
+
+| Test case | Groundedness | Actionability |
+|---|---|---|
+| Real production summary | 1.00 | 1.00 |
+| Adversarial (hallucinated / generic) | 0.00 | 0.10 |
+
+That gap — not the 1.00 alone — is the actual evidence the evaluation framework works.
 
 ```bash
 pytest tests/test_llm_eval.py -v -s

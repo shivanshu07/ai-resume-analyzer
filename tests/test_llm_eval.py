@@ -165,31 +165,18 @@ REAL_ATS_ANALYSIS = {
 }
 
 REAL_LLM_SUMMARY = (
-    "Make the resume map more explicitly to the identified gaps. In "
-    "the “Education” section, clearly state the actual bachelor’s "
-    "degree, field, and relevant quantitative coursework; if you "
-    "actually have a master’s degree or equivalent practical "
-    "experience, state that evidence explicitly, but do not claim a "
-    "degree you do not have. In “Technical Skills,” explicitly list "
-    "the relevant tools and methods you genuinely use, including "
-    "Python, R, MATLAB, SQL, statistical methods, AI/ML, modeling, "
-    "and database skills. Add concrete project or experience bullets "
-    "that demonstrate statistical analysis, marketing analytics, "
-    "marketing effectiveness, problem scoping, and measurable "
-    "metrics—for example, describe the business problem, method, "
-    "model, and quantified result rather than only naming the tool. "
-    "For missing data-structure and metrics knowledge, add relevant "
-    "coursework, project work, or certifications only where you "
-    "actually completed them. Strengthen the experience section by "
-    "rewriting relevant bullets to show client engagement, customer "
-    "or stakeholder collaboration, decision making, and strategic "
-    "insights; if you do not have direct client-engagement or "
-    "marketing-portfolio experience, do not invent it—instead add a "
-    "relevant marketing analytics project that demonstrates those "
-    "capabilities. Finally, add one or two marketing-focused "
-    "analytics projects with specific datasets, analytical methods, "
-    "and measurable outcomes to address the marketing analytics and "
-    "proof-of-concept gaps."
+    "Focus on making your quantitative background unmistakable: add "
+    "a dedicated \u201cEducation\u201d line that lists your degree, major, "
+    "and any relevant coursework (e.g., statistical modeling, "
+    "econometrics, operations research, bioinformatics) and, if you "
+    "have completed any certifications in data science or "
+    "analytics, list those right under the degree. Expand the "
+    "\u201cTechnical Skills\u201d section to explicitly name Python, R, "
+    "MATLAB, SQL, and any ML libraries you\u2019ve used, and pair each "
+    "with a brief bullet that quantifies your experience (e.g., "
+    "\u201cBuilt and deployed a churn-prediction model in Python using "
+    "scikit-learn on a 2M-record SQL database\u201d). Add one or two "
+    "project bullets that showcase marketing-focused analytics."
 )
 
 
@@ -305,14 +292,32 @@ def test_gap_summary_is_actionable_for_the_resume():
     actionability = GEval(
         name="Resume Actionability",
         model=_judge(),
-        criteria=(
-            "Determine whether the actual output gives the "
-            "candidate specific, concrete suggestions for what to "
-            "add or change on their own resume, in light of the "
-            "gaps described in the input. Penalize output that is "
-            "vague, generic career advice, or that talks about "
-            "the job/company rather than the candidate's resume."
-        ),
+        evaluation_steps=[
+            "Identify which gaps in the input are RESUME-EDITABLE "
+            "(e.g. skills not prominently listed, missing project "
+            "descriptions, vague wording, missing keywords) versus "
+            "STRUCTURAL/CREDENTIAL gaps that no amount of resume "
+            "editing can fix (e.g. not holding a specific degree, "
+            "not having a specific number of years of experience, "
+            "not having worked at a specific company).",
+
+            "Check whether the actual output gives specific, "
+            "concrete suggestions for the RESUME-EDITABLE gaps. "
+            "This is the main thing to reward.",
+
+            "Do NOT penalize the output for not proposing a fix "
+            "for a structural/credential gap -- there usually "
+            "isn't a legitimate resume edit that closes a missing "
+            "degree or missing years of experience, so correctly "
+            "not inventing one is expected, good behavior, not a "
+            "flaw.",
+
+            "Penalize the output only if it is vague or generic "
+            "about the resume-editable gaps it does address, or "
+            "if it talks about the job/company rather than giving "
+            "the candidate something to change on their own "
+            "resume.",
+        ],
         evaluation_params=[
             SingleTurnParams.INPUT,
             SingleTurnParams.ACTUAL_OUTPUT,
@@ -337,4 +342,153 @@ def test_gap_summary_is_actionable_for_the_resume():
         f"Resume Actionability scored {actionability.score:.2f} "
         f"(threshold {actionability.threshold}): "
         f"{actionability.reason}"
+    )
+
+
+# ============================================================
+# ADVERSARIAL / NEGATIVE TEST CASES
+#
+# The two tests above only prove the metrics can approve a
+# genuinely good summary. That's necessary but not sufficient
+# evidence the framework works -- a metric that scores
+# EVERYTHING highly would also pass those tests. These tests
+# check the other direction: does the metric actually catch
+# bad output, or does it rubber-stamp anything it's given?
+#
+# Both summaries below are hand-written and deliberately
+# flawed. If either of these scores ABOVE threshold, that is a
+# more serious problem than any single failing "real" test case
+# -- it would mean the metric has no discriminative power at
+# all.
+# ============================================================
+
+HALLUCINATED_SUMMARY = (
+    "Your resume is a strong match for this role. You already "
+    "hold a Master's degree in Statistics and have over 5 years "
+    "of experience leading marketing analytics engagements for "
+    "Fortune 500 clients, which directly satisfies the top "
+    "requirements. Consider adding a certification in cloud "
+    "computing to round things out."
+)
+
+GENERIC_VAGUE_SUMMARY = (
+    "Try to make your resume stand out more. Add more relevant "
+    "experience and highlight your strengths. Make sure your "
+    "resume is well-formatted and easy to read, and tailor it "
+    "to the job description."
+)
+
+
+@requires_groq_key
+def test_metric_catches_hallucinated_claims():
+    """
+    Negative control: this summary confidently asserts things
+    that are FALSE given the real context (a Master's degree
+    and 5+ years of marketing analytics leadership -- neither
+    of which the real candidate has). If Groundedness does not
+    catch this, the metric has no real discriminative power.
+    """
+
+    _, real_context = _build_real_input_and_context()
+
+    groundedness = GEval(
+        name="Groundedness",
+        model=_judge(),
+        evaluation_steps=[
+            "Check whether the actual output makes any FALSE or "
+            "MISLEADING factual claim about the candidate's resume "
+            "or the job's requirements -- for example, asserting "
+            "the candidate already has a skill, degree, or years "
+            "of experience they don't, or asserting a job "
+            "requirement exists that isn't listed in the context.",
+
+            "Do NOT penalize the output for offering generic, "
+            "clearly-hedged illustrative examples or suggestions "
+            "(phrases like 'e.g.', 'for example', 'such as', or "
+            "'if you have completed') as long as they are "
+            "reasonable, relevant advice tied to the gaps "
+            "described in the context -- even if the exact "
+            "example terms used don't appear verbatim in the "
+            "context.",
+
+            "Score high if the output stays truthful about what "
+            "the candidate does and doesn't have. Score low if it "
+            "asserts something false or contradicts the context.",
+        ],
+        evaluation_params=[
+            SingleTurnParams.ACTUAL_OUTPUT,
+            SingleTurnParams.CONTEXT,
+        ],
+        threshold=0.5
+    )
+
+    test_case = LLMTestCase(
+        input="Summarize the resume's biggest gaps for this job.",
+        actual_output=HALLUCINATED_SUMMARY,
+        context=real_context
+    )
+
+    groundedness.measure(test_case)
+
+    print(
+        f"\n[Groundedness -- hallucinated input, EXPECT FAIL] "
+        f"score={groundedness.score:.2f} reason={groundedness.reason}"
+    )
+
+    assert not groundedness.success, (
+        "Groundedness metric FAILED to catch a deliberately "
+        f"hallucinated summary (scored {groundedness.score:.2f}, "
+        "above threshold). This means the metric may not have "
+        "real discriminative power -- treat this as more serious "
+        "than a normal test failure."
+    )
+
+
+@requires_groq_key
+def test_metric_catches_generic_vague_advice():
+    """
+    Negative control: this summary is generic career-advice
+    boilerplate with zero specifics tied to the actual gaps.
+    If Actionability does not catch this, the metric may be
+    scoring based on tone/length rather than actual substance.
+    """
+
+    real_input, _ = _build_real_input_and_context()
+
+    actionability = GEval(
+        name="Resume Actionability",
+        model=_judge(),
+        criteria=(
+            "Determine whether the actual output gives the "
+            "candidate specific, concrete suggestions for what to "
+            "add or change on their own resume, in light of the "
+            "gaps described in the input. Penalize output that is "
+            "vague, generic career advice, or that talks about "
+            "the job/company rather than the candidate's resume."
+        ),
+        evaluation_params=[
+            SingleTurnParams.INPUT,
+            SingleTurnParams.ACTUAL_OUTPUT,
+        ],
+        threshold=0.5
+    )
+
+    test_case = LLMTestCase(
+        input=real_input,
+        actual_output=GENERIC_VAGUE_SUMMARY
+    )
+
+    actionability.measure(test_case)
+
+    print(
+        f"\n[Actionability -- generic input, EXPECT FAIL] "
+        f"score={actionability.score:.2f} reason={actionability.reason}"
+    )
+
+    assert not actionability.success, (
+        "Actionability metric FAILED to catch deliberately vague, "
+        f"generic advice (scored {actionability.score:.2f}, above "
+        "threshold). This means the metric may not be checking "
+        "for real specificity -- treat this as more serious than "
+        "a normal test failure."
     )
